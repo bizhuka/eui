@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Import &amp; Export ITAB[] from Excel or CSV</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>COLUMN_2_INT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Excel column to index</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>EXPORT_TO_ITAB</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Any file -&gt;internal table (Auto Detect)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>EXPORT_TO_ITAB_CSV</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>CSV file -&gt; internal table (With options)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>EXPORT_TO_ITAB_XLSX</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>XLSX file -&gt; internal table (With options)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>IMPORT_FROM_ITAB</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Internal table -&gt; to FILE [&lt;--&gt;]MV_XSTRING (Auto Detect)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>IMPORT_FROM_ITAB_CSV</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Internal table -&gt; to CSV [&lt;--&gt;]MV_XSTRING</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>IMPORT_FROM_ITAB_XLSX_0</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Internal table -&gt; to XLSX [&lt;--&gt;]MV_XSTRING (CL_FDT_XL_SPREA)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>IMPORT_FROM_ITAB_XLSX_1</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Internal table -&gt; to XLSX [&lt;--&gt;]MV_XSTRING (CL_SALV_BS_LEX)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>INT_2_COLUMN</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Index to Excel column</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>MAPPING_ERROR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Do not raised (Handler called by name)@see CONVERT_TO_ITAB()</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>RTTI utils</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>CREATE_STRUCTURE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Create dynamic structure</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>CREATE_TYPE_DESCR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Create data by text</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>FIND_DROPDOWN</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>If IS_LIST_BOX( )</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>FIND_TABLE_FIELDNAME</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>2 times!</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>GET_CATALOG</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get field catalog</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>GET_FIELD_DESC</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get full description of field</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>IS_LIST_BOX</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>If values from domain</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_TYPE</CLSNAME>
+     <CMPNAME>SPLIT_TYPE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get table &amp; fieldname separeted by &apos;-&apos;</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
