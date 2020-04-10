@@ -112,21 +112,21 @@ CLASS lcl_screen IMPLEMENTATION.
     ENDIF.
 
     " IF field exist
-    CHECK iv_fieldname IS NOT INITIAL.
+    CHECK is_map-name IS NOT INITIAL.
     READ TABLE mt_map REFERENCE INTO ls_map
-     WITH KEY name = iv_fieldname.
+     WITH KEY name = is_map-name.
     IF sy-subrc <> 0.
-      CONCATENATE `Unknown field name ` iv_fieldname INTO lv_message.
+      CONCATENATE `Unknown field name ` is_map-name INTO lv_message.
       zcx_eui_exception=>raise_dump( iv_message = lv_message ).
     ENDIF.
 
-    " For convenience
-    ls_map->input    = is_screen-input.
-    ls_map->required = is_screen-required.
-
-    " Text for select-option or parameter
-    CHECK iv_label IS NOT INITIAL.
-    ls_map->label    = iv_label.
+    " Label, input, required or sub_fdesc
+    zcl_eui_conv=>move_corresponding(
+     EXPORTING
+       is_source         = is_map
+       iv_except_initial = abap_true
+     CHANGING
+       cs_destination    = ls_map->* ).
   ENDMETHOD.
 
   METHOD show.

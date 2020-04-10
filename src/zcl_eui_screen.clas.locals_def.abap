@@ -39,9 +39,8 @@ CLASS lcl_screen DEFINITION.
 
       customize
         IMPORTING
-          is_screen    TYPE screen
-          iv_fieldname TYPE zcl_eui_type=>ts_field_desc-name
-          iv_label     TYPE zcl_eui_type=>ts_field_desc-label,
+          is_screen TYPE screen
+          is_map    TYPE zcl_eui_screen=>ts_map,
 
       pbo
         IMPORTING

@@ -46,7 +46,8 @@ public section.
       !INVISIBLE type CHAR1 optional
       !ACTIVE type CHAR1 optional
       !IV_FIELDNAME type ZCL_EUI_TYPE=>TS_FIELD_DESC-NAME optional
-      !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional .
+      !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
+      !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional .
   methods GET_CONTEXT
     returning
       value(RR_CONTEXT) type ref to DATA .
@@ -194,20 +195,24 @@ ENDMETHOD.
 
 METHOD customize.
   DATA ls_screen TYPE screen.
+  DATA ls_map TYPE ts_map.
 
   " Pass as 1 parameter
   ls_screen-name      = name.
   ls_screen-group1    = group1.
-  ls_screen-required  = required.
-  ls_screen-input     = input.
+  ls_screen-input     = ls_map-input    = input.
+  ls_screen-required  = ls_map-required = required.
   ls_screen-output    = output.
   ls_screen-invisible = invisible.
   ls_screen-active    = active.
 
+  ls_map-name      = iv_fieldname.
+  ls_map-label     = iv_label.
+  ls_map-sub_fdesc = iv_sub_fdesc.
+
   mo_helper->customize(
-   is_screen    = ls_screen
-   iv_fieldname = iv_fieldname
-   iv_label     = iv_label ).
+   is_screen = ls_screen
+   is_map    = ls_map ).
 ENDMETHOD.
 
 
