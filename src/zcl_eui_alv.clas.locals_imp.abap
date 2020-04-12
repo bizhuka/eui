@@ -133,14 +133,18 @@ CLASS lcl_helper IMPLEMENTATION.
 *      cs_layout-edit = abap_true. " lcl_opt=>is_editable( ms_field_desc->is_editable ).
 *    ENDIF.
 
-    " Default selection mode & optimize width
+    " Default selection mode
     IF cs_layout-sel_mode IS INITIAL.
-      cs_layout-sel_mode   = 'A'.
-      cs_layout-cwidth_opt = abap_true.
+      cs_layout-sel_mode   = 'A'.       " Many rows
+      cs_layout-cwidth_opt = abap_true. " Optimize width
     ENDIF.
 
     CHECK ms_field_desc IS NOT INITIAL.
-    CONCATENATE `Edit values of ` ms_field_desc->name INTO cs_layout-grid_title.
+    IF mo_eui_alv->mv_read_only = abap_true.
+      CONCATENATE `Edit values of ` ms_field_desc->name INTO cs_layout-grid_title.
+    ELSE.
+      CONCATENATE `View values of ` ms_field_desc->name INTO cs_layout-grid_title.
+    ENDIF.
     cs_layout-smalltitle = abap_true.
   ENDMETHOD.
 
@@ -310,11 +314,20 @@ CLASS lcl_helper IMPLEMENTATION.
     ENDIF.
 
 **********************************************************************
+    DATA lv_save TYPE char01 VALUE 'A'. " restrict_none
+
+*    " Save variant - Always can save variant
+*    AUTHORITY-CHECK OBJECT 'S_ALV_LAYO'
+*      ID 'ACTVT' FIELD '23'.
+*    IF sy-subrc <> 0.
+*      lv_save = 'U'. " restrict_user_dependant
+*    ENDIF.
+
     " And show
     mo_eui_alv->mo_grid->set_table_for_first_display(
       EXPORTING
         is_variant          = mo_eui_alv->ms_variant
-        i_save              = 'A'
+        i_save              = lv_save
         is_layout           = mo_eui_alv->ms_layout
       CHANGING
         it_outtab           = <lt_table>
