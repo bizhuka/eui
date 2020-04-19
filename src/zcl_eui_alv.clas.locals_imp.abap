@@ -141,9 +141,9 @@ CLASS lcl_helper IMPLEMENTATION.
 
     CHECK ms_field_desc IS NOT INITIAL.
     IF mo_eui_alv->mv_read_only = abap_true.
-      CONCATENATE `Edit values of ` ms_field_desc->name INTO cs_layout-grid_title.
-    ELSE.
       CONCATENATE `View values of ` ms_field_desc->name INTO cs_layout-grid_title.
+    ELSE.
+      CONCATENATE `Edit values of ` ms_field_desc->name INTO cs_layout-grid_title.
     ENDIF.
     cs_layout-smalltitle = abap_true.
   ENDMETHOD.

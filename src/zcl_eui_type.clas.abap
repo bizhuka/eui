@@ -357,6 +357,13 @@ METHOD find_dropdown.
     <lv_txt>   TYPE csequence.
 
   " No need
+  IF cs_fieldcat-ref_table = abap_undefined AND cs_fieldcat-ref_field = abap_undefined.
+    CLEAR cs_fieldcat-ref_table.
+    CLEAR cs_fieldcat-ref_field.
+    RETURN.
+  ENDIF.
+
+  " No need
   CHECK cs_fieldcat-checkbox <> abap_true
     AND cs_fieldcat-hotspot  <> abap_true.
 
@@ -510,7 +517,8 @@ METHOD find_dropdown.
 
     ls_dropdown-handle    = cs_fieldcat-drdn_hndl.
     ls_dropdown-int_value = <lv_low>.
-    CONCATENATE <lv_low> ` - ` <lv_txt> INTO ls_dropdown-value.
+    ls_dropdown-value     = <lv_low>.
+    CONCATENATE ls_dropdown-value ` - ` <lv_txt> INTO ls_dropdown-value.
 
     " Add new item to dropdown
     APPEND ls_dropdown TO lt_dropdown.

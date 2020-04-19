@@ -49,6 +49,8 @@ public section.
       !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
       !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional .
   methods GET_CONTEXT
+    importing
+      !IV_READ type ABAP_BOOL default ABAP_TRUE
     returning
       value(RR_CONTEXT) type ref to DATA .
   class-methods EDIT_IN_POPUP
@@ -327,10 +329,12 @@ METHOD get_context.
   DATA ls_map                TYPE REF TO ts_map.
 
   " Read from screen
-  LOOP AT mo_helper->mt_map REFERENCE INTO ls_map WHERE ui_type <> zcl_eui_type=>mc_ui_type-table
-                                                    AND ui_type <> zcl_eui_type=>mc_ui_type-string.
-    mo_helper->read_from_screen( ir_map = ls_map ).
-  ENDLOOP.
+  IF iv_read = abap_true.
+    LOOP AT mo_helper->mt_map REFERENCE INTO ls_map WHERE ui_type <> zcl_eui_type=>mc_ui_type-table
+                                                      AND ui_type <> zcl_eui_type=>mc_ui_type-string.
+      mo_helper->read_from_screen( ir_map = ls_map ).
+    ENDLOOP.
+  ENDIF.
 
   " Return updated
   rr_context = mo_helper->mr_context.

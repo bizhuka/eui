@@ -217,7 +217,7 @@ CLASS lcl_screen IMPLEMENTATION.
         ENDIF.
 
         lv_input = ''.
-        IF ls_map->input = '0' AND ls_screen_dst-group3 <> 'VPU'. " But not for tables
+        IF ls_map->input = '0'. " AND ls_screen_dst-group3 <> 'VPU'. " But not for tables
           lv_input = '0'.
         ENDIF.
 
@@ -267,6 +267,11 @@ CLASS lcl_screen IMPLEMENTATION.
            cs_destination    = ls_screen_dst
            ct_component      = lt_scr_fields ).
       ENDLOOP.
+
+      " Special case for selection push button
+      IF ls_screen_dst-group3 = 'VPU' AND ls_screen_dst-active = '1'.
+        ls_screen_dst-input = '1'.
+      ENDIF.
 
       " And change ls_screen
       CHECK ls_screen_dst <> screen.
@@ -939,8 +944,9 @@ CLASS lcl_scr_auto IMPLEMENTATION.
     " Set title
     CONCATENATE `(` mo_eui_screen->ms_screen-prog `)S_TITLE` INTO lv_name.
     ASSIGN (lv_name) TO <lv_title>.
-    CHECK <lv_title> IS ASSIGNED.
-    <lv_title> = mo_eui_screen->ms_status-title.
+    IF <lv_title> IS ASSIGNED.
+      <lv_title> = mo_eui_screen->ms_status-title.
+    ENDIF.
 
     " And call parent method
     super->pbo( iv_after = iv_after ).
@@ -1055,11 +1061,11 @@ CLASS lcl_scr_auto IMPLEMENTATION.
     ENDCASE.
 
     " Create program
+    " Sorry but usally is strictly prohibited. Please create { mo_eui_screen->ms_screen-prog } by hand based on { lt_code }.
     zcx_eui_exception=>raise_dump( iv_message = 'Cannot call INSERT REPORT' ).
-    " Sorry but usally is strictly prohibited. Please create { ms_screen->prog } by hand based on { lt_code }.
     " And then change second row to *CAN_UPDATE=FALSE
 
-*    INSERT REPORT ms_screen->prog FROM lt_code.
+*    INSERT REPORT mo_eui_screen->ms_screen-prog FROM lt_code.
 *    " wrong syntax in { lt_code }
 *    IF sy-subrc <> 0.
 *      zcx_eui_exception=>raise_sys_error( iv_message = 'Cannot generate report' ).

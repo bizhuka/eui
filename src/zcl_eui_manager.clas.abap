@@ -131,9 +131,15 @@ METHOD zif_eui_manager~pbo.
   SET PF-STATUS ms_status-name EXCLUDING ms_status-exclude OF PROGRAM ms_status-prog.
 
   " Set title bar
-  IF ms_status-title IS NOT INITIAL.
-    SET TITLEBAR 'TITLE_100' OF PROGRAM mc_eui_screen_fugr WITH ms_status-title.
+  IF ms_status-title IS INITIAL.
+    SELECT SINGLE text INTO ms_status-title
+    FROM trdirt
+    WHERE name  = sy-cprog
+      AND sprsl = sy-langu.
   ENDIF.
+
+  CHECK ms_status-title IS NOT INITIAL.
+  SET TITLEBAR 'TITLE_100' OF PROGRAM mc_eui_screen_fugr WITH ms_status-title.
 ENDMETHOD.
 
 
