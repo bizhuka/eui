@@ -24,7 +24,6 @@
        <PARAMETER>IO_SCR_MANAGER</PARAMETER>
        <KIND>P</KIND>
        <STEXT>Screen events manager</STEXT>
-       <INDEX> 001</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>

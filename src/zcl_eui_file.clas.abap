@@ -240,7 +240,16 @@ METHOD download.
         CONCATENATE lv_path iv_default_filename INTO iv_full_path. " lv_file_name
 
         " Already exist. Create unique name
-        IF cl_gui_frontend_services=>file_exist( iv_full_path ) = abap_true.
+        DATA lv_exist TYPE abap_bool.
+        cl_gui_frontend_services=>file_exist(
+          EXPORTING
+            file = iv_full_path
+          RECEIVING
+            result  = lv_exist
+          EXCEPTIONS
+            OTHERS = 0 "prevent GUI messages when file not found
+        ).
+        IF lv_exist  = abap_true.
           TRY.
               lv_guid = cl_system_uuid=>create_uuid_x16_static( ).
             CATCH cx_uuid_error.
