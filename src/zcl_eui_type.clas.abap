@@ -4,6 +4,7 @@ class ZCL_EUI_TYPE definition
   create public .
 
 public section.
+  type-pools ABAP .
 
   types:
     BEGIN OF ts_field_desc,
