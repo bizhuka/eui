@@ -4,6 +4,7 @@ class ZCL_EUI_FILE definition
   create public .
 
 public section.
+  type-pools OLE2 .
 
   types:
     BEGIN OF TS_EXCEL_MAP,
@@ -156,7 +157,7 @@ METHOD download.
   DATA lt_bin_data   TYPE solix_tab.
   DATA lv_filesize   TYPE i.
   DATA lv_no_ext     TYPE string.
-  DATA lv_guid       TYPE char32.
+  DATA lv_guid       TYPE guid_32.
 
   " Side results of method
   set_full_path( ).
@@ -250,13 +251,7 @@ METHOD download.
             OTHERS = 0 "prevent GUI messages when file not found
         ).
         IF lv_exist  = abap_true.
-          TRY.
-              lv_guid = cl_system_uuid=>create_uuid_x16_static( ).
-            CATCH cx_uuid_error.
-              CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
-                          sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO lv_guid.
-          ENDTRY.
-
+          lv_guid = ZCL_EUI_CONV=>GUID_CREATE( ).
           CONCATENATE lv_path lv_no_ext ` ` lv_guid `.` iv_default_extension INTO iv_full_path.
         ENDIF.
 

@@ -4,6 +4,7 @@ class ZCL_EUI_EVENT_CALLER definition
   create public .
 
 public section.
+  type-pools ABAP .
 
   methods ADD_HANDLER
     importing

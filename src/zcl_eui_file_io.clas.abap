@@ -297,6 +297,8 @@ ENDMETHOD.
 
 
 METHOD export_to_itab_xlsx.
+  "NOTE: No cl_fdt_xl_spreadsheet in ABAP 7.01
+
 **********************************************************************
   " Create mapping
 **********************************************************************
@@ -452,6 +454,8 @@ ENDMETHOD.
 
 
 METHOD import_from_itab_xlsx_0.
+  "NOTE: No cl_fdt_xl_spreadsheet in ABAP 7.01
+
   DATA lt_fieldcat    TYPE lvc_t_fcat.
   DATA ls_fieldcat    TYPE REF TO lvc_s_fcat.
   DATA lt_column      TYPE if_fdt_doc_spreadsheet=>t_column.
@@ -554,6 +558,7 @@ ENDMETHOD.
 
 
 METHOD import_from_itab_xlsx_1.
+  "NOTE: No CL_SALV_BS_LEX in ABAP 7.01
   DATA lt_fieldcat TYPE lvc_t_fcat.
   DATA lo_salv_ex_res TYPE REF TO cl_salv_ex_result_data_table.
 
