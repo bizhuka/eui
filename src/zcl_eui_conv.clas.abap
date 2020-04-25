@@ -4,6 +4,7 @@ class ZCL_EUI_CONV definition
   create public .
 
 public section.
+  type-pools JS .
 
   constants:
     BEGIN OF mc_encoding,
@@ -12,6 +13,7 @@ public section.
       utf_16be TYPE abap_encoding VALUE '4102',
       utf_16le TYPE abap_encoding VALUE '4103',
     END OF mc_encoding .
+
   class-methods MOVE_CORRESPONDING
     importing
       !IS_SOURCE type ANY
@@ -27,14 +29,12 @@ public section.
       !IV_ENCODING type ABAP_ENCODING default MC_ENCODING-UTF_8
     returning
       value(RV_STRING) type STRING .
-
   class-methods BINARY_TO_XSTRING
     importing
       !IT_TABLE type STANDARD TABLE
       !IV_LENGTH type I
     returning
       value(RV_XSTRING) type XSTRING .
-
   class-methods XSTRING_TO_BINARY
     importing
       !IV_XSTRING type XSTRING
@@ -96,6 +96,9 @@ public section.
       !IO_SALV type ref to CL_SALV_MODEL_LIST
     returning
       value(RO_GUI_ALV) type ref to CL_GUI_ALV_GRID .
+  class-methods GUID_CREATE
+    returning
+      value(RV_GUID) type GUID_32 .
 protected section.
 private section.
   class-methods ABAP_2_JSON
@@ -457,6 +460,29 @@ METHOD GET_GRID_FROM_SALV.
       MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.
 ENDMETHOD.
+
+
+method GUID_CREATE.
+  "nearly same approach as in ABAP2XLSX, ZCL_EXCEL_OBSOLETE_FUNC_WRAP:
+  TRY.
+      rv_guid = cl_system_uuid=>create_uuid_c32_static( ).
+    CATCH cx_uuid_error.
+      CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
+                  sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO rv_guid.
+  ENDTRY.
+
+*--------------------------------------------------------------------*
+*If you are on a release that does not yet have the class cl_system_uuid
+*please use the following coding instead which is using the function
+*call that was used before but which has been flagged as obsolete
+*in newer SAP releases
+*--------------------------------------------------------------------*
+
+*  CALL FUNCTION 'GUID_CREATE'
+*    IMPORTING
+*      ev_guid_32 = rv_guid.
+
+endmethod.
 
 
 METHOD json_2_abap.

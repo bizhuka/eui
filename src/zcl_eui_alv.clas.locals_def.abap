@@ -23,11 +23,13 @@ CLASS lcl_helper DEFINITION FINAL.
 
       prepare_layout
         CHANGING
-          cs_layout LIKE mo_eui_alv->ms_layout,
+          cs_layout TYPE lvc_s_layo,
+*          cs_layout LIKE mo_eui_alv->ms_layout, " lcl_helper is not a friend of zcl_eui_alv
 
       prepare_variant
         CHANGING
-          cs_variant LIKE mo_eui_alv->ms_variant,
+          cs_variant TYPE disvariant,
+*          cs_variant LIKE mo_eui_alv->ms_variant, " lcl_helper is not a friend of zcl_eui_alv
 
       get_field_catalog
         RETURNING VALUE(rt_fieldcat) TYPE lvc_t_fcat,

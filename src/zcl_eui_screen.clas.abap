@@ -5,7 +5,9 @@ class ZCL_EUI_SCREEN definition
   create public .
 
 public section.
-
+  type-pools SSCR .
+  type-pools SYDB0 .
+  class ZCL_EUI_TYPE DEFINITION LOAD. "Required in ABAP 7.01
   types:
     TT_SCREEN type STANDARD TABLE OF SCREEN WITH DEFAULT KEY .
   types:

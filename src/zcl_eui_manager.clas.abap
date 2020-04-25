@@ -3,6 +3,7 @@ class ZCL_EUI_MANAGER definition
   create public .
 
 public section.
+  type-pools ABAP .
 
   interfaces ZIF_EUI_MANAGER .
 
@@ -23,7 +24,7 @@ public section.
   aliases SHOW
     for ZIF_EUI_MANAGER~SHOW .
 
-  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN' ##NO_TEXT.
+  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN' ##NO_TEXT. "#EC NO_TEXT
 
   methods CONSTRUCTOR
     importing

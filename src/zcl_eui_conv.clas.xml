@@ -44,6 +44,12 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_EUI_CONV</CLSNAME>
+     <CMPNAME>GUID_CREATE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Wrapper for obsolete function GUID_CREATE</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_CONV</CLSNAME>
      <CMPNAME>JSON_2_ABAP</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>https://github.com/cesar-sap/abap_fm_json.git</DESCRIPT>

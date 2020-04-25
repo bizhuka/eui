@@ -64,8 +64,10 @@ CLASS lcl_helper IMPLEMENTATION.
         WHEN cl_abap_typedescr=>typekind_packed OR cl_abap_typedescr=>typekind_float         OR
           cl_abap_typedescr=>typekind_num OR cl_abap_typedescr=>typekind_int                 OR
           cl_abap_typedescr=>typekind_int1 OR cl_abap_typedescr=>typekind_int2               OR
-          cl_abap_typedescr=>typekind_numeric OR cl_abap_typedescr=>typekind_decfloat        OR
-          cl_abap_typedescr=>typekind_decfloat16 OR cl_abap_typedescr=>typekind_decfloat34.
+          cl_abap_typedescr=>typekind_numeric OR '/' OR 'a' or 'E'. " sync with ZCL_XTT_REPLACE_BLOCK->TREE_INITIALIZE()
+          "cl_abap_typedescr=>typekind_decfloat        OR
+          "cl_abap_typedescr=>typekind_decfloat16 OR
+          "cl_abap_typedescr=>typekind_decfloat34.
           <ls_excel_map>-gen_type = mc_gen_type-number.
 
         WHEN cl_abap_typedescr=>typekind_date.
