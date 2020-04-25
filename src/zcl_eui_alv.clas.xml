@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>ALV manager</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <TPOOL>
+    <item>
+     <ID>I</ID>
+     <KEY>CNT</KEY>
+     <ENTRY>Count</ENTRY>
+     <LENGTH>15</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>EDT</KEY>
+     <ENTRY>Edit</ENTRY>
+     <LENGTH>14</LENGTH>
+    </item>
+   </TPOOL>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>CONSTRUCTOR</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>GET_GRID</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Use sender in events &amp; this method in PBO_EVENT</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MO_GRID</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ALV List Viewer</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MS_LAYOUT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ALV control: Layout structure</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MS_VARIANT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Layout (External Use)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MT_FILTER</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ALV control: Table of filter conditions</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MT_MOD_CATALOG</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Field Catalog for List Viewer Control</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MT_SORT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ALV Control: Table of Sort Criteria</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>MT_TOOLBAR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Toolbar Buttons</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
+     <CMPNAME>UPDATE_COMPLEX_FIELDS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>For complex UI fields (range &amp; table)</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
