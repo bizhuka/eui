@@ -7,7 +7,7 @@ class ZCL_EUI_SCREEN definition
 public section.
   type-pools SSCR .
   type-pools SYDB0 .
-  class ZCL_EUI_TYPE DEFINITION LOAD. "Required in ABAP 7.01
+
   types:
     TT_SCREEN type STANDARD TABLE OF SCREEN WITH DEFAULT KEY .
   types:
@@ -35,6 +35,10 @@ public section.
       !IV_DYNNR type SYDYNNR
       !IV_CPROG type SYCPROG default SY-CPROG
       !IR_CONTEXT type ref to DATA optional
+      !IV_STATUS_NAME type GUI_STATUS optional
+      !IV_STATUS_PROG type SYREPID optional
+      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
+      !IV_STATUS_TITLE type CSEQUENCE optional
       !IV_READ_ONLY type ABAP_BOOL optional
     raising
       ZCX_EUI_EXCEPTION .
@@ -161,7 +165,12 @@ METHOD constructor.
   DATA lv_number TYPE i.
   DATA lo_err    TYPE REF TO cx_root.
 
-  super->constructor( iv_read_only = iv_read_only ).
+  super->constructor(
+   iv_status_name    = iv_status_name
+   iv_status_prog    = iv_status_prog
+   it_status_exclude = it_status_exclude
+   iv_status_title   = iv_status_title
+   iv_read_only      = iv_read_only ).
 
   " Screen info
   ms_screen-dynnr = iv_dynnr.

@@ -66,7 +66,7 @@ CLASS lcl_doi IMPLEMENTATION.
     lo_control->get_document_proxy( EXPORTING document_type  = io_file->ms_ole_info-proxy_app
                                     IMPORTING document_proxy = lo_document ).
 
-    " Show documnet
+    " Show document
     DATA lv_exist TYPE abap_bool.
     cl_gui_frontend_services=>file_exist(
       EXPORTING

@@ -48,7 +48,11 @@ public section.
   methods CONSTRUCTOR
     importing
       !IV_FILE_NAME type CSEQUENCE optional
-      !IV_XSTRING type XSTRING optional .
+      !IV_XSTRING type XSTRING optional
+      !IV_STATUS_NAME type GUI_STATUS optional
+      !IV_STATUS_PROG type SYREPID optional
+      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
+      !IV_STATUS_TITLE type CSEQUENCE optional .
   methods GET_OLE_INFO
     returning
       value(RS_OLE_INFO) type TS_OLE_INFO .
@@ -140,7 +144,12 @@ CLASS ZCL_EUI_FILE IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor( iv_read_only = abap_true ).
+  super->constructor(
+   iv_status_name    = iv_status_name
+   iv_status_prog    = iv_status_prog
+   it_status_exclude = it_status_exclude
+   iv_status_title   = iv_status_title
+   iv_read_only      = abap_true ).
 
   mv_xstring = iv_xstring.
   set_full_path( iv_file_name ).

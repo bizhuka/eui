@@ -258,10 +258,10 @@ ENDCLASS.
 **********************************************************************
 **********************************************************************
 
-FORM auto_screen_pbo.                                       "#EC CALLED
-  " Just call EVENT
-  lcl_stack=>pbo_0100( iv_create_cont = abap_false ).
-ENDFORM.
+*" Just call EVENT. Moved to safe CALL FUNCTION 'ZFM_EUI_PBO'.
+*FORM auto_screen_pbo. "#EC CALLED
+*  lcl_stack=>pbo_0100( iv_create_cont = abap_false ).
+*ENDFORM.
 
 *&---------------------------------------------------------------------*
 *----------------------------------------------------------------------*

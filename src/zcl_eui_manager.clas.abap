@@ -28,6 +28,10 @@ public section.
 
   methods CONSTRUCTOR
     importing
+      !IV_STATUS_NAME type GUI_STATUS
+      !IV_STATUS_PROG type SYREPID
+      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE
+      !IV_STATUS_TITLE type CSEQUENCE
       !IV_READ_ONLY type ABAP_BOOL .
 protected section.
 
@@ -44,6 +48,26 @@ CLASS ZCL_EUI_MANAGER IMPLEMENTATION.
 
 METHOD constructor.
   mv_read_only = iv_read_only.
+
+  IF iv_status_name IS NOT INITIAL.
+    ms_status-name = iv_status_name.
+    ms_status-is_fixed = abap_true.
+  ENDIF.
+
+  IF iv_status_prog IS NOT INITIAL.
+    ms_status-prog = iv_status_prog.
+    ms_status-is_fixed = abap_true.
+  ENDIF.
+
+  IF it_status_exclude IS NOT INITIAL.
+    ms_status-exclude = it_status_exclude.
+    ms_status-is_fixed = abap_true.
+  ENDIF.
+
+  IF iv_status_title IS NOT INITIAL.
+    ms_status-title = iv_status_title.
+    ms_status-is_fixed = abap_true.
+  ENDIF.
 ENDMETHOD.
 
 

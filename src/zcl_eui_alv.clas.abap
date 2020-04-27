@@ -15,6 +15,10 @@ public section.
       !IS_VARIANT type DISVARIANT optional
       !IT_FILTER type LVC_T_FILT optional
       !IT_SORT type LVC_T_SORT optional
+      !IV_STATUS_NAME type GUI_STATUS optional
+      !IV_STATUS_PROG type SYREPID optional
+      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
+      !IV_STATUS_TITLE type CSEQUENCE optional
       !IV_READ_ONLY type ABAP_BOOL default ABAP_TRUE
       !IS_FIELD_DESC type ref to ZCL_EUI_TYPE=>TS_FIELD_DESC optional .
   methods GET_GRID
@@ -50,7 +54,13 @@ CLASS ZCL_EUI_ALV IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor( iv_read_only = iv_read_only ).
+  super->constructor(
+   iv_status_name    = iv_status_name
+   iv_status_prog    = iv_status_prog
+   it_status_exclude = it_status_exclude
+   iv_status_title   = iv_status_title
+   iv_read_only      = iv_read_only ).
+
   mr_table             = ir_table.
   mt_toolbar           = it_toolbar.
   mt_mod_catalog       = it_mod_catalog.

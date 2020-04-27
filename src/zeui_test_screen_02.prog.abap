@@ -17,7 +17,7 @@ PARAMETERS:
 **********************************************************************
 TABLES: usr02.
 SELECTION-SCREEN BEGIN OF SCREEN 1020 AS SUBSCREEN.
-SELECTION-SCREEN BEGIN OF BLOCK bl_1020 WITH FRAME TITLE text-tit.
+SELECTION-SCREEN BEGIN OF BLOCK bl_1020 WITH FRAME TITLE TEXT-tit.
 PARAMETERS:
   p_bukrs TYPE bukrs,
   p_bdc_m TYPE ettcd-mode AS LISTBOX VISIBLE LENGTH 50,
@@ -113,9 +113,10 @@ CLASS lcl_main IMPLEMENTATION.
         " Pass params
         CREATE OBJECT mo_screen
           EXPORTING
-            iv_dynnr   = lv_dynnr
-            iv_cprog   = lv_prog
-            ir_context = ls_context. " <--- Set initial values
+            iv_dynnr        = lv_dynnr
+            iv_cprog        = lv_prog
+            iv_status_title = 'Test dynamic screens' " <--- status & title is fixed
+            ir_context      = ls_context.            " <--- Set initial values
       CATCH zcx_eui_exception INTO lo_error.
         MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
         RETURN.
@@ -138,11 +139,8 @@ CLASS lcl_main IMPLEMENTATION.
       mo_screen->customize( iv_fieldname = 'P_MEMO' iv_label = 'Test edit text' ).
     ENDIF.
 
+    " As popup
     mo_screen->popup( iv_col_end = 118 ).
-
-    " Do not clear status & title
-    mo_screen->ms_status-title    = 'Test dynamic screens'.
-    mo_screen->ms_status-is_fixed = abap_true.
 
     " If pressed OK
     IF mo_screen->show( io_handler = me ) = 'OK'.

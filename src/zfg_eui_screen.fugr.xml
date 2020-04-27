@@ -28,6 +28,10 @@
       </RSFDO>
      </DOCUMENTATION>
     </item>
+    <item>
+     <FUNCNAME>ZFM_EUI_PBO</FUNCNAME>
+     <SHORT_TEXT>Call PBO for subscreen without error</SHORT_TEXT>
+    </item>
    </FUNCTIONS>
    <DYNPROS>
     <item>

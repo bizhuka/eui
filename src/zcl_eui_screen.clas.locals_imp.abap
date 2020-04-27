@@ -1045,8 +1045,7 @@ CLASS lcl_scr_auto IMPLEMENTATION.
     APPEND ``  TO lt_code.
     APPEND `AT SELECTION-SCREEN OUTPUT.`              TO lt_code.
     " PBO
-    CONCATENATE `PERFORM AUTO_SCREEN_PBO IN PROGRAM ` zcl_eui_screen=>mc_eui_screen_fugr `.` INTO lv_code.
-    APPEND lv_code TO lt_code.
+    APPEND `CALL FUNCTION 'ZFM_EUI_PBO'.` TO lt_code.
 
     DATA lv_can_update TYPE abap_bool.
     lv_can_update = check_can_update( ).
