@@ -28,10 +28,10 @@ public section.
 
   methods CONSTRUCTOR
     importing
-      !IV_STATUS_NAME type GUI_STATUS
-      !IV_STATUS_PROG type SYREPID
-      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE
-      !IV_STATUS_TITLE type CSEQUENCE
+      !IV_STATUS_NAME type GUI_STATUS optional
+      !IV_STATUS_PROG type SYREPID optional
+      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
+      !IV_STATUS_TITLE type CSEQUENCE optional
       !IV_READ_ONLY type ABAP_BOOL .
 protected section.
 

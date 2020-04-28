@@ -329,7 +329,7 @@ ENDCLASS.
 
 CLASS lcl_txt_editor IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( p_reado ).
+    super->constructor( iv_read_only = p_reado ).
     mo_grid = io_grid.
     mr_text = ir_text.
   ENDMETHOD.
