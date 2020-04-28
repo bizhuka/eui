@@ -65,6 +65,12 @@
  new ZCL_EUI_FILE( )->IMPORT_FROM_STRING(  IV_ENCODING = utf_16be )->DOWNLOAD( IV_FULL_PATH = ... )->OPEN_BY_OLE( )
 ```
 
+Если в конце его нужно показть его внутри SAP GUI inplace меняем DOWNLOAD( ) на **SHOW( )**
+
+```abap
+ new ZCL_EUI_FILE( )->IMPORT_FROM_STRING(  IV_ENCODING = utf_16be )->SHOW( )
+```
+
 Каждый из шагов может выбросить, выкинуть, вызвать исключение или исключения по этому лучше его завернуть в **TRY**\
 То есть 1 обработчик исключений для всей цепочки вызовов
 ```abap
