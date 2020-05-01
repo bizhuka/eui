@@ -220,8 +220,8 @@ CLASS lcl_report IMPLEMENTATION.
       lo_file  TYPE REF TO zcl_eui_file_io,
       lv_ext   TYPE string,
       lo_error TYPE REF TO zcx_eui_exception,
-      lt_map   TYPE REF TO zcl_eui_file=>tt_excel_map,
-      ls_map   TYPE REF TO zcl_eui_file=>ts_excel_map.
+      lt_map   TYPE REF TO zcl_eui_file_io=>tt_excel_map,
+      ls_map   TYPE REF TO zcl_eui_file_io=>ts_excel_map.
 
     TRY.
         " If just want to load part of table (OR order is different in Excel & mt_alv[])
@@ -259,7 +259,7 @@ CLASS lcl_report IMPLEMENTATION.
             lv_ext = zcl_eui_file=>mc_extension-xlsx.
         ENDCASE.
 
-        " In new syntax just  --->   new ZCL_EUI_FILE( )->IMPORT_FROM_FILE( )->CONVERT_TO_ITAB( )
+        " In new syntax just  --->   new ZCL_EUI_FILE( )->IMPORT_FROM_FILE( )->EXPORT_TO_ITAB( )
         CREATE OBJECT lo_file
           EXPORTING
             iv_file_name = lv_ext.

@@ -72,6 +72,18 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Do not raised (Handler called by name)@see CONVERT_TO_ITAB()</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>TS_EXCEL_MAP</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Mapping between internal table and Excel columns</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_FILE_IO</CLSNAME>
+     <CMPNAME>TT_EXCEL_MAP</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Fill FILED &amp; COLUMN_NAME only</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

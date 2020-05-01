@@ -10,7 +10,7 @@ Example decomposition of the **DOWNLOAD** method or thinking in OOP within 1 day
 
 If you have a method with a dozen optional parameters you worth ~~start smoking more often~~ divide it into several smaller and more understandable methods
 
-Once upon a time there was a simple method **DOWNLOAD** for uploading files.\
+Once upon a time there was a simple **DOWNLOAD** method for uploading files.\
 It took 2 parameters __IT_TABLE__ and its length __IV_LENGTH__.\
 He was not at all complicated, until unloading from IV_**X**STRING was needed.\
 And then from the usual line __IV_STRING__ + encoding __IV_ENCODING__ (utf-8 by default)

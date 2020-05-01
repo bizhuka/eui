@@ -7,25 +7,6 @@ public section.
   type-pools OLE2 .
 
   types:
-    BEGIN OF TS_EXCEL_MAP,
-     " Field of internal table
-     field        TYPE fieldname,
-
-     " Convenient for Excel
-     column_name  TYPE char3,
-
-     " More convenient for CSV. Could be filled automatically
-     column_index TYPE i,
-
-     " FM of conversion. ALPHA for exmple
-     fm          TYPE string,
-
-     " Generic type
-     gen_type    TYPE string,
-   END OF TS_EXCEL_MAP .
-  types:
-    TT_EXCEL_MAP type STANDARD TABLE OF TS_EXCEL_MAP WITH DEFAULT KEY .
-  types:
     BEGIN OF TS_OLE_INFO,
       " Excel & Word
       app      TYPE ole2_object,

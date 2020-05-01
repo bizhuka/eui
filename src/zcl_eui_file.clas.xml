@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_EUI_FILE</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>File basic operations</DESCRIPT>
+    <DESCRIPT>Basic file operations</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
@@ -116,21 +116,9 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_EUI_FILE</CLSNAME>
-     <CMPNAME>TS_EXCEL_MAP</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Mapping between internal table and Excel columns</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_FILE</CLSNAME>
      <CMPNAME>TS_OLE_INFO</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Ole information</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_FILE</CLSNAME>
-     <CMPNAME>TT_EXCEL_MAP</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Fill FILED &amp; COLUMN_NAME only</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

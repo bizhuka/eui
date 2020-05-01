@@ -28,10 +28,10 @@ CLASS lcl_helper DEFINITION FINAL.
       fill_mapping
         IMPORTING
           ir_table     TYPE REF TO data
-          ir_excel_map TYPE REF TO zcl_eui_file=>tt_excel_map
+          ir_excel_map TYPE REF TO zcl_eui_file_io=>tt_excel_map
         EXPORTING
           et_fieldcat  TYPE lvc_t_fcat
-          er_excel_map TYPE REF TO zcl_eui_file=>tt_excel_map,
+          er_excel_map TYPE REF TO zcl_eui_file_io=>tt_excel_map,
 
       export_2_table
         IMPORTING
@@ -40,7 +40,7 @@ CLASS lcl_helper DEFINITION FINAL.
                   ir_source    TYPE REF TO data
                   iv_row_from  TYPE sytabix
                   io_file      TYPE REF TO zcl_eui_file_io " for messages only
-                  ir_excel_map TYPE REF TO zcl_eui_file=>tt_excel_map
+                  ir_excel_map TYPE REF TO zcl_eui_file_io=>tt_excel_map
         RAISING   zcx_eui_exception.
 ENDCLASS.
 
