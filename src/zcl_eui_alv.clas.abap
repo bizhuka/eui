@@ -69,6 +69,11 @@ METHOD constructor.
   mt_filter            = it_filter.
   mt_sort              = it_sort.
 
+  " Just check
+  IF ms_layout-edit = abap_true AND iv_read_only IS NOT SUPPLIED.
+    MESSAGE `Please also specify 'IV_READ_ONLY' parameter` TYPE 'S' DISPLAY LIKE 'W'.
+  ENDIF.
+
   CREATE OBJECT mo_helper
     EXPORTING
       io_eui_alv    = me

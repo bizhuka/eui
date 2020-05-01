@@ -195,6 +195,9 @@ METHOD zif_eui_manager~popup.
 
   " And set
   ms_popup = ls_popup.
+
+  " For chains
+  ro_manager = me.
 ENDMETHOD.
 
 

@@ -65,7 +65,9 @@ interface ZIF_EUI_MANAGER
       !IV_COL_END type I optional
       !IV_ROW_BEG type I optional
       !IV_ROW_END type I optional
-      !IV_NO_SHIFT type ABAP_BOOL default ABAP_FALSE .
+      !IV_NO_SHIFT type ABAP_BOOL default ABAP_FALSE
+    returning
+      value(RO_MANAGER) type ref to ZIF_EUI_MANAGER .
   methods SHOW
     importing
       !IO_HANDLER type ref to OBJECT optional
