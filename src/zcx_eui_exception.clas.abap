@@ -110,10 +110,7 @@ METHOD raise_sys_error.
      IMPORTING
        include_name = lv_incl
        source_line  = lv_line ).
-    IF ls_string IS NOT INITIAL.
-      lv_text = lv_line.
-      CONCATENATE ls_string lv_incl  INTO ls_string SEPARATED BY ` - `.
-    ENDIF.
+    " put break-point here ---> { lv_incl } - { lv_line }
 
     io_error = io_error->previous.
   ENDWHILE.

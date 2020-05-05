@@ -25,6 +25,7 @@ public section.
      html TYPE STRING VALUE 'html',
      pdf  TYPE STRING VALUE 'pdf',
    END OF MC_EXTENSION .
+  data MV_XSTRING type XSTRING read-only .
 
   methods CONSTRUCTOR
     importing
@@ -43,7 +44,7 @@ public section.
   methods IMPORT_FROM_FILE
     importing
       value(IV_FULL_PATH) type STRING optional
-      !IV_WINDOW_TITLE type STRING default 'Import'
+      !IV_WINDOW_TITLE type CSEQUENCE default 'Import'
       value(IV_DEFAULT_EXTENSION) type STRING optional
       value(IV_DEFAULT_FILENAME) type STRING optional
       value(IV_FILE_FILTER) type STRING optional
@@ -70,12 +71,13 @@ public section.
       value(RO_FILE) type ref to ZCL_EUI_FILE .
   methods DOWNLOAD
     importing
-      value(IV_FULL_PATH) type STRING optional
-      !IV_SAVE_DIALOG type ABAP_BOOL default ABAP_TRUE
-      !IV_WINDOW_TITLE type STRING default 'Export'
+      !IV_FULL_PATH type CSEQUENCE optional
+      !IV_SAVE_DIALOG type ABAP_BOOL default ABAP_FALSE
+      !IV_WINDOW_TITLE type CSEQUENCE default 'Export'
       value(IV_DEFAULT_EXTENSION) type STRING optional
       value(IV_DEFAULT_FILENAME) type STRING optional
       value(IV_FILE_FILTER) type STRING optional
+      !IV_FILETYPE type CHAR10 default 'BIN'
     returning
       value(RO_FILE) type ref to ZCL_EUI_FILE
     raising
@@ -99,6 +101,11 @@ public section.
       !EV_FILENAME type CSEQUENCE
       !EV_FILE_NOEXT type CSEQUENCE
       !EV_EXTENSION type CSEQUENCE .
+  class-methods FILE_EXIST
+    importing
+      !IV_FULL_PATH type STRING
+    returning
+      value(RV_EXIST) type ABAP_BOOL .
 
   methods ZIF_EUI_MANAGER~PBO
     redefinition .
@@ -106,7 +113,6 @@ public section.
     redefinition .
 protected section.
 
-  data MV_XSTRING type XSTRING .
   data MV_EXTENSION type STRING .
   data MV_FILE_NAME type STRING .
 
@@ -138,8 +144,7 @@ ENDMETHOD.
 
 
 METHOD download.
-*  DATA lv_file_name  TYPE STRING.
-*  DATA lv_extension  TYPE STRING.
+  DATA lv_full_path  TYPE string.
   DATA lv_path       TYPE string.
   DATA lv_sep        TYPE char1.
   DATA lv_len        TYPE i.
@@ -148,14 +153,16 @@ METHOD download.
   DATA lv_filesize   TYPE i.
   DATA lv_no_ext     TYPE string.
   DATA lv_guid       TYPE guid_32.
+  DATA lv_title      TYPE string.
 
   " Side results of method
   set_full_path( ).
   ro_file = me.
 
+  lv_full_path = iv_full_path.
   zcl_eui_file=>split_file_path(
    EXPORTING
-     iv_fullpath   = iv_full_path
+     iv_fullpath   = lv_full_path
    IMPORTING
      ev_filename   = iv_default_filename  " lv_file_name
      ev_path       = lv_path
@@ -194,15 +201,16 @@ METHOD download.
         " Texts for dialog
         prepare_dialog.
 
+        lv_title = iv_window_title.
         cl_gui_frontend_services=>file_save_dialog(
           EXPORTING
-            window_title      = iv_window_title
+            window_title      = lv_title
             default_extension = iv_default_extension " lv_extension
             default_file_name = iv_default_filename  " lv_file_name
             file_filter       = iv_file_filter
           CHANGING
             filename          = iv_default_filename  " lv_file_name
-            fullpath          = iv_full_path
+            fullpath          = lv_full_path
             path              = lv_path
             user_action       = lv_action ).
 
@@ -228,20 +236,12 @@ METHOD download.
         ENDIF.
 
         " And create new path
-        CONCATENATE lv_path iv_default_filename INTO iv_full_path. " lv_file_name
+        CONCATENATE lv_path iv_default_filename INTO lv_full_path. " lv_file_name
 
         " Already exist. Create unique name
-        DATA lv_exist TYPE abap_bool.
-        cl_gui_frontend_services=>file_exist(
-          EXPORTING
-            file    = iv_full_path
-          RECEIVING
-            result  = lv_exist
-          EXCEPTIONS
-            OTHERS = 0 ).  " prevent GUI messages when file not found
-        IF lv_exist  = abap_true.
+        IF zcl_eui_file=>file_exist( lv_full_path ) = abap_true.
           lv_guid = zcl_eui_conv=>guid_create( ).
-          CONCATENATE lv_path lv_no_ext ` ` lv_guid `.` iv_default_extension INTO iv_full_path.
+          CONCATENATE lv_path lv_no_ext ` ` lv_guid `.` iv_default_extension INTO lv_full_path.
         ENDIF.
     ENDCASE.
   ENDIF.
@@ -262,8 +262,8 @@ METHOD download.
     cl_gui_frontend_services=>gui_download(
       EXPORTING
         bin_filesize = lv_solix_len
-        filename     = iv_full_path
-        filetype     = 'BIN'
+        filename     = lv_full_path
+        filetype     = iv_filetype
       CHANGING
         data_tab     = lt_solix_tab
       EXCEPTIONS
@@ -284,7 +284,7 @@ METHOD download.
       CHECK sy-subrc = 0.
 
       " create_folders( cv_fullpath ).
-      lv_cpath = iv_full_path.
+      lv_cpath = lv_full_path.
       CALL FUNCTION 'FTP_R3_TO_CLIENT'
         EXPORTING
           fname           = lv_cpath
@@ -308,8 +308,19 @@ METHOD download.
   ENDIF.
 
   " Save side results
-  set_full_path( iv_full_path ).
+  set_full_path( lv_full_path ).
 ENDMETHOD.                                               "#EC CI_VALPAR
+
+
+METHOD file_exist.
+  cl_gui_frontend_services=>file_exist(
+    EXPORTING
+      file   = iv_full_path
+    RECEIVING
+      result = rv_exist
+    EXCEPTIONS
+      OTHERS = 0 ). " prevent GUI messages when file not found
+ENDMETHOD.
 
 
 METHOD get_full_path.
@@ -336,6 +347,7 @@ METHOD import_from_file.
   DATA          lv_rc       TYPE i.
   DATA          lt_bin_data TYPE solix_tab.
   DATA          lv_filesize TYPE i.
+  DATA          lv_title    TYPE string.
   FIELD-SYMBOLS <ls_file>   LIKE LINE OF lt_file.
 
   " Side results of method
@@ -346,9 +358,10 @@ METHOD import_from_file.
     " Texts for dialog
     prepare_dialog.
 
+    lv_title = iv_window_title.
     cl_gui_frontend_services=>file_open_dialog(
       EXPORTING
-        window_title      = iv_window_title
+        window_title      = lv_title
         default_extension = iv_default_extension
         default_filename  = iv_default_filename
         file_filter       = iv_file_filter
@@ -388,7 +401,7 @@ METHOD import_from_file.
 
   " Save side results
   set_full_path( iv_full_path ).
-ENDMETHOD. "#EC CI_VALPAR
+ENDMETHOD.                                               "#EC CI_VALPAR
 
 
 METHOD import_from_string.

@@ -4,14 +4,14 @@ REPORT zeui_test_screen_01.
 
 " Screen 1000
 PARAMETERS:
-  p_01_obl AS CHECKBOX,
+  p_01_gry AS CHECKBOX DEFAULT ' ',
   p_02_obl AS CHECKBOX DEFAULT 'X'.
 
 " Screen 1010
 SELECTION-SCREEN BEGIN OF SCREEN 1010 AS SUBSCREEN.
 SELECTION-SCREEN BEGIN OF BLOCK bl_1010 WITH FRAME TITLE TEXT-tit.
-PARAMETERS : p_fld_01 TYPE sytabix,  " OBLIGATORY,
-             p_fld_02 TYPE sytabix.  " OBLIGATORY
+PARAMETERS : p_fld_01 TYPE sytabix,
+             p_fld_02 TYPE sytabix.
 SELECTION-SCREEN END OF BLOCK bl_1010.
 SELECTION-SCREEN END OF SCREEN 1010.
 
@@ -65,8 +65,8 @@ CLASS lcl_main IMPLEMENTATION.
     ENDTRY.
 **********************************************************************
     " For pbo
-    IF p_01_obl = abap_true.
-      mo_screen->customize( name = 'P_FLD_01' required = '1' ).
+    IF p_01_gry = abap_true.
+      mo_screen->customize( name = 'P_FLD_01' input = '0' ).
     ENDIF.
 
     IF p_02_obl = abap_true.

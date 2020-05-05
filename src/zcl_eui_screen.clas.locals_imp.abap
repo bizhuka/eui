@@ -111,10 +111,12 @@ CLASS lcl_screen IMPLEMENTATION.
       APPEND is_screen TO mt_screen.
     ENDIF.
 
-    " IF field exist
-    CHECK is_map-name IS NOT INITIAL.
+    " IF have something
+    CHECK is_map IS NOT INITIAL
+      AND is_screen-name IS NOT INITIAL.
+
     READ TABLE mt_map REFERENCE INTO ls_map
-     WITH KEY name = is_map-name.
+     WITH KEY name = is_screen-name.
     IF sy-subrc <> 0.
       CONCATENATE `Unknown field name ` is_map-name INTO lv_message.
       zcx_eui_exception=>raise_dump( iv_message = lv_message ).
@@ -132,6 +134,14 @@ CLASS lcl_screen IMPLEMENTATION.
   METHOD show.
   ENDMETHOD.
 
+  METHOD get_screen_by_map.
+    DATA lr_screen TYPE REF TO zcl_eui_screen=>ts_screen.
+
+    " Just return INPUT & REQUIRED
+    READ TABLE mt_screen INTO rs_screen
+     WITH KEY name = iv_name.
+  ENDMETHOD.
+
   METHOD pbo.
     CHECK iv_after = abap_true.
 
@@ -146,10 +156,13 @@ CLASS lcl_screen IMPLEMENTATION.
     IF mv_pbo_init_params = abap_true.
       mv_pbo_init_params = abap_false.
 
-      DATA ls_map                TYPE REF TO zcl_eui_screen=>ts_map.
-      DATA lv_name               TYPE string.
-      FIELD-SYMBOLS <lv_param>   TYPE any.
-      FIELD-SYMBOLS <lv_src>     TYPE any.
+      DATA ls_map                   TYPE REF TO zcl_eui_screen=>ts_map.
+      DATA lv_name                  TYPE string.
+      DATA lv_id                    TYPE char80.
+      FIELD-SYMBOLS <lv_param>      TYPE any.
+      FIELD-SYMBOLS <lv_src>        TYPE any.
+      FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
+
 
       LOOP AT mt_map REFERENCE INTO ls_map WHERE ui_type <> zcl_eui_type=>mc_ui_type-table
                                              AND ui_type <> zcl_eui_type=>mc_ui_type-string.
@@ -169,6 +182,38 @@ CLASS lcl_screen IMPLEMENTATION.
 
         ASSIGN ls_map->cur_value->* TO <lv_src>.
         <lv_param> = <lv_src>.
+      ENDLOOP.
+
+      " Set listbox search helps
+      LOOP AT mt_screen ASSIGNING <ls_screen_src> WHERE
+            name IS NOT INITIAL
+        AND t_listbox IS NOT INITIAL.
+
+        " Get name
+        READ TABLE mt_map REFERENCE INTO ls_map
+         WITH KEY name = <ls_screen_src>-name.
+        CHECK sy-subrc = 0.
+        lv_id = ls_map->par_name.
+
+        " Initialize 1 time only
+        DATA lt_listbox TYPE vrm_values.
+        CLEAR lt_listbox.
+        CALL FUNCTION 'VRM_GET_VALUES'
+          EXPORTING
+            id     = lv_id
+          IMPORTING
+            values = lt_listbox
+          EXCEPTIONS
+            OTHERS = 1.
+        CHECK sy-subrc <> 0 OR lt_listbox IS INITIAL.
+
+        " And set
+        CALL FUNCTION 'VRM_SET_VALUES'
+          EXPORTING
+            id     = lv_id
+            values = <ls_screen_src>-t_listbox[]
+          EXCEPTIONS
+            OTHERS = 0.
       ENDLOOP.
     ENDIF.
 
@@ -191,10 +236,10 @@ CLASS lcl_screen IMPLEMENTATION.
 
     DATA lv_rem                   TYPE string.
     DATA ls_screen_dst            TYPE screen.
-    DATA ls_screen_src            TYPE screen.
+    DATA ls_screen_src            LIKE LINE OF mt_screen.
     DATA lt_scr_fields            TYPE abap_compdescr_tab. " Filled 1 time with all ls_screen fields
     DATA lv_input                 TYPE screen-input.
-    FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
+    DATA ls_screen                TYPE zcl_eui_screen=>ts_screen.
 
     LOOP AT SCREEN.
       " Have rule or not ?
@@ -211,13 +256,16 @@ CLASS lcl_screen IMPLEMENTATION.
       READ TABLE mt_map REFERENCE INTO ls_map
        WITH KEY par_name = lv_name.
       IF sy-subrc = 0.
+        " Get by screen option
+        ls_screen = get_screen_by_map( ls_map->name ).
+
         " Set required for parameter or select-option
-        IF ls_map->required IS NOT INITIAL AND ( ls_screen_dst-group3 = 'PAR' OR ls_screen_dst-group3 = 'LOW' ).
-          ls_screen_dst-required = ls_map->required.
+        IF ls_screen-required IS NOT INITIAL AND ( ls_screen_dst-group3 = 'PAR' OR ls_screen_dst-group3 = 'LOW' ).
+          ls_screen_dst-required = ls_screen-required.
         ENDIF.
 
         lv_input = ''.
-        IF ls_map->input = '0'. " AND ls_screen_dst-group3 <> 'VPU'. " But not for tables
+        IF ls_screen-input = '0'. " AND ls_screen_dst-group3 <> 'VPU'. " But not for tables
           lv_input = '0'.
         ENDIF.
 
@@ -329,13 +377,17 @@ CLASS lcl_screen IMPLEMENTATION.
     DATA lr_field_desc TYPE REF TO zcl_eui_type=>ts_field_desc.
     DATA lv_read_only  TYPE abap_bool.
     DATA ls_layout     TYPE lvc_s_layo.
+    DATA ls_screen     TYPE zcl_eui_screen=>ts_screen.
 
     " Get current field
     READ TABLE mt_map REFERENCE INTO ls_map INDEX iv_map_index.
     CHECK sy-subrc = 0.
 
+    " Get by screen option
+    ls_screen = get_screen_by_map( ls_map->name ).
+
     " Edit or not
-    IF mo_eui_screen->mv_read_only = abap_true OR ls_map->input = '0'.
+    IF mo_eui_screen->mv_read_only = abap_true OR ls_screen-input = '0'.
       lv_read_only   = abap_true.
     ELSE.
       ls_layout-edit = abap_true.
@@ -966,14 +1018,23 @@ CLASS lcl_scr_auto IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD show.
-    CONSTANTS c_dynnr  TYPE sydynnr VALUE '9459'.
+    CONSTANTS c_dynnr_auto  TYPE sydynnr VALUE '9999'.
 
     CHECK iv_before = abap_true.
 
     " Text of parameters
     me->mv_pbo_set_labels = abap_true.
-    " Dynnr always the same
-    mo_eui_screen->ms_screen-dynnr = c_dynnr.
+
+    " Detect dynnr
+    CLEAR mo_eui_screen->ms_screen-dynnr.
+    SPLIT mo_eui_screen->ms_screen-prog AT `^` INTO
+      mo_eui_screen->ms_screen-prog
+      mo_eui_screen->ms_screen-dynnr.
+
+    " Use default
+    IF mo_eui_screen->ms_screen-dynnr IS INITIAL.
+      mo_eui_screen->ms_screen-dynnr = c_dynnr_auto.
+    ENDIF.
 
     " No data is passed
     IF mt_map IS INITIAL.
@@ -1009,7 +1070,7 @@ CLASS lcl_scr_auto IMPLEMENTATION.
 **********************************************************************
     " Begin of screen
     APPEND `` TO lt_code.
-    CONCATENATE `SELECTION-SCREEN BEGIN OF SCREEN ` c_dynnr ` AS SUBSCREEN.` INTO lv_code.
+    CONCATENATE `SELECTION-SCREEN BEGIN OF SCREEN ` mo_eui_screen->ms_screen-dynnr ` AS SUBSCREEN.` INTO lv_code.
     APPEND lv_code TO lt_code.
     APPEND `SELECTION-SCREEN BEGIN OF BLOCK bl_main WITH FRAME TITLE s_title.` TO lt_code.
 
@@ -1038,7 +1099,7 @@ CLASS lcl_scr_auto IMPLEMENTATION.
     " END ofd screen
     APPEND `` TO lt_code.
     APPEND `SELECTION-SCREEN END OF BLOCK bl_main.`           TO lt_code.
-    CONCATENATE `SELECTION-SCREEN END OF SCREEN ` c_dynnr `.` INTO lv_code.
+    CONCATENATE `SELECTION-SCREEN END OF SCREEN ` mo_eui_screen->ms_screen-dynnr `.` INTO lv_code.
     APPEND lv_code                                            TO lt_code.
 
     " For EVENT call FM ZFM_EUI_PBO_SUB_SCREEN!
@@ -1059,8 +1120,33 @@ CLASS lcl_scr_auto IMPLEMENTATION.
         RETURN.
     ENDCASE.
 
+    " concat_lines_of( )
+    DATA lv_source TYPE string.
+    DATA lo_error  TYPE REF TO zcx_eui_exception.
+
+    LOOP AT lt_code INTO lv_code.
+      CONCATENATE lv_source lv_code cl_abap_char_utilities=>cr_lf INTO lv_source.
+    ENDLOOP.
+
+    " Save lt_code to file
+    DATA lo_file TYPE REF TO zcl_eui_file.
+    CREATE OBJECT lo_file.
+    lo_file->import_from_string( iv_string = lv_source ).
+
+    CONCATENATE mo_eui_screen->ms_screen-prog `_scr.txt` INTO lv_code.
+    TRY.
+        lo_file->download( iv_save_dialog = abap_true
+                           iv_full_path   = lv_code ).
+      CATCH zcx_eui_exception INTO lo_error.
+        MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+**********************************************************************
     " Create program
     " Sorry but usally is strictly prohibited. Please create { mo_eui_screen->ms_screen-prog } by hand based on { lt_code }.
+**********************************************************************
+
+    " read text above
     zcx_eui_exception=>raise_dump( iv_message = 'Cannot call INSERT REPORT' ).
     " And then change second row to *CAN_UPDATE=FALSE
 
@@ -1148,6 +1234,7 @@ CLASS lcl_scr_dpop IMPLEMENTATION.
 
     " POPUP declaration
     DATA lr_map        TYPE REF TO zcl_eui_screen=>ts_map.
+    DATA ls_screen     TYPE zcl_eui_screen=>ts_screen.
     DATA ls_attr       TYPE sci_attent.
 
     " Title group
@@ -1160,7 +1247,10 @@ CLASS lcl_scr_dpop IMPLEMENTATION.
       CLEAR ls_attr.
       ls_attr-text = lr_map->label.
       ls_attr-ref  = lr_map->cur_value.
-      IF lr_map->required = '1'.
+
+      " Get by screen option
+      ls_screen = get_screen_by_map( lr_map->name ).
+      IF ls_screen-required = '1'.
         ls_attr-obligatory = abap_true.
       ENDIF.
 

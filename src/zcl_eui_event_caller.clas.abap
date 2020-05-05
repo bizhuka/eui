@@ -59,8 +59,9 @@ private section.
 
   types:
     BEGIN OF TS_LISTENER,
-     LISTENER  TYPE REF TO OBJECT,
-     METHDESCR TYPE ABAP_METHDESCR_TAB,
+     listener    type ref to object,
+     t_methdescr type abap_methdescr_tab,
+     t_friend    type abap_frndtypes_tab,
    END OF TS_LISTENER .
   types:
     TT_LISTENER type STANDARD TABLE OF TS_LISTENER WITH DEFAULT KEY .
@@ -76,7 +77,7 @@ CLASS ZCL_EUI_EVENT_CALLER IMPLEMENTATION.
 METHOD add_handler.
   DATA:
     lt_event        TYPE STANDARD TABLE OF abap_methname,
-    lo_object_descr TYPE REF TO cl_abap_objectdescr,
+    lo_object_descr TYPE REF TO cl_abap_classdescr,
     lv_tabix        TYPE sytabix,
     ls_method       TYPE REF TO abap_methdescr,
     ls_item         LIKE LINE OF mt_listener.
@@ -92,13 +93,19 @@ METHOD add_handler.
     RETURN.
   ENDIF.
 
+  " Already exist ?
+  READ TABLE mt_listener TRANSPORTING NO FIELDS
+   WITH KEY listener = io_handler.
+  CHECK sy-subrc <> 0.
+
   " Call public methods of ...
   ls_item-listener = io_handler.
 
   " Get all handler methods
   lo_object_descr ?= cl_abap_objectdescr=>describe_by_object_ref( ls_item-listener ).
-  ls_item-methdescr = lo_object_descr->methods.
-  DELETE ls_item-methdescr WHERE for_event IS INITIAL.
+  ls_item-t_methdescr = lo_object_descr->methods.
+  ls_item-t_friend    = lo_object_descr->get_friend_types( ).
+  DELETE ls_item-t_methdescr WHERE for_event IS INITIAL.
 
   " Exact only specefic methods
   IF iv_handlers_map IS NOT INITIAL.
@@ -106,7 +113,7 @@ METHOD add_handler.
 
     " Check declared or not
     LOOP AT lt_event ASSIGNING <ls_event>.
-      READ TABLE ls_item-methdescr TRANSPORTING NO FIELDS
+      READ TABLE ls_item-t_methdescr TRANSPORTING NO FIELDS
        WITH TABLE KEY name = <ls_event>.
       CHECK sy-subrc <> 0.
 
@@ -116,7 +123,7 @@ METHOD add_handler.
 
     " Could be many similar EVENT handlers
     SORT lt_event BY table_line.
-    LOOP AT ls_item-methdescr REFERENCE INTO ls_method.
+    LOOP AT ls_item-t_methdescr REFERENCE INTO ls_method.
       lv_tabix = sy-tabix.
 
       " Delete unnecessary
@@ -124,7 +131,7 @@ METHOD add_handler.
        WITH KEY table_line = ls_method->name.
       CHECK sy-subrc <> 0.
 
-      DELETE ls_item-methdescr INDEX lv_tabix.
+      DELETE ls_item-t_methdescr INDEX lv_tabix.
     ENDLOOP.
   ENDIF.
 
@@ -142,7 +149,8 @@ METHOD call_handlers.
     lt_param_input TYPE abap_parmbind_tab,
     lt_param_call  LIKE lt_param_input,
     ls_param       TYPE abap_parmbind,
-    lo_error       TYPE REF TO cx_sy_dyn_call_error.
+    lo_error       TYPE REF TO cx_sy_dyn_call_error,
+    lv_is_friend   TYPE abap_bool.
   FIELD-SYMBOLS:
     <ls_param>     LIKE LINE OF lt_param_input,
     <ls_methdescr> TYPE abap_methdescr,
@@ -179,12 +187,20 @@ METHOD call_handlers.
 **********************************************************************
 
   LOOP AT mt_listener ASSIGNING <ls_item>.
-    LOOP AT <ls_item>-methdescr ASSIGNING <ls_methdescr>
+    " Public or friend
+    lv_is_friend = abap_false.
+    READ TABLE <ls_item>-t_friend TRANSPORTING NO FIELDS
+     WITH KEY table_line->absolute_name = '\CLASS=ZCL_EUI_EVENT_CALLER'.
+    IF sy-subrc = 0.
+      lv_is_friend = abap_true.
+    ENDIF.
+
+    LOOP AT <ls_item>-t_methdescr ASSIGNING <ls_methdescr>
        WHERE of_class  = iv_of_class
          AND for_event = iv_for_event.
 
       " Make method public!
-      IF <ls_methdescr>-visibility <> cl_abap_objectdescr=>public.
+      IF <ls_methdescr>-visibility <> cl_abap_objectdescr=>public AND lv_is_friend <> abap_true.
         MESSAGE s008(zeui_message) WITH <ls_methdescr>-name INTO sy-msgli.
         zcx_eui_exception=>raise_dump( iv_message = sy-msgli ).
       ENDIF.
@@ -217,7 +233,7 @@ METHOD has_handler.
 
   rv_ok = abap_false.
   LOOP AT mt_listener ASSIGNING <ls_item>.
-    READ TABLE <ls_item>-methdescr TRANSPORTING NO FIELDS
+    READ TABLE <ls_item>-t_methdescr TRANSPORTING NO FIELDS
       WITH KEY of_class  = iv_of_class
                for_event = iv_for_event.
 

@@ -23,9 +23,9 @@
     </item>
     <item>
      <ID>S</ID>
-     <KEY>P_01_OBL</KEY>
-     <ENTRY>Make P_FLD_01 obligatory</ENTRY>
-     <LENGTH>32</LENGTH>
+     <KEY>P_01_GRY</KEY>
+     <ENTRY>Make P_FLD_01 gray</ENTRY>
+     <LENGTH>26</LENGTH>
     </item>
     <item>
      <ID>S</ID>

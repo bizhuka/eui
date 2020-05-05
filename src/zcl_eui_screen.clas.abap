@@ -7,15 +7,24 @@ class ZCL_EUI_SCREEN definition
 public section.
   type-pools SSCR .
   type-pools SYDB0 .
+  type-pools VRM .
 
   types:
-    TT_SCREEN type STANDARD TABLE OF SCREEN WITH DEFAULT KEY .
+    BEGIN OF TS_SCREEN.
+     INCLUDE TYPE screen.
+  types:
+     t_listbox TYPE vrm_values,
+    END OF TS_SCREEN .
+  types:
+    TT_SCREEN type STANDARD TABLE OF TS_SCREEN WITH DEFAULT KEY .
   types:
     BEGIN OF ts_map.
     INCLUDE TYPE zcl_eui_type=>ts_field_desc AS field_desc.
   types:
-    input       TYPE char1,
-    required    TYPE char1,
+*     @see get_screen_by_map
+*    input       TYPE char1,
+*    required    TYPE char1,
+
     cur_value   TYPE REF TO DATA,
     par_name    TYPE string,
     is_list_box TYPE abap_bool,
@@ -51,7 +60,7 @@ public section.
       !OUTPUT type CHAR1 optional
       !INVISIBLE type CHAR1 optional
       !ACTIVE type CHAR1 optional
-      !IV_FIELDNAME type ZCL_EUI_TYPE=>TS_FIELD_DESC-NAME optional
+      !IT_LISTBOX type VRM_VALUES optional
       !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
       !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional .
   methods GET_CONTEXT
@@ -207,19 +216,20 @@ ENDMETHOD.
 
 
 METHOD customize.
-  DATA ls_screen TYPE screen.
+  DATA ls_screen TYPE ts_screen.
   DATA ls_map TYPE ts_map.
 
   " Pass as 1 parameter
   ls_screen-name      = name.
   ls_screen-group1    = group1.
-  ls_screen-input     = ls_map-input    = input.
-  ls_screen-required  = ls_map-required = required.
+  ls_screen-input     = input.    " ls_map-input
+  ls_screen-required  = required. " ls_map-required
   ls_screen-output    = output.
   ls_screen-invisible = invisible.
   ls_screen-active    = active.
+  ls_screen-t_listbox = it_listbox.
 
-  ls_map-name      = iv_fieldname.
+  " ls_map-name      = iv_fieldname.
   ls_map-label     = iv_label.
   ls_map-sub_fdesc = iv_sub_fdesc.
 
@@ -281,9 +291,9 @@ METHOD edit_in_popup.
   ENDIF.
 
   lo_screen->customize(
-   iv_fieldname = 'P_OK'
-   iv_label     = iv_label
-   required     = lv_required ).
+   name     = 'P_OK'
+   required = lv_required
+   iv_label = iv_label ).
 
   lo_manager->popup( iv_col_end = 118 ).
 
@@ -298,48 +308,15 @@ METHOD edit_in_popup.
   cv_value = <lv_value>.
   MESSAGE s019(zeui_message).
   cv_ok = abap_true.
-
-*  IF iv_rollname IS NOT INITIAL.
-*    DATA lt_field TYPE STANDARD TABLE OF sval.
-*    DATA ls_field TYPE REF TO sval.
-*    DATA lv_rc    TYPE char1.
-*    APPEND INITIAL LINE TO lt_field REFERENCE INTO ls_field.
-*
-*    " For F4
-*    SPLIT iv_rollname AT '-' INTO ls_field->tabname ls_field->fieldname.
-*    CHECK sy-subrc = 0
-*     AND ls_field->tabname IS NOT INITIAL
-*     AND ls_field->fieldname IS NOT INITIAL.
-*
-*    ls_field->value = cv_value.
-*
-*    CALL FUNCTION 'POPUP_GET_VALUES'
-*      EXPORTING
-*        no_value_check  = abap_true
-*        popup_title     = iv_title
-*      IMPORTING
-*        returncode      = lv_rc
-*      TABLES
-*        fields          = lt_field
-*      EXCEPTIONS
-*        error_in_fields = 1
-*        OTHERS          = 2.
-*    IF sy-subrc <> 0 OR lv_rc = 'A'.
-*      MESSAGE s118(ed) DISPLAY LIKE 'E'.
-*      RETURN.
-*    ENDIF.
-*
-*    " First row
-*    READ TABLE lt_field REFERENCE INTO ls_field INDEX 1.
-*    CHECK sy-subrc = 0.
-*  ENDIF.
 ENDMETHOD.
 
 
 METHOD get_context.
   DATA ls_map                TYPE REF TO ts_map.
 
-  " Read from screen
+  " Read from screen.
+  " for PAI read any time
+  " for PBO check sy-dynnr = (sender)lo_screen->ms_screen-dynnr
   IF iv_read = abap_true.
     LOOP AT mo_helper->mt_map REFERENCE INTO ls_map WHERE ui_type <> zcl_eui_type=>mc_ui_type-table
                                                       AND ui_type <> zcl_eui_type=>mc_ui_type-string.

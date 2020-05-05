@@ -29,7 +29,8 @@ public section.
   methods CREATE_TOOLBAR
     importing
       !IT_MENU type TT_MENU
-      value(IV_WIDTH) type I optional
+      !IV_WIDTH type I optional
+      !IV_CHECK_TCODE type ABAP_BOOL default ABAP_TRUE
     returning
       value(RO_MENU) type ref to ZCL_EUI_MENU .
   methods GET_CONTAINER
@@ -38,17 +39,17 @@ public section.
   methods GET_TOOLBAR
     returning
       value(RO_TOOLBAR) type ref to CL_GUI_TOOLBAR .
+  methods ADD_HANDLER
+    importing
+      !IO_HANDLER type ref to OBJECT .
   methods CHANGE_HANDLER
     importing
-      !IO_HANDLER type ref to OBJECT
-    raising
-      ZCX_EUI_EXCEPTION .
+      !IO_HANDLER type ref to OBJECT .
 protected section.
 private section.
 
   data MO_TOOLBAR type ref to CL_GUI_TOOLBAR .
   data MO_CONTAINER type ref to CL_GUI_CONTAINER .
-  data MV_USE_GOS_CONTAINER type ABAP_BOOL .
   data MO_EVENT_CALLER type ref to ZCL_EUI_EVENT_CALLER .
 
   methods ON_FUNCTION_SELECTED
@@ -56,10 +57,6 @@ private section.
     importing
       !SENDER
       !FCODE .
-  methods SET_TOOLBAR
-    importing
-      !IO_TOOLBAR type ref to CL_GUI_TOOLBAR optional
-      !IV_CLEAR_PREV type ABAP_BOOL default ABAP_TRUE .
 ENDCLASS.
 
 
@@ -67,46 +64,61 @@ ENDCLASS.
 CLASS ZCL_EUI_MENU IMPLEMENTATION.
 
 
+METHOD add_handler.
+  DATA lo_error TYPE REF TO zcx_eui_exception.
+
+  CHECK io_handler IS NOT INITIAL.
+
+  TRY.
+      " Specify receiver
+      IF mo_event_caller IS INITIAL.
+        CREATE OBJECT mo_event_caller.
+      ENDIF.
+
+      mo_event_caller->add_handler( io_handler ).
+    CATCH zcx_eui_exception INTO lo_error.
+      zcx_eui_exception=>raise_dump( io_error = lo_error ).
+  ENDTRY.
+ENDMETHOD.
+
+
 METHOD change_handler.
+  DATA lo_error TYPE REF TO zcx_eui_exception.
+
   CLEAR mo_event_caller.
   CHECK io_handler IS NOT INITIAL.
 
-  " Specify receiver
-  CREATE OBJECT mo_event_caller.
-  mo_event_caller->add_handler( io_handler ).
+  TRY.
+      " Specify receiver
+      CREATE OBJECT mo_event_caller.
+      mo_event_caller->add_handler( io_handler ).
+    CATCH zcx_eui_exception INTO lo_error.
+      zcx_eui_exception=>raise_dump( io_error = lo_error ).
+  ENDTRY.
 ENDMETHOD.
 
 
 METHOD constructor.
-  DATA:
-    lo_error TYPE REF TO zcx_eui_exception.
-
   " Use SUPPLIED container
   IF io_container IS NOT INITIAL.
     mo_container = io_container.
-  ELSE.
-    " Create on the fly
-    mv_use_gos_container = abap_true.
   ENDIF.
 
-  TRY.
-      change_handler( io_handler ).
-    CATCH zcx_eui_exception INTO lo_error.
-      MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
-      RETURN.
-  ENDTRY.
+  change_handler( io_handler ).
 ENDMETHOD.
 
 
 METHOD create_toolbar.
   DATA:
-    lo_toolbar       LIKE mo_toolbar,
     lp_dialog_status TYPE char1,
     lp_gui           TYPE char1,
     lp_cat           TYPE char1,
     lt_stb_menu      TYPE SORTED TABLE OF stb_btnmnu WITH UNIQUE KEY function,
     ls_stb_menu      TYPE stb_btnmnu,
-    lv_icon          TYPE icon-id.
+    lv_icon          TYPE icon-id,
+    lv_width         TYPE i,
+    ls_event         TYPE REF TO cntl_simple_event,
+    lt_event         TYPE cntl_simple_events.
   FIELD-SYMBOLS:
     <ls_menu>     LIKE LINE OF it_menu,
     <ls_stb_menu> TYPE stb_btnmnu.
@@ -115,9 +127,11 @@ METHOD create_toolbar.
   ro_menu = me.
 
   " Do not work in standard transactions (except SE38, SE80 ...)
-  CHECK sy-tcode CP 'Z*'
-     OR sy-tcode CP 'Y*'
-     OR sy-tcode CP 'SE*'.
+  IF iv_check_tcode = abap_true.
+    CHECK sy-tcode CP 'Z*'
+       OR sy-tcode CP 'Y*'
+       OR sy-tcode CP 'SE*'.
+  ENDIF.
 
   " if we are called by RFC in a dialogless BAPI or in update task or in batch suppress the starter
   GET PARAMETER ID 'FLAG_DIALOG_STATUS' FIELD lp_dialog_status.
@@ -140,18 +154,19 @@ METHOD create_toolbar.
 **********************************************************************
   " Calc new width
 **********************************************************************
-  IF iv_width = 0.
+  lv_width = iv_width.
+  IF lv_width = 0.
     LOOP AT it_menu ASSIGNING <ls_menu> WHERE hide <> abap_true
                                           AND par_function IS INITIAL.
       CASE <ls_menu>-butn_type.
         WHEN cntb_btype_menu.
-          ADD 51 TO iv_width.
+          ADD 51 TO lv_width.
 
         WHEN cntb_btype_sep.
-          ADD 6 TO iv_width.
+          ADD 6 TO lv_width.
 
         WHEN OTHERS.
-          ADD 41 TO iv_width.
+          ADD 41 TO lv_width.
       ENDCASE.
     ENDLOOP.
   ENDIF.
@@ -160,24 +175,15 @@ METHOD create_toolbar.
   " Create new toolbar. Could be different buttons each time
 **********************************************************************
 
-  " Delete prev
-  IF me->mo_toolbar IS NOT INITIAL.
-    set_toolbar( )." <--- IO_TOOLBAR Is Initial. just clear previous
+  IF mo_toolbar IS NOT INITIAL.
+    mo_toolbar->delete_all_buttons( ).
   ENDIF.
 
   " Create new container if needed
-  IF mo_container IS INITIAL OR
-     mv_use_gos_container = abap_true. " have to recretae for GOS. bug with contaoner width
-
-    " Delete prev for GOS
-    IF mo_container IS NOT INITIAL.
-      mo_container->finalize( ).
-      mo_container->free( ).
-    ENDIF.
-
+  IF mo_container IS INITIAL. " have to recretae for GOS. bug with contaoner width
     CREATE OBJECT mo_container TYPE cl_gui_gos_container
       EXPORTING
-        width                   = iv_width
+        width                   = lv_width
         no_autodef_progid_dynnr = abap_true
       EXCEPTIONS
         OTHERS                  = 5.
@@ -185,9 +191,20 @@ METHOD create_toolbar.
   ENDIF.
 
   " New toolbar
-  CREATE OBJECT lo_toolbar
-    EXPORTING
-      parent = mo_container.
+  IF mo_toolbar IS INITIAL.
+    CREATE OBJECT mo_toolbar
+      EXPORTING
+        parent = mo_container.
+
+    " 1 event only
+    APPEND INITIAL LINE TO lt_event REFERENCE INTO ls_event.
+    ls_event->appl_event = abap_true.
+    ls_event->eventid = cl_gui_toolbar=>m_id_function_selected.
+    mo_toolbar->set_registered_events( events = lt_event ).
+
+    " Set new handler
+    SET HANDLER on_function_selected FOR mo_toolbar ACTIVATION abap_true.
+  ENDIF.
 
 **********************************************************************
   " Create buttons
@@ -197,7 +214,7 @@ METHOD create_toolbar.
     lv_icon = <ls_menu>-icon.
 
     IF <ls_menu>-par_function IS INITIAL.
-      lo_toolbar->add_button(
+      mo_toolbar->add_button(
         fcode       = <ls_menu>-function
         icon        = <ls_menu>-icon
         is_disabled = <ls_menu>-disabled
@@ -251,7 +268,7 @@ METHOD create_toolbar.
       ENDCASE.
 
       " Set menu or delete it
-      lo_toolbar->set_static_ctxmenu(
+      mo_toolbar->set_static_ctxmenu(
        EXPORTING
         fcode     = <ls_menu>-par_function
         ctxmenu   = <ls_stb_menu>-ctmenu
@@ -259,11 +276,6 @@ METHOD create_toolbar.
         OTHERS    = 1 ).
     ENDIF.
   ENDLOOP.
-
-**********************************************************************
-  " Set new handlers (3-d call)
-**********************************************************************
-  set_toolbar( io_toolbar = lo_toolbar ).
 ENDMETHOD.
 
 
@@ -285,35 +297,5 @@ METHOD on_function_selected.
    iv_for_event    = 'FUNCTION_SELECTED'
    iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
    iv_param_nam_01 = 'FCODE'           iv_param_val_01 = fcode ).
-ENDMETHOD.
-
-
-METHOD set_toolbar.
-  DATA:
-    lo_object_descr TYPE REF TO cl_abap_objectdescr,
-    ls_event        TYPE REF TO cntl_simple_event,
-    lt_event        TYPE cntl_simple_events.
-
-  " Clear previous
-  IF me->mo_toolbar IS NOT INITIAL AND iv_clear_prev = abap_true.
-    SET HANDLER on_function_selected FOR mo_toolbar ACTIVATION abap_false.
-    mo_toolbar->delete_all_buttons( ).
-    mo_toolbar->finalize( ).
-    mo_toolbar->free( ).
-    CLEAR mo_toolbar.
-  ENDIF.
-
-  " No need
-  mo_toolbar = io_toolbar.
-  CHECK mo_toolbar IS NOT INITIAL.
-
-  " 1 event only
-  APPEND INITIAL LINE TO lt_event REFERENCE INTO ls_event.
-  ls_event->appl_event = abap_true.
-  ls_event->eventid = cl_gui_toolbar=>m_id_function_selected.
-  mo_toolbar->set_registered_events( events = lt_event ).
-
-  " Set new handler
-  SET HANDLER on_function_selected FOR mo_toolbar ACTIVATION abap_true.
 ENDMETHOD.
 ENDCLASS.

@@ -204,7 +204,7 @@ CLASS lcl_report IMPLEMENTATION.
         IF iv_show = abap_true.
           lo_file->show( io_handler = me ).
         ELSE.
-          lo_file->download( ).
+          lo_file->download( iv_save_dialog = abap_true ).
           lo_file->open( ). " open_by_ole( ) For ole
         ENDIF.
       CATCH zcx_eui_exception INTO lo_error.

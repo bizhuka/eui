@@ -39,8 +39,13 @@ CLASS lcl_screen DEFINITION.
 
       customize
         IMPORTING
-          is_screen TYPE screen
+          is_screen TYPE zcl_eui_screen=>ts_screen
           is_map    TYPE zcl_eui_screen=>ts_map,
+
+      get_screen_by_map
+        IMPORTING
+                  iv_name          TYPE zcl_eui_screen=>ts_map-name
+        RETURNING VALUE(rs_screen) TYPE zcl_eui_screen=>ts_screen,
 
       pbo
         IMPORTING

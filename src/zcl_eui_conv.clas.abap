@@ -443,7 +443,8 @@ METHOD from_json.
     DATA lo_file TYPE REF TO zcl_eui_file.
     lo_file->import_from_string( iv_json ).
     TRY.
-        lo_file->download( iv_full_path = 'c:\temp\dump.json' ).
+        lo_file->download( iv_full_path   = 'dump.json'
+                           iv_save_dialog = abap_true ).
       CATCH zcx_eui_exception.
     ENDTRY.
   ENDIF.

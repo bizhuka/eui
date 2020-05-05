@@ -67,15 +67,7 @@ CLASS lcl_doi IMPLEMENTATION.
                                     IMPORTING document_proxy = lo_document ).
 
     " Show document
-    DATA lv_exist TYPE abap_bool.
-    cl_gui_frontend_services=>file_exist(
-      EXPORTING
-        file   = io_file->mv_full_path
-      RECEIVING
-        result = lv_exist
-      EXCEPTIONS
-        OTHERS = 0 ). " prevent GUI messages when file not found
-    IF lv_exist = abap_true.
+    IF zcl_eui_file=>file_exist( io_file->mv_full_path ) = abap_true.
       DATA lv_url TYPE swk_url.
       CONCATENATE `FILE://` io_file->mv_full_path INTO lv_url.
       lo_document->open_document( document_url = lv_url

@@ -42,7 +42,7 @@ CLASS lcl_main IMPLEMENTATION.
         RETURN.
     ENDTRY.
 
-    " TODO pass various tables
+    " Mask 1
     lo_screen->customize(
        name      = '*P_0*'
        input     = '0'
@@ -70,10 +70,10 @@ CLASS lcl_main IMPLEMENTATION.
       invisible = '0' ).
 
     " Start of group (could be standard parameter in LDB screen)
-    lo_screen->customize( name   = '+' input  = '0').
+    lo_screen->customize( name = '+' input = '0').
     " Copy params from +
-    lo_screen->customize( name   = '+P_02').
-    lo_screen->customize( name   = '+P_03').
+    lo_screen->customize( name = '+P_02').
+    lo_screen->customize( name = '+P_03').
 
     lo_screen->pbo( ).
   ENDMETHOD.
