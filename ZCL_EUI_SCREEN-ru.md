@@ -64,7 +64,7 @@
 Те по своей сути ir_context работает как **CHANGING** параметр
 
 ```abap
-    DATA(lr_context) = new new ts_context( p_bukrs = '1000' ).
+    DATA(lr_context) = new ts_context( p_bukrs = '1000' ).
 
     " Передача контекста
     DATA(lo_scr_1020) = NEW zcl_eui_screen(
@@ -86,10 +86,11 @@
 * CALL FUNCTION **'FREE_SELECTIONS_DIALOG'**
     * `new zcl_eui_screen( iv_dynnr = zcl_eui_screen=>mc_dynnr-free_sel )`    
 * **CL_CI_QUERY_ATTRIBUTES**=>GENERIC( )
-    * `new zcl_eui_screen( iv_dynnr = zcl_eui_screen=>mc_dynnr-auto_gen )`
+    * `new zcl_eui_screen( iv_dynnr = zcl_eui_screen=>mc_dynnr-dyn_popup )`
 * Если вы хотите использовать свой, уже объявленный в другой программе, экран. Укажите его в конструкторе
     * `new zcl_eui_screen( iv_dynnr = '1020'  iv_cprog = 'ZEUI_TEST_SCREEN_02' )`
     
+* Режим iv_dynnr = zcl_eui_screen=>mc_dynnr-**auto_gen** генерирует подобно CL_CI_QUERY_ATTRIBUTES программу, но не сохраняет ее тк **INSERT REPORT** обычно запрещен
 ***
 
 ### 2) PBO
