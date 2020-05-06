@@ -55,24 +55,41 @@ METHOD show_initial_screen.
     " Screen declarations
 **********************************************************************
 
-    " Main screen
+    " Start screen
     BEGIN OF ts_context_main,
       v_make_gray     TYPE xsdboolean,
       v_make_required TYPE xsdboolean,
       v_make_lsitbox  TYPE xsdboolean,
     END OF ts_context_main,
 
-    " Checked SCREEN context
+    " Tested screen context
     BEGIN OF ts_context,
+      " Check it after screen close
       p_bukrs  TYPE bukrs,
-      p_bdc_m  TYPE ettcd_mode, " <-- listbox by domain
-      p_mandt  TYPE t001-mandt, " <-- listbox in runtime
+
+      " listbox by domain
+      p_bdc_m  TYPE ettcd_mode,
+
+      " listbox in runtime
+      " FREE_SEL sometimes do not like T001-MANDT
+      " Change type for SH
+      p_mandt  TYPE char3,
+
+      " Checkbox
       p_check  TYPE xsdboolean,
-      s_user   TYPE offline_log_user_itab, " Range <-- cl_ci_query_attributes no SH
+
+      " Range <-- cl_ci_query_attributes no SH
+      s_user   TYPE offline_log_user_itab,
+
+      " Make it GRAY
       p_land1  TYPE t005t-land1,
-      p_fld_i  TYPE syindex,       " do not use i! use from dictionary
-      p_fld_i2 TYPE sytabix,       " do not use i! use from dictionary
-      " p_memo     TYPE stringval, " String & tables also Ok
+
+      " do not use types like I! use from dictionary
+      p_fld_i  TYPE syindex,
+      p_fld_i2 TYPE sytabix,
+
+      " String & tables also Ok
+      " p_memo     TYPE stringval,
     END OF ts_context,
 
     " For listbox
@@ -181,12 +198,13 @@ METHOD show_initial_screen.
         CONCATENATE c_cprog '_ZZZ1' INTO lv_prog.
 
       WHEN 'CMD_04'.
-        " mc_dynnr-auto_gen in testing
+        " mc_dynnr-auto_gen in testing (do not use it)
+        " Cannot use GENERATE SUBROUTINE :(
+
+        " Create unqique name for program
+        " For test ->  lv_prog = 'ZZZ_SCREEN' -> follow the instructions
         lv_dynnr = zcl_eui_screen=>mc_dynnr-auto_gen.
         CONCATENATE c_cprog '^9999' INTO lv_prog.
-
-        " Create unqique name for program/ Cannot use GENERATE SUBROUTINE :(
-        " For test ->  lv_prog = 'ZZZ_SCREEN' -> follow the instructions
     ENDCASE.
 
     TRY.

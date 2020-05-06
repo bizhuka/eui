@@ -1137,6 +1137,7 @@ CLASS lcl_scr_auto IMPLEMENTATION.
     TRY.
         lo_file->download( iv_save_dialog = abap_true
                            iv_full_path   = lv_code ).
+        lo_file->open( ).
       CATCH zcx_eui_exception INTO lo_error.
         MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
         RETURN.
