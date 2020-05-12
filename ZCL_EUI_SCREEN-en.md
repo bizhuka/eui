@@ -143,6 +143,12 @@ I hope the meaning of this syntax is clear without explanation, since the parame
     it_listbox = lt_listbox ).
 ```
 
+Also you can pass multiple rules in a one table
+![image](https://user-images.githubusercontent.com/36256417/81519414-98e97d80-935a-11ea-8129-3cc01da448bc.png)
+
+It's more convenient from ABAP 7.40 syntax
+![image](https://user-images.githubusercontent.com/36256417/81519260-0943cf00-935a-11ea-99dc-1972b9e90ab9.png)
+
 ***
 
 ### 3) User input validation

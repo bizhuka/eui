@@ -104,31 +104,44 @@ CLASS lcl_screen IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD customize.
-    DATA ls_map                TYPE REF TO zcl_eui_screen=>ts_map.
-    DATA lv_message            TYPE string.
+    DATA lr_customize TYPE REF TO zcl_eui_screen=>ts_customize.
+    DATA ls_screen    TYPE zcl_eui_screen=>ts_screen.
+    DATA ls_map       TYPE zcl_eui_screen=>ts_map.
+    DATA lr_map       TYPE REF TO zcl_eui_screen=>ts_map.
+    DATA lv_message   TYPE string.
 
-    IF is_screen-name IS NOT INITIAL OR is_screen-group1 IS NOT INITIAL.
-      APPEND is_screen TO mt_screen.
-    ENDIF.
+    LOOP AT it_customize REFERENCE INTO lr_customize.
+      " All by name
+      MOVE-CORRESPONDING lr_customize->* TO ls_screen.
 
-    " IF have something
-    CHECK is_map IS NOT INITIAL
-      AND is_screen-name IS NOT INITIAL.
+      " For map
+      ls_map-label     = lr_customize->label.
+      ls_map-sub_fdesc = lr_customize->sub_fdesc.
 
-    READ TABLE mt_map REFERENCE INTO ls_map
-     WITH KEY name = is_screen-name.
-    IF sy-subrc <> 0.
-      CONCATENATE `Unknown field name ` is_map-name INTO lv_message.
-      zcx_eui_exception=>raise_dump( iv_message = lv_message ).
-    ENDIF.
+      "№ 1
+      IF ls_screen-name IS NOT INITIAL OR ls_screen-group1 IS NOT INITIAL.
+        APPEND ls_screen TO mt_screen.
+      ENDIF.
 
-    " Label, input, required or sub_fdesc
-    zcl_eui_conv=>move_corresponding(
-     EXPORTING
-       is_source         = is_map
-       iv_except_initial = abap_true
-     CHANGING
-       cs_destination    = ls_map->* ).
+      "№ 2 IF have something
+      CHECK ls_map IS NOT INITIAL
+        AND ls_screen-name IS NOT INITIAL.
+
+      READ TABLE mt_map REFERENCE INTO lr_map
+       WITH KEY name = ls_screen-name.
+      IF sy-subrc <> 0.
+        CONCATENATE `Unknown field name ` ls_map-name INTO lv_message.
+        zcx_eui_exception=>raise_dump( iv_message = lv_message ).
+      ENDIF.
+
+      " Label or sub_fdesc
+      zcl_eui_conv=>move_corresponding(
+       EXPORTING
+         is_source         = ls_map
+         iv_except_initial = abap_true
+       CHANGING
+         cs_destination    = lr_map->* ).
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD show.

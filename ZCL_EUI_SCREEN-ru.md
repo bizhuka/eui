@@ -143,6 +143,12 @@
     it_listbox = lt_listbox ).
 ```
 
+Также вы можете передать несколько правил в одной таблице
+![image](https://user-images.githubusercontent.com/36256417/81519414-98e97d80-935a-11ea-8129-3cc01da448bc.png)
+
+Это немного удобнее с ABAP 7.40
+![image](https://user-images.githubusercontent.com/36256417/81519260-0943cf00-935a-11ea-99dc-1972b9e90ab9.png)
+
 ***
 
 ### 3) Проверка ввода пользователя

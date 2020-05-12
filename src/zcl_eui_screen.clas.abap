@@ -31,6 +31,23 @@ public section.
    END OF ts_map .
   types:
     tt_map TYPE STANDARD TABLE OF ts_map WITH DEFAULT KEY .
+  types:
+    BEGIN OF ts_customize,
+      name         TYPE screen-name,
+      group1       TYPE screen-group1,
+      required     TYPE screen-required,
+      input        TYPE screen-input,
+      output       TYPE screen-output,
+      invisible    TYPE screen-invisible,
+      active       TYPE screen-active,
+      t_listbox    TYPE vrm_values,
+
+      " For map
+      label        TYPE zcl_eui_type=>ts_field_desc-label,
+      sub_fdesc    TYPE zcl_eui_type=>ts_field_desc-sub_fdesc,
+    END OF ts_customize .
+  types:
+    tt_customize TYPE STANDARD TABLE OF ts_customize WITH DEFAULT KEY .
 
   constants:
     BEGIN OF MC_DYNNR,
@@ -53,6 +70,7 @@ public section.
       ZCX_EUI_EXCEPTION .
   methods CUSTOMIZE
     importing
+      !IT_ type TT_CUSTOMIZE optional
       !NAME type CSEQUENCE optional
       !GROUP1 type CHAR3 optional
       !REQUIRED type CHAR1 optional
@@ -216,26 +234,29 @@ ENDMETHOD.
 
 
 METHOD customize.
-  DATA ls_screen TYPE ts_screen.
-  DATA ls_map TYPE ts_map.
+  DATA lt_all    LIKE it_.
+  DATA ls_param  LIKE LINE OF lt_all.
+
+  lt_all[] = it_[].
 
   " Pass as 1 parameter
-  ls_screen-name      = name.
-  ls_screen-group1    = group1.
-  ls_screen-input     = input.    " ls_map-input
-  ls_screen-required  = required. " ls_map-required
-  ls_screen-output    = output.
-  ls_screen-invisible = invisible.
-  ls_screen-active    = active.
-  ls_screen-t_listbox = it_listbox.
+  ls_param-name      = name.
+  ls_param-group1    = group1.
+  ls_param-input     = input.    " ls_map-input
+  ls_param-required  = required. " ls_map-required
+  ls_param-output    = output.
+  ls_param-invisible = invisible.
+  ls_param-active    = active.
+  ls_param-t_listbox = it_listbox.
 
-  " ls_map-name      = iv_fieldname.
-  ls_map-label     = iv_label.
-  ls_map-sub_fdesc = iv_sub_fdesc.
+  " For map
+  ls_param-label     = iv_label.
+  ls_param-sub_fdesc = iv_sub_fdesc.
 
-  mo_helper->customize(
-   is_screen = ls_screen
-   is_map    = ls_map ).
+  " And add
+  APPEND ls_param TO lt_all.
+
+  mo_helper->customize( lt_all ).
 ENDMETHOD.
 
 
