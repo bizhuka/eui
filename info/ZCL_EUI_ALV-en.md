@@ -5,7 +5,7 @@ How to show the consultant that the amount is calculated correctly?
 
 Often writing the report itself takes a little time, but ~~further "Rumble in the Bronx"~~ joint search for errors takes much more physical and mental efforts, both of the developer and the task manager.
 
-One of the easiest ways is to show in popup ALV what this amount is made of.\
+One of the easiest ways is to show in popup ALV what this amount is made of.<br/>
 Those suppose that a report is **collect**ing amount in the main table, during drilldown we show all the positions from which this amount was collected   
 
 ![](https://raw.githubusercontent.com/wiki/bizhuka/py_demo/src/alv_0.png)
@@ -25,14 +25,14 @@ The basic skills of most ABAP developers are probably classes **CL_GUI_ALV_GRID*
 
 Although the latter is newer, it:
 * does not support editing by default (There are of course several types of tricks to get around this)
-* customization of field catalog, toolbar, layout and variant occurs through method calls\
+* customization of field catalog, toolbar, layout and variant occurs through method calls<br/>
 those imho CL_SALV_TABLE more verbose than CL_GUI_ALV_GRID (начиная с 7.40) where all ALV tuning happens, as usual, through tables and structures 
 
 CL_GUI_ALV_GRID, in turn, has 1 but a very significant drawback - to create screens for the main and popup tables ~~love to do masochists~~ a very tedious task for an already busy programmer ~~between sleeping and watching the show during lunch~~
 
 ***
 
-For simple cases, the entire ALV display can be written 1 line :metal:
+For simple cases, the entire ALV display can be almost written 1 line
 
 ```abap
  NEW zcl_eui_alv( ir_table = REF #( mt_alv ) )->
@@ -40,7 +40,7 @@ For simple cases, the entire ALV display can be written 1 line :metal:
     show( ).
 ```
 
-It is written in 3 lines for clarity :smile:\
+It is written in 3 lines for clarity<br/>
 And the fact that you *can* write so does not mean that you *need* to do
 
 ***
@@ -73,10 +73,10 @@ Let's move on to the syntax 7.40
          ( fieldname = 'LGART' subtot = abap_true expa = abap_true ) ) ).
 ```
 
-For those who remember not only REUSE, but also reporting using `WRITE` + COLOR + HOTSPOT events ~~that old fart~~ I think everything is clear.\
+For those who remember not only REUSE, but also reporting using `WRITE` + COLOR + HOTSPOT events ~~that old fart~~ I think everything is clear.<br/>
 And so a single drilldown in LVC_S_LAYO и DISVARIANT (alv variant) and double drilldown in LVC_T_FILT, LVC_T_FCAT, TTB_BUTTON (toolbar) и LVC_T_SORT will remove most of the questions about how it works.
 
-Parameter **IT_MOD_CATALOG** not assembled from scratch field catalog! It simply complements it with non-empty values. Also, for convenience, you can specify a mask for the fields\
+Parameter **IT_MOD_CATALOG** not assembled from scratch field catalog! It simply complements it with non-empty values. Also, for convenience, you can specify a mask for the fields<br/>
 `fieldname = 'SUM*' do_sum = 'X' hotspot = 'X'`
 
 ---
@@ -106,7 +106,7 @@ Call the ALV show itself
       lo_alv->show( ).
 ```
 
-This method returns the code of the closing function. For example, if `check lo_alv->show( ) = 'OK'.`\
+This method returns the code of the closing function. For example, if `check lo_alv->show( ) = 'OK'.`<br/>
 PF-STATUS и TITLE BAR can be specified statically in the constructor or dynamically by event
  
 ```abap

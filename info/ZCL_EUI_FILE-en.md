@@ -10,16 +10,16 @@ Example decomposition of the **DOWNLOAD** method or thinking in OOP within 1 day
 
 If you have a method with a dozen optional parameters you worth ~~start smoking more often~~ divide it into several smaller and more understandable methods
 
-Once upon a time there was a simple **DOWNLOAD** method for uploading files.\
-It took 2 parameters __IT_TABLE__ and its length __IV_LENGTH__.\
-He was not at all complicated, until unloading from IV_**X**STRING was needed.\
+Once upon a time there was a simple **DOWNLOAD** method for uploading files.<br/>
+It took 2 parameters __IT_TABLE__ and its length __IV_LENGTH__.<br/>
+He was not at all complicated, until unloading from IV_**X**STRING was needed.<br/>
 And then from the usual line __IV_STRING__ + encoding __IV_ENCODING__ (utf-8 by default)
 
-I decided that it would be nice to open the file after downloading __IV_OPEN__\
-Yes, and sometimes it was necessary to open it through __OLE__ (+ 1 parameter) to call the macro.\
-Then the optimization was made for downloading files via FTP for files over 10 megabytes\
-Everything was fine, but then sometimes the files needed to be downloaded to a folder specified by the user\
-or have a permanent name\
+I decided that it would be nice to open the file after downloading __IV_OPEN__<br/>
+Yes, and sometimes it was necessary to open it through __OLE__ (+ 1 parameter) to call the macro.<br/>
+Then the optimization was made for downloading files via FTP for files over 10 megabytes<br/>
+Everything was fine, but then sometimes the files needed to be downloaded to a folder specified by the user<br/>
+or have a permanent name<br/>
 or generate random one to upload to **sap_tmp**
 
 ---
@@ -52,7 +52,7 @@ If you do not need to do anything after downloading, the call chain breaks, othe
 
 ---
 
-As a result, if you need to download a file from the internal table, call the Save file dialogue and then open it\
+As a result, if you need to download a file from the internal table, call the Save file dialogue and then open it<br/>
 a **chain** will look like
 
 ```abap
@@ -79,7 +79,7 @@ If at the end you need to show it inside the SAP GUI inplace, change DOWNLOAD( )
     SHOW( )
 ```
 
-Each of the steps can ~~throw~~ ~~raise~~ cause an exception, therefore it is better to wrap it in **TRY**\
+Each of the steps can ~~throw~~ ~~raise~~ cause an exception, therefore it is better to wrap it in **TRY**<br/>
 That is 1 exception handler for the entire call chain
 ```abap
     TRY.

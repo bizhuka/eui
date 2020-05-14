@@ -2,8 +2,8 @@
 
 ### Screen manager
 
-If you have a global class, how to use screens in it correctly?\
-According to the SAP recommendation, you can use function groups.\
+If you have a global class, how to use screens in it correctly?<br/>
+According to the SAP recommendation, you can use function groups.<br/>
 But how convenient is this? 
 
 ![image](https://user-images.githubusercontent.com/36256417/81061683-3887b580-8eee-11ea-8343-b55a1da73fc8.png)
@@ -24,19 +24,19 @@ Usually, to customize the screen, the developer:
 1. After the screen show, further processing of the user entered data
     * `DATA(lv_value) = ZSS_SCREEN_0200-FIELD_01.`
 
-If you use global classes, you probably know the feeling of the archaic nature of this method\
+If you use global classes, you probably know the feeling of the archaic nature of this method<br/>
 We will consider each step separately.
     
 ---
 
 ### 1) Context transfer
 
-Whether it’s web-dynpro, selection or regular screens, it’s most convenient to use a structure to describe the screen.\
+Whether it’s web-dynpro, selection or regular screens, it’s most convenient to use a structure to describe the screen.<br/>
 In it, you can specify the correct data element and text, search helps etc.
 
 That is, you can say the structure is your screen. **structure = screen**
 
-For the class **ZCL_EUI_SCREEN** is often sufficient to pass such a structure\
+For the class **ZCL_EUI_SCREEN** is often sufficient to pass such a structure<br/>
 It will contain the name of the fields and the initial values.
 ```abap
     " Checked SCREEN context
@@ -60,7 +60,7 @@ If you just need to pass the initial values to the screen fill **ir_context** pa
     ).
 ```   
          
-For item **4)** after closing the screen, through the context you can get the values entered by a user\
+For item **4)** after closing the screen, through the context you can get the values entered by a user<br/>
 So actually ir_context works like **CHANGING** parameter
 
 ```abap
@@ -80,7 +80,7 @@ So actually ir_context works like **CHANGING** parameter
 
 ### 1.1) Screen number IV_DYNNR parameter
 
-If you are familiar with two common SAP techniques,\
+If you are familiar with two common SAP techniques,<br/>
 You do not need to declare the screen through `SELECTION-SCREEN BEGIN OF SCREEN` in the program, just use:
 
 * CALL FUNCTION **'FREE_SELECTIONS_DIALOG'**
@@ -106,8 +106,9 @@ You do not need to declare the screen through `SELECTION-SCREEN BEGIN OF SCREEN`
 
 **2.2** LOOP AT SCREEN
 
-Often in PBO this block is quite confusing\
-On the idea of setting SCREEN through the parameters I saw here https://entropii.net/?p=2927\
+Often in PBO this block is quite confusing<br/>
+On the idea of setting SCREEN through the parameters I saw here https://entropii.net/?p=2927
+
 I hope the meaning of this syntax is clear without explanation, since the parameters correspond to the **SCREEN** fields
 
 ##### SE38 -> ZEUI_TEST_SCREEN_00
@@ -174,7 +175,7 @@ Handler ON_START_PAI accepts the function code **IV_COMMAND** and can close the 
 ![image](https://user-images.githubusercontent.com/36256417/81135290-f3589780-8f70-11ea-8767-f66fd56b1c55.png)
 
 
-Since all 4 methods have the same signature, the actions they perform are similar\
+Since all 4 methods have the same signature, the actions they perform are similar<br/>
 So after closing the screen, the SHOW method always returns the last function code. Often enough to check it for 'OK'
 
 ```abap
@@ -183,7 +184,7 @@ So after closing the screen, the SHOW method always returns the last function co
 ``` 
 
 ### 4) Post Processing
-About item 4), it has already been written above that the context can be passed (and then received) through the **ir_context** parameter.\
+About item 4), it has already been written above that the context can be passed (and then received) through the **ir_context** parameter.<br/>
 After closing the screen, it will contain the entered data.
 
 ```abap
@@ -192,18 +193,14 @@ After closing the screen, it will contain the entered data.
     ).
 ```
 
-Обычно для этого подходит ссылка на **локальную** структуру.\
-Чтобы получить ее и прочитать текущий контекст в PAI нужно воспользоваться методом **get_context**\
-Предварительно ссылку **sender** надо преобразовать на **ZCL_EUI_SCREEN**
-
-Usually a reference to the **local** structure is suitable for this.\
-To get it and read the current context in PAI you need to use the **get_context** method\
+Usually a reference to the **local** structure is suitable for this.<br/>
+To get it and read the current context in PAI you need to use the **get_context** method<br/>
 But firstly the **sender** must be converted to **ZCL_EUI_SCREEN**
 
 ```abap
 METHOD on_start_pai.  
   " Main Screen Structure
-  DATA lr_context TYPE TS_CONTEXT_MAIN.
+  DATA lr_context TYPE REF TO TS_CONTEXT_MAIN.
 
   " Get access to screen data
   data(lo_screen) = cast ZCL_EUI_SCREEN( sender ).
