@@ -43,8 +43,7 @@ interface ZIF_EUI_MANAGER
 
   events PBO_EVENT
     exporting
-      value(IO_CONTAINER) type ref to CL_GUI_CONTAINER optional
-      value(IV_DYNNR) type SYDYNNR optional .
+      value(IO_CONTAINER) type ref to CL_GUI_CONTAINER optional .
   events PAI_EVENT
     exporting
       value(IV_COMMAND) type SYUCOMM

@@ -46,8 +46,7 @@ CLASS lcl_report DEFINITION FINAL.
 
       on_pbo_event FOR EVENT pbo_event OF zif_eui_manager
         IMPORTING
-            sender
-            iv_dynnr.
+            sender.
 ENDCLASS.
 
 **********************************************************************
@@ -320,7 +319,7 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD on_pbo_event.
     " Set handler for ALV->CLICK_COL_HEADER (Not in the basic list)
-    CONCATENATE `SCREEN № ` iv_dynnr INTO sender->ms_status-title.
+    CONCATENATE `SCREEN № ` sy-dynnr INTO sender->ms_status-title.
   ENDMETHOD.
 ENDCLASS.
 

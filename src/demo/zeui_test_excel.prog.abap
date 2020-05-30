@@ -63,8 +63,7 @@ CLASS lcl_report DEFINITION FINAL.
       on_pbo_event FOR EVENT pbo_event OF zif_eui_manager
         IMPORTING
             sender
-            io_container
-            iv_dynnr.
+            io_container.
 ENDCLASS.
 
 

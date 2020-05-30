@@ -46,7 +46,8 @@ CLASS lcl_stack DEFINITION FINAL.
     CLASS-METHODS:
       push_stack
         IMPORTING
-          io_manager TYPE REF TO zif_eui_manager,
+          io_manager          TYPE REF TO zif_eui_manager
+          VALUE(iv_read_only) TYPE abap_bool,
 
       get_stack
         IMPORTING
@@ -91,8 +92,25 @@ CLASS lcl_stack IMPLEMENTATION.
     lo_stack->manager = io_manager.
     INSERT lo_stack INTO TABLE mt_stack.
 
-    " Show screen
-    lv_dynnr = lo_stack->dynnr + 600.
+**********************************************************************
+    " Detect screen number
+    READ TABLE io_manager->ms_status-exclude TRANSPORTING NO FIELDS
+     WITH KEY table_line = zif_eui_manager=>mc_cmd-ok.
+    IF sy-subrc = 0.
+      iv_read_only = abap_true.
+    ENDIF.
+
+    " If default PF-STATUS & READ_ONLY & FULL SCREEN
+    IF io_manager->ms_status-name IS INITIAL AND io_manager->ms_status-prog IS INITIAL AND
+       iv_read_only = abap_true AND
+       io_manager->ms_popup-col_beg IS INITIAL.
+      lv_dynnr = lo_stack->dynnr + 700.
+    ELSE.
+      lv_dynnr = lo_stack->dynnr + 600.
+    ENDIF.
+**********************************************************************
+
+    " Full screen?
     IF io_manager->ms_popup-col_beg IS INITIAL.
       CALL SCREEN lv_dynnr.
     ELSE.
@@ -124,9 +142,11 @@ CLASS lcl_stack IMPLEMENTATION.
       zcx_eui_exception=>raise_dump( iv_message = 'No current stack ?' ).
     ENDIF.
 
-    " Screen index
+    " Check screen index
     lv_dynnr = sy-dynnr.
-    IF lv_dynnr >= 700.
+    IF lv_dynnr >= 800.
+      lv_dynnr = lv_dynnr  - 700.
+    ELSEIF lv_dynnr >= 700.
       lv_dynnr = lv_dynnr  - 600.
     ENDIF.
 

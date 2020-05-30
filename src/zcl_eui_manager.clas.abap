@@ -219,7 +219,8 @@ METHOD zif_eui_manager~show.
   " Just call nect screen
   CALL FUNCTION 'ZFM_EUI_NEXT_SCREEN'
     EXPORTING
-      io_scr_manager = me.
+      io_scr_manager = me
+      iv_read_only   = me->mv_read_only.
 
   " return as a result
   rv_close_cmd = mv_close_cmd.
