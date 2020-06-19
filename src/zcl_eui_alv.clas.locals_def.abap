@@ -13,7 +13,10 @@ CLASS lcl_helper DEFINITION FINAL.
       mt_sub_field  TYPE zcl_eui_type=>tt_field_desc,
 
       " Own table
-      mr_table      TYPE REF TO data.
+      mr_table      TYPE REF TO data,
+
+      " TOP_OF_PAGE
+      mo_dyndoc     TYPE REF TO cl_dd_document.
 
     METHODS:
       constructor

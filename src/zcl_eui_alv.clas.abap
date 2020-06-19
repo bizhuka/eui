@@ -15,6 +15,7 @@ public section.
       !IS_VARIANT type DISVARIANT optional
       !IT_FILTER type LVC_T_FILT optional
       !IT_SORT type LVC_T_SORT optional
+      !IV_TOP_OF_PAGE_HEIGHT type I default 12
       !IV_STATUS_NAME type GUI_STATUS optional
       !IV_STATUS_PROG type SYREPID optional
       !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
@@ -46,6 +47,7 @@ private section.
   data MT_FILTER type LVC_T_FILT .
   data MT_SORT type LVC_T_SORT .
   data MO_HELPER type ref to LCL_HELPER .
+  data MV_TOP_OF_PAGE_HEIGHT type I .
 ENDCLASS.
 
 
@@ -61,13 +63,14 @@ METHOD constructor.
    iv_status_title   = iv_status_title
    iv_read_only      = iv_read_only ).
 
-  mr_table             = ir_table.
-  mt_toolbar           = it_toolbar.
-  mt_mod_catalog       = it_mod_catalog.
-  ms_layout            = is_layout.
-  ms_variant           = is_variant.
-  mt_filter            = it_filter.
-  mt_sort              = it_sort.
+  mr_table              = ir_table.
+  mt_toolbar            = it_toolbar.
+  mt_mod_catalog        = it_mod_catalog.
+  ms_layout             = is_layout.
+  ms_variant            = is_variant.
+  mt_filter             = it_filter.
+  mt_sort               = it_sort.
+  mv_top_of_page_height = iv_top_of_page_height.
 
   " Just check
   IF ms_layout-edit = abap_true AND iv_read_only IS NOT SUPPLIED.

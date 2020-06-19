@@ -255,9 +255,38 @@ CLASS lcl_helper IMPLEMENTATION.
     ENDIF.
 
     " Create ALV
+    DATA lv_has_top   TYPE abap_bool.
+    DATA lo_splitter  TYPE REF TO cl_gui_splitter_container.
+    DATA lo_top       TYPE REF TO cl_gui_container.
+    DATA lo_container TYPE REF TO cl_gui_container.
+
+    " Has event handler for TOP_OF_PAGE
+    lv_has_top = mo_eui_alv->mo_event_caller->has_handler(
+        iv_of_class  = 'CL_GUI_ALV_GRID'
+        iv_for_event = 'TOP_OF_PAGE' ).
+    IF mo_eui_alv->mv_top_of_page_height IS INITIAL.
+      CLEAR lv_has_top.
+    ENDIF.
+
+    IF lv_has_top <> abap_true.
+      lo_container = io_container.
+    ELSE.
+      CREATE OBJECT lo_splitter
+        EXPORTING
+          parent  = io_container
+          rows    = 2
+          columns = 1.
+      lo_top       = lo_splitter->get_container( row       = 1
+                                                 column    = 1 ).
+      lo_container = lo_splitter->get_container( row       = 2
+                                                 column    = 1 ).
+      lo_splitter->set_row_height( id     = 1
+                                   height = mo_eui_alv->mv_top_of_page_height ).
+    ENDIF.
+
     CREATE OBJECT mo_eui_alv->mo_grid
       EXPORTING
-        i_parent = io_container
+        i_parent = lo_container
 *       i_appl_events = abap_true
       EXCEPTIONS
         OTHERS   = 1.
@@ -340,6 +369,22 @@ CLASS lcl_helper IMPLEMENTATION.
       MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno DISPLAY LIKE 'E' WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
       RETURN.
     ENDIF.
+
+    " Raise TOP_OF_PAGE
+    CHECK lo_top IS NOT INITIAL.
+
+    CREATE OBJECT mo_dyndoc
+      EXPORTING
+        style = 'ALV_GRID'.
+    mo_eui_alv->mo_grid->list_processing_events( i_event_name = 'TOP_OF_PAGE'
+                                                 i_dyndoc_id  = mo_dyndoc ).
+
+    mo_dyndoc->display_document(
+      EXPORTING
+        reuse_control = abap_true
+        parent        = lo_top
+      EXCEPTIONS
+        OTHERS        = 0 ).
   ENDMETHOD.
 
   METHOD after_close.

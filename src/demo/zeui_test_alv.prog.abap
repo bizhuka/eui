@@ -44,9 +44,21 @@ CLASS lcl_report DEFINITION FINAL.
         IMPORTING
             e_ucomm,
 
+      on_top_of_page FOR EVENT top_of_page OF cl_gui_alv_grid
+        IMPORTING
+            e_dyndoc_id,
+
       on_pbo_event FOR EVENT pbo_event OF zif_eui_manager
         IMPORTING
-            sender.
+            sender,
+
+      on_toolbar FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING
+            e_object,
+
+      on_double_click FOR EVENT double_click OF cl_gui_alv_grid.
+
+*      on_data_changed FOR EVENT data_changed OF cl_gui_alv_grid.
 ENDCLASS.
 
 **********************************************************************
@@ -193,17 +205,24 @@ CLASS lcl_report IMPLEMENTATION.
 **********************************************************************
     DATA lo_eui_alv TYPE REF TO zcl_eui_alv.
 
+    " Show top of page ?
+    DATA lv_height TYPE i VALUE 12.
+    IF p_popup = abap_true.
+      CLEAR lv_height.
+    ENDIF.
+
     " Pass by reference
     GET REFERENCE OF mt_alv INTO lr_table.
     CREATE OBJECT lo_eui_alv
       EXPORTING
-        ir_table       = lr_table
+        ir_table              = lr_table
         " grid parameters
-        is_layout      = ls_layout
-        it_mod_catalog = lt_mod_catalog
-        it_toolbar     = lt_toolbar
-        it_sort        = lt_sort
-        iv_read_only   = p_reado.
+        is_layout             = ls_layout
+        it_mod_catalog        = lt_mod_catalog
+        it_toolbar            = lt_toolbar
+        it_sort               = lt_sort
+        iv_read_only          = p_reado
+        iv_top_of_page_height = lv_height.
 
     " Popup?
     IF p_popup = abap_true.
@@ -213,8 +232,61 @@ CLASS lcl_report IMPLEMENTATION.
     " Instead of set handler
     lo_eui_alv->show(
      io_handler        = me
-     iv_handlers_map   = 'ON_HOTSPOT_CLICK;ON_USER_COMMAND;ON_PBO_EVENT' " If omit map all  (Could be several nad nested ON_USER_COMMAND)
+     " If omit map all  (Could be several nad nested ON_USER_COMMAND)
+*     iv_handlers_map   = 'ON_HOTSPOT_CLICK;ON_USER_COMMAND;ON_PBO_EVENT'
     ).
+  ENDMETHOD.
+
+  METHOD on_top_of_page.
+    e_dyndoc_id->add_text( text      = 'Test of ZCL_EUI_ALV'
+                           sap_style = cl_dd_area=>large ).
+
+    e_dyndoc_id->new_line( repeat = 1 ).
+
+    e_dyndoc_id->add_link( text =  'EUI library'
+                           url  =  'https://bizhuka.github.io/eui/' ).
+  ENDMETHOD.
+
+  METHOD on_hotspot_click.
+    DATA:
+      lo_txt_editor TYPE REF TO zif_eui_manager,
+      lr_text       TYPE REF TO string.
+    FIELD-SYMBOLS:
+      <ls_alv> LIKE LINE OF mt_alv.
+
+    " Only for text
+    " for sums could call another zcl_eui_alv=>show( )
+    IF e_column_id <> 'TITLE'.
+      MESSAGE 'No drilldown to SUM, please press CAPTION field' TYPE 'S' DISPLAY LIKE 'W'.
+      RETURN.
+    ENDIF.
+
+    " Get current item
+    READ TABLE mt_alv ASSIGNING <ls_alv> INDEX e_row_id-index.
+    CHECK sy-subrc = 0.
+
+    GET REFERENCE OF <ls_alv>-title INTO lr_text.
+    CREATE OBJECT lo_txt_editor TYPE lcl_txt_editor
+      EXPORTING
+        io_grid = sender
+        ir_text = lr_text.
+
+    " In popup
+    lo_txt_editor->popup( ).
+
+    " Show in next SCREEN
+    lo_txt_editor->show( io_handler = lo_txt_editor ).
+  ENDMETHOD.
+
+  METHOD on_toolbar.
+    " Hide default buttons. to add use IT_TOOLBAR[] instead!
+    DELETE e_object->mt_toolbar WHERE
+      function CP '*MB_SUM*'     OR
+      function CP '*MB_SUBTOT*'.
+  ENDMETHOD.
+
+  METHOD on_double_click.
+    MESSAGE 'DOUBLE_CLICK' TYPE 'S'.
   ENDMETHOD.
 
   METHOD on_user_command.
@@ -284,37 +356,6 @@ CLASS lcl_report IMPLEMENTATION.
      io_handler      = me
      iv_handlers_map = 'ON_PBO_EVENT' " ;ON_PAI_EVENT for 'OK' command
     ).
-  ENDMETHOD.
-
-  METHOD on_hotspot_click.
-    DATA:
-      lo_txt_editor TYPE REF TO zif_eui_manager,
-      lr_text       TYPE REF TO string.
-    FIELD-SYMBOLS:
-      <ls_alv> LIKE LINE OF mt_alv.
-
-    " Only for text
-    " for sums could call another zcl_eui_alv=>show( )
-    IF e_column_id <> 'TITLE'.
-      MESSAGE 'No drilldown to SUM, please press CAPTION field' TYPE 'S' DISPLAY LIKE 'W'.
-      RETURN.
-    ENDIF.
-
-    " Get current item
-    READ TABLE mt_alv ASSIGNING <ls_alv> INDEX e_row_id-index.
-    CHECK sy-subrc = 0.
-
-    GET REFERENCE OF <ls_alv>-title INTO lr_text.
-    CREATE OBJECT lo_txt_editor TYPE lcl_txt_editor
-      EXPORTING
-        io_grid = sender
-        ir_text = lr_text.
-
-    " In popup
-    lo_txt_editor->popup( ).
-
-    " Show in next SCREEN
-    lo_txt_editor->show( io_handler = lo_txt_editor ).
   ENDMETHOD.
 
   METHOD on_pbo_event.
