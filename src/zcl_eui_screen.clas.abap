@@ -35,6 +35,7 @@ public section.
     BEGIN OF ts_customize,
       name         TYPE screen-name,
       group1       TYPE screen-group1,
+      group2       TYPE screen-group2,
       required     TYPE screen-required,
       input        TYPE screen-input,
       output       TYPE screen-output,
@@ -72,15 +73,18 @@ public section.
     importing
       !IT_ type TT_CUSTOMIZE optional
       !NAME type CSEQUENCE optional
-      !GROUP1 type CHAR3 optional
-      !REQUIRED type CHAR1 optional
-      !INPUT type CHAR1 optional
-      !OUTPUT type CHAR1 optional
-      !INVISIBLE type CHAR1 optional
-      !ACTIVE type CHAR1 optional
+      !GROUP1 type SCREEN-GROUP1 optional
+      !GROUP2 type SCREEN-GROUP2 optional
+      !REQUIRED type SCREEN-REQUIRED optional
+      !INPUT type SCREEN-INPUT optional
+      !OUTPUT type SCREEN-OUTPUT optional
+      !INVISIBLE type SCREEN-INVISIBLE optional
+      !ACTIVE type SCREEN-ACTIVE optional
       !IT_LISTBOX type VRM_VALUES optional
       !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
-      !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional .
+      !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional
+    returning
+      value(RO_SCREEN) type ref to ZCL_EUI_SCREEN .
   methods GET_CONTEXT
     importing
       !IV_READ type ABAP_BOOL default ABAP_TRUE
@@ -237,24 +241,31 @@ METHOD customize.
   DATA lt_all    LIKE it_.
   DATA ls_param  LIKE LINE OF lt_all.
 
-  lt_all[] = it_[].
+  " For chains
+  ro_screen = me.
 
-  " Pass as 1 parameter
-  ls_param-name      = name.
-  ls_param-group1    = group1.
-  ls_param-input     = input.    " ls_map-input
-  ls_param-required  = required. " ls_map-required
-  ls_param-output    = output.
-  ls_param-invisible = invisible.
-  ls_param-active    = active.
-  ls_param-t_listbox = it_listbox.
+  " All as one input argument
+  IF it_ IS NOT INITIAL.
+    lt_all[]  = it_[].
+  ELSE.
+    " Pass as 1 parameter
+    ls_param-name      = name.
+    ls_param-group1    = group1.
+    ls_param-group2    = group2.
+    ls_param-input     = input.    " ls_map-input
+    ls_param-required  = required. " ls_map-required
+    ls_param-output    = output.
+    ls_param-invisible = invisible.
+    ls_param-active    = active.
+    ls_param-t_listbox = it_listbox.
 
-  " For map
-  ls_param-label     = iv_label.
-  ls_param-sub_fdesc = iv_sub_fdesc.
+    " For map
+    ls_param-label     = iv_label.
+    ls_param-sub_fdesc = iv_sub_fdesc.
 
-  " And add
-  APPEND ls_param TO lt_all.
+    " And add
+    APPEND ls_param TO lt_all.
+  ENDIF.
 
   mo_helper->customize( lt_all ).
 ENDMETHOD.

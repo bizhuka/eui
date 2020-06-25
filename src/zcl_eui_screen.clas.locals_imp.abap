@@ -119,7 +119,9 @@ CLASS lcl_screen IMPLEMENTATION.
       ls_map-sub_fdesc = lr_customize->sub_fdesc.
 
       "№ 1
-      IF ls_screen-name IS NOT INITIAL OR ls_screen-group1 IS NOT INITIAL.
+      IF   ls_screen-name IS NOT INITIAL
+        OR ls_screen-group1 IS NOT INITIAL
+        OR ls_screen-group2 IS NOT INITIAL.
         APPEND ls_screen TO mt_screen.
       ENDIF.
 
@@ -312,6 +314,8 @@ CLASS lcl_screen IMPLEMENTATION.
 
         IF ls_screen_src-group1 IS NOT INITIAL.      " By group 01
           CHECK ls_screen_dst-group1 = ls_screen_src-group1.
+        ELSEIF ls_screen_src-group2 IS NOT INITIAL.  " By group 02
+          CHECK ls_screen_dst-group2 = ls_screen_src-group2.
         ELSEIF ls_screen_src-name CS '*'.            " By mask
           CHECK ls_screen_dst-name   CP ls_screen_src-name.
         ELSE.

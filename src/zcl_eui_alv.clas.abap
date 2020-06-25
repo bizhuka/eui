@@ -107,7 +107,8 @@ METHOD update_complex_fields.
     <ls_dest>       TYPE any,
     <lv_ui_ext>     TYPE string,
     <lt_sub_table>  TYPE ANY TABLE,
-    <ls_sub_src>    TYPE any.
+    <ls_sub_src>    TYPE any,
+    <lv_high>       TYPE any.
 
   " Create standard table for alv editing
   ASSIGN ir_table->* TO <lt_table_dest>.
@@ -160,7 +161,8 @@ METHOD update_complex_fields.
             ENDIF.
 
             " Do not show HIGH
-            IF ls_range-high IS INITIAL.
+            ASSIGN COMPONENT 'HIGH' OF STRUCTURE <ls_sub_src> TO <lv_high>.
+            IF <lv_high> IS INITIAL.
               CLEAR lv_end_txt.
             ELSE.
               CONCATENATE `:` ls_range-high INTO lv_end_txt.
