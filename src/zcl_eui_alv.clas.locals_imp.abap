@@ -260,6 +260,7 @@ CLASS lcl_helper IMPLEMENTATION.
     DATA lo_top       TYPE REF TO cl_gui_container.
     DATA lo_container TYPE REF TO cl_gui_container.
 
+**********************************************************************
     " Has event handler for TOP_OF_PAGE
     lv_has_top = mo_eui_alv->mo_event_caller->has_handler(
         iv_of_class  = 'CL_GUI_ALV_GRID'
@@ -303,7 +304,8 @@ CLASS lcl_helper IMPLEMENTATION.
       on_top_of_page   FOR mo_eui_alv->mo_grid,
       on_hotspot_click FOR mo_eui_alv->mo_grid,
       on_double_click  FOR mo_eui_alv->mo_grid,
-      on_data_changed  FOR mo_eui_alv->mo_grid.
+      on_data_changed  FOR mo_eui_alv->mo_grid,
+      on_f4            FOR mo_eui_alv->mo_grid.
 
 **********************************************************************
     " VARIANT
@@ -341,6 +343,30 @@ CLASS lcl_helper IMPLEMENTATION.
 
       mo_eui_alv->mo_grid->set_ready_for_input( 1 ).
     ENDIF.
+
+**********************************************************************
+    " Has event handler for ONF4
+    DATA lv_has_f4   TYPE abap_bool.
+    DATA lt_f4       TYPE lvc_t_f4.
+    DATA ls_f4       TYPE lvc_s_f4.
+    DATA lr_fieldcat TYPE REF TO lvc_s_fcat.
+
+    DO 1 TIMES.
+      lv_has_f4 = mo_eui_alv->mo_event_caller->has_handler(
+              iv_of_class  = 'CL_GUI_ALV_GRID'
+              iv_for_event = 'ONF4' ).
+      CHECK lv_has_f4 = abap_true.
+
+      LOOP AT lt_fieldcat REFERENCE INTO lr_fieldcat WHERE f4availabl = abap_true.
+        ls_f4-fieldname = lr_fieldcat->fieldname.
+        ls_f4-register  = abap_true.
+        INSERT ls_f4 INTO TABLE lt_f4.
+      ENDLOOP.
+
+      CHECK lt_f4[] IS NOT INITIAL.
+      mo_eui_alv->mo_grid->register_f4_for_fields(
+        it_f4 = lt_f4 ).
+    ENDDO.
 
 **********************************************************************
     DATA lv_save TYPE char01 VALUE 'A'. " restrict_none
@@ -600,7 +626,20 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_of_class     = 'CL_GUI_ALV_GRID'
      iv_for_event    = 'USER_COMMAND'
      iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
-     iv_param_nam_01 = 'E_UCOMM '        iv_param_val_01 = e_ucomm  ).
+     iv_param_nam_01 = 'E_UCOMM'         iv_param_val_01 = e_ucomm  ).
+  ENDMETHOD.
+
+  METHOD on_f4.
+    mo_eui_alv->mo_event_caller->call_handlers(
+     iv_of_class     = 'CL_GUI_ALV_GRID'
+     iv_for_event    = 'ONF4'
+     iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
+     iv_param_nam_01 = 'E_FIELDNAME'     iv_param_val_01 = e_fieldname
+     iv_param_nam_02 = 'E_FIELDVALUE'    iv_param_val_02 = e_fieldvalue
+     iv_param_nam_03 = 'ES_ROW_NO'       iv_param_val_03 = es_row_no
+     iv_param_nam_04 = 'ER_EVENT_DATA'   iv_param_val_04 = er_event_data
+     iv_param_nam_05 = 'ET_BAD_CELLS'    iv_param_val_05 = et_bad_cells
+     iv_param_nam_06 = 'E_DISPLAY'       iv_param_val_06 = e_display ).
   ENDMETHOD.
 
 ENDCLASS.

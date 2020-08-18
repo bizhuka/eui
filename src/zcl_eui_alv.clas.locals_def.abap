@@ -83,7 +83,17 @@ CLASS lcl_helper DEFINITION FINAL.
       on_user_command FOR EVENT user_command OF cl_gui_alv_grid
         IMPORTING
             sender
-            e_ucomm.
+            e_ucomm,
+
+      on_f4 FOR EVENT onf4 OF cl_gui_alv_grid
+        IMPORTING
+            sender
+            e_fieldname
+            e_fieldvalue
+            es_row_no
+            er_event_data
+            et_bad_cells
+            e_display.
 ENDCLASS.
 
 CLASS zcl_eui_alv DEFINITION LOCAL FRIENDS lcl_helper.
