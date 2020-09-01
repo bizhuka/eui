@@ -368,9 +368,9 @@ METHOD find_dropdown.
   CHECK cs_fieldcat-checkbox <> abap_true
     AND cs_fieldcat-hotspot  <> abap_true
     AND cs_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int
-    AND cs_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int1
-    AND cs_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int2
-    AND cs_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int8.
+    AND cs_fieldcat-inttype  <> 'b' "cl_abap_typedescr=>typekind_int1
+    AND cs_fieldcat-inttype  <> 's' "cl_abap_typedescr=>typekind_int2
+    AND cs_fieldcat-inttype  <> '8'."cl_abap_typedescr=>typekind_int8.
 
   " Get top SH
   is_list_box(
