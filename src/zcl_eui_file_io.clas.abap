@@ -101,7 +101,7 @@ public section.
       value(RO_FILE) type ref to ZCL_EUI_FILE .
   class-methods COLUMN_2_INT
     importing
-      value(IV_COLUMN) type CHAR3
+      value(IV_COLUMN) type CSEQUENCE
     returning
       value(RV_COLUMN) type I .
   class-methods INT_2_COLUMN
