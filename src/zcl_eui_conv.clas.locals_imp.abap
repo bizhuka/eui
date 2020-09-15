@@ -2,7 +2,10 @@
 *"* local helper classes, interface definitions and type
 *"* declarations
 
-CLASS lcl_helper IMPLEMENTATION.
+**********************************************************************
+**********************************************************************
+
+CLASS lcl_json_util IMPLEMENTATION.
 
   METHOD class_constructor.
     FIELD-SYMBOLS <lv_type> LIKE LINE OF mt_xsdboolean.
@@ -20,9 +23,13 @@ CLASS lcl_helper IMPLEMENTATION.
     " Is standard table
     SORT mt_xsdboolean BY table_line.
   ENDMETHOD.
+ENDCLASS.
 
+**********************************************************************
+**********************************************************************
 
-  METHOD alv_from_salv.
+CLASS lcl_salv_util IMPLEMENTATION.
+  METHOD _get_grid_from_salv.
     DATA:
       lo_grid_adapter TYPE REF TO cl_salv_grid_adapter,
       lo_fs_adapter   TYPE REF TO cl_salv_fullscreen_adapter,
@@ -65,6 +72,34 @@ CLASS lcl_helper IMPLEMENTATION.
           msgno = '001'
           msgty = 'W'
           msgv1 = 'Adapter is not bound yet'.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+**********************************************************************
+**********************************************************************
+
+CLASS lcl_grid_util IMPLEMENTATION.
+  METHOD _get_grid_table.
+    rr_table = io_alv->mt_outtab.
+  ENDMETHOD.
+ENDCLASS.
+
+**********************************************************************
+**********************************************************************
+
+CLASS lcl_assert_util IMPLEMENTATION.
+  METHOD get_class_name.
+    " Let see >=7.02
+    SELECT SINGLE clsname INTO rv_class_name
+    FROM seoclass
+    WHERE clsname = 'CL_ABAP_UNIT_ASSERT'.
+
+    " Let see >=7.00 or even lower
+    IF rv_class_name IS INITIAL.
+      SELECT SINGLE clsname INTO rv_class_name
+      FROM seoclass
+      WHERE clsname = 'CL_AUNIT_ASSERT'.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

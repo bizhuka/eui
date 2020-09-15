@@ -96,9 +96,35 @@ public section.
       !IO_SALV type ref to CL_SALV_MODEL_LIST
     returning
       value(RO_GUI_ALV) type ref to CL_GUI_ALV_GRID .
+  class-methods GET_GRID_TABLE
+    importing
+      !IO_ALV type ref to CL_GUI_ALV_GRID
+    returning
+      value(RR_TABLE) type ref to DATA .
   class-methods GUID_CREATE
     returning
       value(RV_GUID) type GUID_32 .
+  class-methods ASSERT_EQUALS
+    importing
+      !EXP type ANY
+      !ACT type ANY
+      !MSG type CSEQUENCE optional
+      !LEVEL type AUNIT_LEVEL default IF_AUNIT_CONSTANTS=>CRITICAL
+      !TOL type F optional
+      !QUIT type AUNIT_FLOWCTRL default IF_AUNIT_CONSTANTS=>METHOD
+      !IGNORE_HASH_SEQUENCE type ABAP_BOOL default ABAP_FALSE
+    returning
+      value(ASSERTION_FAILED) type ABAP_BOOL .
+  class-methods ASSERT_DIFFERS
+    importing
+      !EXP type SIMPLE
+      !ACT type SIMPLE
+      !MSG type CSEQUENCE optional
+      !LEVEL type AUNIT_LEVEL default IF_AUNIT_CONSTANTS=>CRITICAL
+      !TOL type F optional
+      !QUIT type AUNIT_FLOWCTRL default IF_AUNIT_CONSTANTS=>METHOD
+    returning
+      value(ASSERTION_FAILED) type ABAP_BOOL .
 protected section.
 private section.
   class-methods ABAP_2_JSON
@@ -126,7 +152,7 @@ ENDCLASS.
 CLASS ZCL_EUI_CONV IMPLEMENTATION.
 
 
-METHOD ABAP_2_JSON.
+METHOD abap_2_json.
   CONSTANTS:
     c_comma TYPE c VALUE ',',
     c_colon TYPE c VALUE ':',
@@ -199,7 +225,7 @@ METHOD ABAP_2_JSON.
 *           condense &1.
 
       WHEN 'C' OR 'g'. " Char sequences and Strings
-        READ TABLE lcl_helper=>mt_xsdboolean TRANSPORTING NO FIELDS BINARY SEARCH
+        READ TABLE lcl_json_util=>mt_xsdboolean TRANSPORTING NO FIELDS BINARY SEARCH
          WITH KEY table_line = &3->absolute_name.
         IF sy-subrc = 0.
           dont_quote = 'X'.
@@ -370,6 +396,45 @@ METHOD ABAP_2_JSON.
 ENDMETHOD.
 
 
+METHOD assert_differs.
+  " Could use assert ?
+  DATA lv_class_name TYPE seoclass-clsname.
+  lv_class_name = lcl_assert_util=>get_class_name( ).
+  CHECK lv_class_name IS NOT INITIAL.
+
+  CALL METHOD (lv_class_name)=>assert_differs
+    EXPORTING
+      exp              = exp
+      act              = act
+      msg              = msg
+      level            = level
+      tol              = tol
+      quit             = quit
+    RECEIVING
+      assertion_failed = assertion_failed.
+ENDMETHOD.
+
+
+METHOD assert_equals.
+  " Could use assert ?
+  DATA lv_class_name TYPE seoclass-clsname.
+  lv_class_name = lcl_assert_util=>get_class_name( ).
+  CHECK lv_class_name IS NOT INITIAL.
+
+  CALL METHOD (lv_class_name)=>assert_equals
+    EXPORTING
+      exp                  = exp
+      act                  = act
+      msg                  = msg
+      level                = level
+      tol                  = tol
+      quit                 = quit
+      ignore_hash_sequence = ignore_hash_sequence
+    RECEIVING
+      assertion_failed     = assertion_failed.
+ENDMETHOD.
+
+
 METHOD BINARY_TO_STRING.
   CALL FUNCTION 'SCMS_BINARY_TO_STRING'
     EXPORTING
@@ -452,15 +517,19 @@ METHOD from_json.
 ENDMETHOD.
 
 
-METHOD GET_GRID_FROM_SALV.
-  DATA:
-    lo_error TYPE REF TO cx_salv_msg.
+METHOD get_grid_from_salv.
+  DATA lo_error TYPE REF TO cx_salv_msg.
 
   TRY.
-      ro_gui_alv = lcl_helper=>alv_from_salv( io_salv ).
+      ro_gui_alv = lcl_salv_util=>_get_grid_from_salv( io_salv ).
     CATCH cx_salv_msg INTO lo_error.
       MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
   ENDTRY.
+ENDMETHOD.
+
+
+METHOD get_grid_table.
+  rr_table = lcl_grid_util=>_get_grid_table( io_alv ).
 ENDMETHOD.
 
 
@@ -550,7 +619,7 @@ METHOD json_2_abap.
           CONDENSE l_value NO-GAPS.
         ENDIF.
       WHEN 'C'. " char
-        READ TABLE lcl_helper=>mt_xsdboolean TRANSPORTING NO FIELDS BINARY SEARCH
+        READ TABLE lcl_json_util=>mt_xsdboolean TRANSPORTING NO FIELDS BINARY SEARCH
          WITH KEY table_line = lo_type->absolute_name.
         IF sy-subrc = 0.
           CASE l_value.
@@ -735,7 +804,7 @@ METHOD json_2_abap.
       " forget it.
 
   ENDCASE.
-ENDMETHOD. "#EC CI_VALPAR
+ENDMETHOD.                                               "#EC CI_VALPAR
 
 
 METHOD MOVE_CORRESPONDING.

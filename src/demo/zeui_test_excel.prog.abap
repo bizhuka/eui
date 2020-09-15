@@ -196,7 +196,7 @@ CLASS lcl_report IMPLEMENTATION.
           EXPORTING
             iv_file_name = lv_ext.
 
-        " No mapping. All fields
+        " No mapping. All fields. Import a file content FROM INTERNAL table
         lo_file->import_from_itab(
          ir_table = mr_alv ).
 
@@ -266,7 +266,7 @@ CLASS lcl_report IMPLEMENTATION.
         " Show file open dialog if path is not supplied
         lo_file->import_from_file( ).
 
-        " Export content to INTERNAL table
+        " Export file content to -> INTERNAL table
         lo_file->export_to_itab(
             ir_table        = mr_alv
             iv_row_from     = 2       " Skip header

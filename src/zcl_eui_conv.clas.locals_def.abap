@@ -2,16 +2,21 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
-CLASS lcl_helper DEFINITION INHERITING FROM cl_salv_model_list FINAL.
+CLASS lcl_json_util DEFINITION FINAL.
   PUBLIC SECTION.
 
     CLASS-DATA:
      mt_xsdboolean TYPE stringtab.
 
     CLASS-METHODS:
-      class_constructor,
+      class_constructor.
+ENDCLASS.
 
-      alv_from_salv
+CLASS lcl_salv_util DEFINITION INHERITING FROM cl_salv_model_list FINAL.
+  PUBLIC SECTION.
+
+    CLASS-METHODS:
+      _get_grid_from_salv
         IMPORTING
           io_salv           TYPE REF TO cl_salv_model_list
         RETURNING
@@ -20,4 +25,20 @@ CLASS lcl_helper DEFINITION INHERITING FROM cl_salv_model_list FINAL.
           cx_salv_msg.
 ENDCLASS.
 
-CLASS zcl_eui_conv DEFINITION LOCAL FRIENDS lcl_helper.
+CLASS lcl_grid_util DEFINITION INHERITING FROM cl_gui_alv_grid FINAL.
+  PUBLIC SECTION.
+
+    CLASS-METHODS:
+      _get_grid_table
+        IMPORTING
+          io_alv          TYPE REF TO cl_gui_alv_grid
+        RETURNING
+          VALUE(rr_table) TYPE REF TO data .
+ENDCLASS.
+
+CLASS lcl_assert_util DEFINITION FINAL.
+  PUBLIC SECTION.
+    CLASS-METHODS:
+      get_class_name
+        RETURNING VALUE(rv_class_name) TYPE seoclass-clsname.
+ENDCLASS.

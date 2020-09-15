@@ -25,6 +25,16 @@ public section.
    END OF TS_EXCEL_MAP .
   types:
     TT_EXCEL_MAP type STANDARD TABLE OF TS_EXCEL_MAP WITH DEFAULT KEY .
+  types:
+    BEGIN OF s_column_fdt,
+      id TYPE fdt_uuid,
+      name TYPE string,
+      display_name TYPE string,
+      is_result   TYPE abap_bool,
+      type TYPE REF TO cl_abap_datadescr,
+   END OF s_column_fdt .
+  types:
+    t_column_fdt TYPE STANDARD TABLE OF s_column_fdt WITH DEFAULT KEY .
 
   events MAPPING_ERROR
     exporting
@@ -89,7 +99,9 @@ public section.
       !IR_TABLE type ref to DATA
       !IT_EXCEL_MAP type ref to TT_EXCEL_MAP optional
     returning
-      value(RO_FILE) type ref to ZCL_EUI_FILE .
+      value(RO_FILE) type ref to ZCL_EUI_FILE
+    raising
+      ZCX_EUI_EXCEPTION .
   methods IMPORT_FROM_ITAB_CSV
     importing
       !IR_TABLE type ref to DATA
@@ -332,18 +344,24 @@ METHOD export_to_itab_xlsx.
 **********************************************************************
   " Fill raw table from ME->MV_FILE_NAME
   DATA lr_source     TYPE REF TO data.
-  DATA lo_excel      TYPE REF TO if_fdt_doc_spreadsheet.
+  DATA lo_excel TYPE REF TO object. " if_fdt_doc_spreadsheet.
   DATA lv_sheet_name LIKE iv_sheet_name.
-  DATA lt_worksheet  TYPE if_fdt_doc_spreadsheet=>t_worksheet_names.
+  DATA lt_worksheet TYPE stringtab. " if_fdt_doc_spreadsheet=>t_worksheet_names.
 
   " Create XLSX reader
-  CREATE OBJECT lo_excel TYPE cl_fdt_xl_spreadsheet
-    EXPORTING
-      document_name = me->mv_file_name
-      xdocument     = me->mv_xstring.
+  TRY.
+      CREATE OBJECT lo_excel TYPE ('CL_FDT_XL_SPREADSHEET')
+        EXPORTING
+          document_name = me->mv_file_name
+          xdocument     = me->mv_xstring.
+    CATCH cx_sy_create_error.
+      zcx_eui_exception=>raise_dump( iv_message = 'Minimum version 7.02!' ).
+  ENDTRY.
 
   " Get all sheet names
-  lo_excel->get_worksheet_names( IMPORTING worksheet_names = lt_worksheet ).
+  CALL METHOD lo_excel->('IF_FDT_DOC_SPREADSHEET~GET_WORKSHEET_NAMES')
+    IMPORTING
+      worksheet_names = lt_worksheet.
 
   " TODO exception
   lv_sheet_name = iv_sheet_name.
@@ -364,7 +382,11 @@ METHOD export_to_itab_xlsx.
     READ TABLE lt_worksheet INTO lv_sheet_name INDEX 1.
   ENDIF.
 
-  lr_source = lo_excel->get_itab_from_worksheet( lv_sheet_name ).
+  CALL METHOD lo_excel->('IF_FDT_DOC_SPREADSHEET~GET_ITAB_FROM_WORKSHEET')
+    EXPORTING
+      worksheet_name = lv_sheet_name
+    RECEIVING
+      itab           = lr_source.
 
 **********************************************************************
   " And import from lr_source
@@ -390,10 +412,16 @@ METHOD import_from_itab.
       " For more complex reports use XTT
       " @see -> https://github.com/bizhuka/xtt/wiki
     WHEN mc_extension-xlsx.
-      ro_file = import_from_itab_xlsx_0(  " 7.02 import_from_itab_xlsx_1( )
-         " iv_sheet_name = `testOk`
-         ir_table     = ir_table
-         it_excel_map = it_excel_map ).
+      TRY.
+          ro_file = import_from_itab_xlsx_1(  " > 7.02 ?
+             ir_table     = ir_table
+             it_excel_map = it_excel_map ).
+        CATCH zcx_eui_exception.
+          ro_file = import_from_itab_xlsx_0(  " = 7.02
+             " iv_sheet_name = `testOk`
+             ir_table     = ir_table
+             it_excel_map = it_excel_map ).
+      ENDTRY.
 
     WHEN mc_extension-csv.
       " defaults IV_ENCODING, IV_ROW_DELIMITER, IV_FIELD_DELIMITER
@@ -476,10 +504,12 @@ METHOD import_from_itab_xlsx_0.
   "NOTE: No cl_fdt_xl_spreadsheet in ABAP 7.01
   DATA lt_fieldcat    TYPE lvc_t_fcat.
   DATA ls_fieldcat    TYPE REF TO lvc_s_fcat.
-  DATA lt_column      TYPE if_fdt_doc_spreadsheet=>t_column.
-  DATA ls_column      TYPE REF TO if_fdt_doc_spreadsheet=>s_column.
+  DATA lt_column      TYPE REF TO data.  " if_fdt_doc_spreadsheet=>t_column.
+  DATA ls_column      TYPE s_column_fdt. " REF TO if_fdt_doc_spreadsheet=>s_column.
   DATA lv_result      TYPE xstring.
   DATA lv_sheets      TYPE string.
+  FIELD-SYMBOLS <lt_column> TYPE STANDARD TABLE.
+  FIELD-SYMBOLS <ls_column> TYPE any.
 
   " Fill mapping
   lcl_helper=>fill_mapping(
@@ -489,30 +519,40 @@ METHOD import_from_itab_xlsx_0.
    IMPORTING
     et_fieldcat  = lt_fieldcat ).
 
+  TRY.
+      CREATE DATA lt_column TYPE ('IF_FDT_DOC_SPREADSHEET=>T_COLUMN').
+      ASSIGN lt_column->* TO <lt_column>.
+    CATCH cx_sy_create_error.
+      zcx_eui_exception=>raise_dump( iv_message = 'Minimum version 7.02!' ).
+  ENDTRY.
+
   " List of columns
   LOOP AT lt_fieldcat REFERENCE INTO ls_fieldcat WHERE rollname IS NOT INITIAL.
-    APPEND INITIAL LINE TO lt_column REFERENCE INTO ls_column.
-    ls_column->id           = sy-tabix.
-    ls_column->name         = ls_fieldcat->fieldname.
-    ls_column->display_name = ls_fieldcat->reptext.
-    ls_column->is_result    = abap_true.
-    ls_column->type         ?= cl_abap_typedescr=>describe_by_name( ls_fieldcat->rollname ).
+    ls_column-id           = sy-tabix.
+    ls_column-name         = ls_fieldcat->fieldname.
+    ls_column-display_name = ls_fieldcat->reptext.
+    ls_column-is_result    = abap_true.
+    ls_column-type         ?= cl_abap_typedescr=>describe_by_name( ls_fieldcat->rollname ).
+
+    " And add
+    APPEND INITIAL LINE TO <lt_column> ASSIGNING <ls_column>.
+    MOVE-CORRESPONDING ls_column TO <ls_column>.
   ENDLOOP.
 
   DATA lo_err TYPE REF TO cx_sy_dyn_call_error.
   TRY.
-      CALL METHOD cl_fdt_xl_spreadsheet=>('IF_FDT_DOC_SPREADSHEET~CREATE_DOCUMENT')
+      CALL METHOD ('CL_FDT_XL_SPREADSHEET')=>('IF_FDT_DOC_SPREADSHEET~CREATE_DOCUMENT')
         EXPORTING
-          columns      = lt_column
+          columns      = <lt_column>
           itab         = ir_table
           iv_call_type = 1 " 7.02 if_fdt_doc_spreadsheet=>gc_call_dec_table
         RECEIVING
           xdocument    = lv_result.
     CATCH cx_sy_dyn_call_error INTO lo_err.
       " 7.02
-      CALL METHOD cl_fdt_xl_spreadsheet=>('IF_FDT_DOC_SPREADSHEET~CREATE_DOCUMENT')
+      CALL METHOD ('CL_FDT_XL_SPREADSHEET')=>('IF_FDT_DOC_SPREADSHEET~CREATE_DOCUMENT')
         EXPORTING
-          columns     = lt_column
+          columns     = <lt_column>
           itab        = ir_table
           is_dt_excel = abap_false
         RECEIVING
@@ -577,7 +617,7 @@ ENDMETHOD.
 
 METHOD import_from_itab_xlsx_1.
   DATA lt_fieldcat TYPE lvc_t_fcat.
-  DATA lo_salv_ex_res TYPE REF TO cl_salv_ex_result_data_table.
+  DATA lo_salv_ex_res TYPE REF TO cl_salv_ex_result_data_table. " object ?
 
   " Fill mapping
   lcl_helper=>fill_mapping(
@@ -587,17 +627,25 @@ METHOD import_from_itab_xlsx_1.
    IMPORTING
     et_fieldcat  = lt_fieldcat ).
 
-  lo_salv_ex_res = cl_salv_ex_util=>factory_result_data_table(
-    r_data         = ir_table
-    t_fieldcatalog = lt_fieldcat ).
+  TRY.
+      CALL METHOD ('CL_SALV_EX_UTIL')=>('FACTORY_RESULT_DATA_TABLE')
+        EXPORTING
+          r_data              = ir_table
+          t_fieldcatalog      = lt_fieldcat
+        RECEIVING
+          r_result_data_table = lo_salv_ex_res.
 
-  " 7.02
-  CALL METHOD ('CL_SALV_BS_LEX')=>export_from_result_data_table
-    EXPORTING
-      is_format            = 'xlsx' " if_salv_bs_lex_format=>mc_format_xlsx
-      ir_result_data_table = lo_salv_ex_res
-    IMPORTING
-      er_result_file       = me->mv_xstring.
+      " 7.02
+      CALL METHOD ('CL_SALV_BS_LEX')=>('EXPORT_FROM_RESULT_DATA_TABLE')
+        EXPORTING
+          is_format            = 'xlsx' " if_salv_bs_lex_format=>mc_format_xlsx
+          ir_result_data_table = lo_salv_ex_res
+        IMPORTING
+          er_result_file       = me->mv_xstring.
+    CATCH cx_sy_dyn_call_error.
+      CLEAR me->mv_xstring.
+      zcx_eui_exception=>raise_sys_error( iv_message = `Old SAP version` ).
+  ENDTRY.
 
   ro_file = me.
 ENDMETHOD.
