@@ -52,6 +52,7 @@ CLASS lcl_screen DEFINITION.
           iv_after      TYPE abap_bool OPTIONAL
         CHANGING
           cv_set_status TYPE abap_bool OPTIONAL,
+      set_initial_values,
 
       show
         IMPORTING

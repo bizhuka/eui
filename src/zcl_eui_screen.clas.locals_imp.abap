@@ -166,77 +166,16 @@ CLASS lcl_screen IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-**********************************************************************
-    " Set parameters from context ( 1 time only )
-    IF mv_pbo_init_params = abap_true.
-      mv_pbo_init_params = abap_false.
-
-      DATA ls_map                   TYPE REF TO zcl_eui_screen=>ts_map.
-      DATA lv_name                  TYPE string.
-      DATA lv_id                    TYPE char80.
-      FIELD-SYMBOLS <lv_param>      TYPE any.
-      FIELD-SYMBOLS <lv_src>        TYPE any.
-      FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
-
-
-      LOOP AT mt_map REFERENCE INTO ls_map WHERE ui_type <> zcl_eui_type=>mc_ui_type-table
-                                             AND ui_type <> zcl_eui_type=>mc_ui_type-string.
-        " Name of parameter
-        CONCATENATE `(` mo_eui_screen->ms_screen-prog `)` ls_map->par_name INTO lv_name.
-
-        " Name of SELECT-OPTION
-        IF ls_map->ui_type = zcl_eui_type=>mc_ui_type-range.
-          CONCATENATE lv_name `[]` INTO lv_name.
-        ENDIF.
-
-        ASSIGN (lv_name) TO <lv_param>.
-        IF sy-subrc <> 0.
-          MESSAGE s014(zeui_message) WITH ls_map->par_name sy-cprog INTO sy-msgli.
-          zcx_eui_exception=>raise_dump( iv_message = sy-msgli ).
-        ENDIF.
-
-        ASSIGN ls_map->cur_value->* TO <lv_src>.
-        <lv_param> = <lv_src>.
-      ENDLOOP.
-
-      " Set listbox search helps
-      LOOP AT mt_screen ASSIGNING <ls_screen_src> WHERE
-            name IS NOT INITIAL
-        AND t_listbox IS NOT INITIAL.
-
-        " Get name
-        READ TABLE mt_map REFERENCE INTO ls_map
-         WITH KEY name = <ls_screen_src>-name.
-        CHECK sy-subrc = 0.
-        lv_id = ls_map->par_name.
-
-        " Initialize 1 time only
-        DATA lt_listbox TYPE vrm_values.
-        CLEAR lt_listbox.
-        CALL FUNCTION 'VRM_GET_VALUES'
-          EXPORTING
-            id     = lv_id
-          IMPORTING
-            values = lt_listbox
-          EXCEPTIONS
-            OTHERS = 1.
-        CHECK sy-subrc <> 0 OR lt_listbox IS INITIAL.
-
-        " And set
-        CALL FUNCTION 'VRM_SET_VALUES'
-          EXPORTING
-            id     = lv_id
-            values = <ls_screen_src>-t_listbox[]
-          EXCEPTIONS
-            OTHERS = 0.
-      ENDLOOP.
-    ENDIF.
+    set_initial_values( ).
 
 **********************************************************************
     " Set parameters labels ( 1 time only )
     IF mv_pbo_set_labels = abap_true.
       mv_pbo_set_labels = abap_false.
 
+      DATA ls_map  TYPE REF TO zcl_eui_screen=>ts_map.
+      DATA lv_name TYPE string.
+      FIELD-SYMBOLS <lv_param> TYPE any.
       LOOP AT mt_map REFERENCE INTO ls_map.
         CONCATENATE `(` mo_eui_screen->ms_screen-prog `)%_` ls_map->par_name `_%_APP_%-TEXT` INTO lv_name.
         ASSIGN (lv_name) TO <lv_param>.
@@ -300,6 +239,7 @@ CLASS lcl_screen IMPLEMENTATION.
         ENDIF.
       ENDIF.
 
+      FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
       LOOP AT mt_screen ASSIGNING <ls_screen_src>.
         " Start of PSEUDO group (1 symbol)
         IF <ls_screen_src>-name = '+'.
@@ -345,12 +285,80 @@ CLASS lcl_screen IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD set_initial_values.
+    " Set parameters from context ( 1 time only )
+    CHECK mv_pbo_init_params = abap_true.
+    mv_pbo_init_params = abap_false.
+
+    DATA ls_map TYPE REF TO zcl_eui_screen=>ts_map.
+    LOOP AT mt_map REFERENCE INTO ls_map WHERE ui_type <> zcl_eui_type=>mc_ui_type-table
+                                           AND ui_type <> zcl_eui_type=>mc_ui_type-string.
+      " Name of parameter
+      DATA lv_name TYPE string.
+      CONCATENATE `(` mo_eui_screen->ms_screen-prog `)` ls_map->par_name INTO lv_name.
+
+      " Name of SELECT-OPTION
+      IF ls_map->ui_type = zcl_eui_type=>mc_ui_type-range.
+        CONCATENATE lv_name `[]` INTO lv_name.
+      ENDIF.
+
+      FIELD-SYMBOLS <lv_param> TYPE any.
+      ASSIGN (lv_name) TO <lv_param>.
+      IF sy-subrc <> 0.
+        MESSAGE s014(zeui_message) WITH ls_map->par_name sy-cprog INTO sy-msgli.
+        zcx_eui_exception=>raise_dump( iv_message = sy-msgli ).
+      ENDIF.
+
+      FIELD-SYMBOLS <lv_src> TYPE any.
+      ASSIGN ls_map->cur_value->* TO <lv_src>.
+      <lv_param> = <lv_src>.
+    ENDLOOP.
+
+    " Set listbox search helps
+    FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
+    LOOP AT mt_screen ASSIGNING <ls_screen_src> WHERE
+          name IS NOT INITIAL
+      AND t_listbox IS NOT INITIAL.
+
+      " Get name
+      READ TABLE mt_map REFERENCE INTO ls_map
+       WITH KEY name = <ls_screen_src>-name.
+      CHECK sy-subrc = 0.
+
+      DATA lv_id TYPE char80.
+      lv_id = ls_map->par_name.
+
+      " Initialize 1 time only
+      DATA lt_listbox TYPE vrm_values.
+      CLEAR lt_listbox.
+      CALL FUNCTION 'VRM_GET_VALUES'
+        EXPORTING
+          id     = lv_id
+        IMPORTING
+          values = lt_listbox
+        EXCEPTIONS
+          OTHERS = 1.
+      CHECK sy-subrc <> 0 OR lt_listbox IS INITIAL.
+
+      " And set
+      CALL FUNCTION 'VRM_SET_VALUES'
+        EXPORTING
+          id     = lv_id
+          values = <ls_screen_src>-t_listbox[]
+        EXCEPTIONS
+          OTHERS = 0.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD read_from_screen.
     DATA lv_prog               TYPE string.
     DATA lv_param              TYPE string.
     DATA lv_name               TYPE string.
     FIELD-SYMBOLS <lv_param>   TYPE any.
     FIELD-SYMBOLS <lv_dest>    TYPE any.
+
+    " Not initialized yet
+    CHECK mv_pbo_init_params <> abap_true.
 
     " Get name of paramater or range
     lv_param = ir_map->par_name.
