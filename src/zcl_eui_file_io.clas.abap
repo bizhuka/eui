@@ -659,17 +659,17 @@ METHOD int_2_column.
     lv_uccpi   TYPE i,
     lv_text    TYPE sychar02.
 
-  IF iv_column > 16384 OR iv_column < 1.
-    MESSAGE s004(zeui_message) WITH iv_column INTO sy-msgli.
-    zcx_eui_exception=>raise_sys_error( ).
-  ENDIF.
-
   " For speed
   READ TABLE lcl_helper=>mt_ind_col REFERENCE INTO lr_col_ind
    WITH TABLE KEY ind = iv_column.
   IF sy-subrc = 0.
     rv_column = lr_col_ind->col.
     RETURN.
+  ENDIF.
+
+  IF iv_column > 16384 OR iv_column < 1.
+    MESSAGE s004(zeui_message) WITH iv_column INTO sy-msgli.
+    zcx_eui_exception=>raise_sys_error( ).
   ENDIF.
 
   ls_col_ind-ind = iv_column.

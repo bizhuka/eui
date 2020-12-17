@@ -14,12 +14,6 @@
    <DESCRIPTIONS>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_EUI_CONV</CLSNAME>
-     <CMPNAME>ABAP_2_JSON</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>https://github.com/cesar-sap/abap_fm_json.git</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_CONV</CLSNAME>
      <CMPNAME>ASSERT_DIFFERS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Ensure Difference Between 2 (Elementary) data Objects</DESCRIPT>
@@ -68,15 +62,15 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_EUI_CONV</CLSNAME>
-     <CMPNAME>JSON_2_ABAP</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>https://github.com/cesar-sap/abap_fm_json.git</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_CONV</CLSNAME>
      <CMPNAME>MC_ENCODING</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Encodings constants</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_CONV</CLSNAME>
+     <CMPNAME>MC_JSON_MODE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>JSON handle order</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_EUI_CONV</CLSNAME>
@@ -131,6 +125,18 @@
      <CMPNAME>XSTRING_TO_STRING</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>XSTRING -&gt; STRING</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_CONV</CLSNAME>
+     <CMPNAME>_ABAP_2_JSON</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>https://github.com/cesar-sap/abap_fm_json.git</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_EUI_CONV</CLSNAME>
+     <CMPNAME>_JSON_2_ABAP</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>https://github.com/cesar-sap/abap_fm_json.git</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

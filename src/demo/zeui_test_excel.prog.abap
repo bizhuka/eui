@@ -18,14 +18,16 @@ CLASS lcl_report DEFINITION FINAL.
     TYPES:
       BEGIN OF ts_alv.
         INCLUDE TYPE spfli.
-    TYPES:
-      color TYPE lvc_t_scol,
+      TYPES:
+        color TYPE lvc_t_scol,
       END OF ts_alv,
       tt_alv TYPE STANDARD TABLE OF ts_alv WITH DEFAULT KEY.
 
     DATA:
       " Main data to Export/Import
-      mr_alv TYPE REF TO tt_alv.
+      mr_alv    TYPE REF TO tt_alv,
+
+      mo_logger TYPE REF TO zcl_eui_logger.
 
     CONSTANTS:
       BEGIN OF mc_cmd,
@@ -39,8 +41,8 @@ CLASS lcl_report DEFINITION FINAL.
 
       on_user_command FOR EVENT user_command OF cl_gui_alv_grid
         IMPORTING
-            sender
-            e_ucomm,
+          sender
+          e_ucomm,
 
       export
         IMPORTING
@@ -53,17 +55,17 @@ CLASS lcl_report DEFINITION FINAL.
 
       on_mapping_error FOR EVENT mapping_error OF zcl_eui_file_io
         IMPORTING
-            iv_source
-            iv_row
-            is_excel_map
-            io_error
-            cv_value
-            cs_row,
+          iv_source
+          iv_row
+          is_excel_map
+          io_error
+          cv_value
+          cs_row,
 
       on_pbo_event FOR EVENT pbo_event OF zif_eui_manager
         IMPORTING
-            sender
-            io_container.
+          sender
+          io_container.
 ENDCLASS.
 
 
@@ -222,6 +224,12 @@ CLASS lcl_report IMPLEMENTATION.
       lt_map   TYPE REF TO zcl_eui_file_io=>tt_excel_map,
       ls_map   TYPE REF TO zcl_eui_file_io=>ts_excel_map.
 
+    IF mo_logger IS INITIAL.
+      " For title -> EXPORTING is_header = VALUE #( object = '/GC1/GC' subobject = 'LOG' )
+      CREATE OBJECT mo_logger.
+    ELSE.
+      mo_logger->clear( ).
+    ENDIF.
     TRY.
         " If just want to load part of table (OR order is different in Excel & mt_alv[])
         CREATE DATA lt_map.
@@ -283,6 +291,13 @@ CLASS lcl_report IMPLEMENTATION.
     " Could fill with texts of mt_alv
     io_grid->refresh_table_display( ).
 
+    " Button and log itself
+    mo_logger->show_as_button( ).
+
+    DATA ls_profile TYPE bal_s_prof.
+    ls_profile-title = 'Test title'.
+    mo_logger->show( iv_profile = zcl_eui_logger=>mc_profile-popup
+                     is_profile = ls_profile ).
   ENDMETHOD.
 
   METHOD on_mapping_error.
@@ -301,12 +316,12 @@ CLASS lcl_report IMPLEMENTATION.
       <lv_distance> = 77777.
     ENDIF.
 
-    " For simplicity create a message.
-    " In production probaly use a logger like cf_reca_message_list=>create( )
+    " alternative for cf_reca_message_list=>create( )
     lv_text  = iv_row.
-    lv_error = io_error->get_text( ).
+    lv_error = io_error->get_text( ). " mo_logger->add_exception( io_exception = io_error ).
     CONCATENATE `In row ` lv_text ` there is an error:` lv_error INTO lv_error.
-    MESSAGE lv_error TYPE 'I'.
+    mo_logger->add_text( iv_text  = lv_error
+                         iv_msgty = 'E' ).
 
     " Change color of cell
     ASSIGN cs_row->* TO <ls_alv>.

@@ -82,6 +82,10 @@ public section.
       value(RO_FILE) type ref to ZCL_EUI_FILE
     raising
       ZCX_EUI_EXCEPTION .
+  methods TO_APP_SERVER
+    importing
+      !IV_FULL_PATH type CSEQUENCE
+      !IV_OVERWRITE type ABAP_BOOL default ABAP_TRUE .
   methods OPEN
     raising
       ZCX_EUI_EXCEPTION .
@@ -103,7 +107,7 @@ public section.
       !EV_EXTENSION type CSEQUENCE .
   class-methods FILE_EXIST
     importing
-      !IV_FULL_PATH type STRING
+      !IV_FULL_PATH type CSEQUENCE
     returning
       value(RV_EXIST) type ABAP_BOOL .
 
@@ -313,9 +317,11 @@ ENDMETHOD.                                               "#EC CI_VALPAR
 
 
 METHOD file_exist.
+  DATA lv_full_path TYPE string.
+  lv_full_path = iv_full_path.
   cl_gui_frontend_services=>file_exist(
     EXPORTING
-      file   = iv_full_path
+      file   = lv_full_path
     RECEIVING
       result = rv_exist
     EXCEPTIONS
@@ -599,6 +605,45 @@ METHOD split_file_path.
       set_if_requested ev_file_noext iv_fullpath+lv_ind(lv_cnt).
     ENDIF.
   ENDIF.
+ENDMETHOD.
+
+
+METHOD to_app_server.
+  DATA lv_file TYPE char200.
+  lv_file = iv_full_path.
+
+  " Downport to 7.02
+  DATA lr_content TYPE REF TO data.
+  FIELD-SYMBOLS <lt_content> TYPE STANDARD TABLE.
+  CREATE DATA lr_content TYPE STANDARD TABLE OF ('RCGREPFILE').
+  ASSIGN lr_content->* TO <lt_content>.
+
+  DATA lv_length TYPE i.
+  CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
+    EXPORTING
+      buffer        = mv_xstring
+    IMPORTING
+      output_length = lv_length
+    TABLES
+      binary_tab    = <lt_content>.
+
+  sy-cprog = 'RC1TCG3Z'.
+  CALL FUNCTION 'C13Z_RAWDATA_WRITE'
+    EXPORTING
+      i_file           = lv_file
+      i_file_size      = lv_length
+      i_file_overwrite = iv_overwrite
+    TABLES
+      i_rcgrepfile_tab = <lt_content>
+    EXCEPTIONS
+      no_permission    = 1
+      open_failed      = 2
+      ap_file_exists   = 3
+      close_failed     = 4
+      write_failed     = 5
+      OTHERS           = 6.
+  CHECK sy-subrc <> 0.
+  zcx_eui_no_check=>raise_sys_error( ).
 ENDMETHOD.
 
 

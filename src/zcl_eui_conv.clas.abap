@@ -13,6 +13,11 @@ public section.
       utf_16be TYPE abap_encoding VALUE '4102',
       utf_16le TYPE abap_encoding VALUE '4103',
     END OF mc_encoding .
+  constants:
+    BEGIN OF mc_json_mode,
+      standard TYPE string VALUE '1-2',
+      safe     TYPE string VALUE '2-1',
+    END OF mc_json_mode .
 
   class-methods MOVE_CORRESPONDING
     importing
@@ -88,6 +93,7 @@ public section.
   class-methods FROM_JSON
     importing
       !IV_JSON type STRING
+      !IV_MODE type STRING default MC_JSON_MODE-STANDARD
     exporting
       !EX_DATA type ANY
       !EV_OK type ABAP_BOOL .
@@ -127,13 +133,14 @@ public section.
       value(ASSERTION_FAILED) type ABAP_BOOL .
 protected section.
 private section.
-  class-methods ABAP_2_JSON
+
+  class-methods _ABAP_2_JSON
     importing
       !IM_DATA type DATA
       !IV_NAME type STRING optional
     returning
       value(RV_JSON) type STRING .
-  class-methods JSON_2_ABAP
+  class-methods _JSON_2_ABAP
     importing
       !JSON_STRING type STRING optional
       !VAR_NAME type STRING optional
@@ -152,7 +159,418 @@ ENDCLASS.
 CLASS ZCL_EUI_CONV IMPLEMENTATION.
 
 
-METHOD abap_2_json.
+METHOD assert_differs.
+  " Could use assert ?
+  DATA lv_class_name TYPE seoclass-clsname.
+  lv_class_name = lcl_assert_util=>get_class_name( ).
+  CHECK lv_class_name IS NOT INITIAL.
+
+  CALL METHOD (lv_class_name)=>assert_differs
+    EXPORTING
+      exp              = exp
+      act              = act
+      msg              = msg
+      level            = level
+      tol              = tol
+      quit             = quit
+    RECEIVING
+      assertion_failed = assertion_failed.
+ENDMETHOD.
+
+
+METHOD assert_equals.
+  " Could use assert ?
+  DATA lv_class_name TYPE seoclass-clsname.
+  lv_class_name = lcl_assert_util=>get_class_name( ).
+  CHECK lv_class_name IS NOT INITIAL.
+
+  CALL METHOD (lv_class_name)=>assert_equals
+    EXPORTING
+      exp                  = exp
+      act                  = act
+      msg                  = msg
+      level                = level
+      tol                  = tol
+      quit                 = quit
+      ignore_hash_sequence = ignore_hash_sequence
+    RECEIVING
+      assertion_failed     = assertion_failed.
+ENDMETHOD.
+
+
+METHOD BINARY_TO_STRING.
+  CALL FUNCTION 'SCMS_BINARY_TO_STRING'
+    EXPORTING
+      input_length = iv_length
+      encoding     = iv_encoding
+    IMPORTING
+      text_buffer  = rv_string
+    TABLES
+      binary_tab   = it_table.
+ENDMETHOD.
+
+
+METHOD BINARY_TO_XSTRING.
+  " cl_bcs_convert=>solix_to_xstring( )
+  CALL FUNCTION 'SCMS_BINARY_TO_XSTRING'
+    EXPORTING
+      input_length = iv_length
+    IMPORTING
+      buffer       = rv_xstring
+    TABLES
+      binary_tab   = it_table.
+ENDMETHOD.
+
+
+METHOD from_json.
+  CLEAR:
+   ev_ok,
+   ex_data.
+
+  " No need. Always have {"DATA":} ?
+  CHECK iv_json IS NOT INITIAL.
+
+  " Detect order
+  DATA lt_mode TYPE stringtab.
+  SPLIT iv_mode AT '-' INTO TABLE lt_mode.
+
+  DATA lv_mode TYPE string.
+  LOOP AT lt_mode INTO lv_mode.
+    CASE lv_mode.
+      " in most cases it works fine regardless the fact that in system there is no if_sxml=>co_xt_json declared
+      WHEN '1'.
+        TRY.
+            CALL TRANSFORMATION id SOURCE XML iv_json
+                                   RESULT data = ex_data.
+            " Ok
+            ev_ok = abap_true.
+          CATCH cx_transformation_error.
+            ev_ok = abap_false.
+        ENDTRY.
+
+      " For version ABAP 7.02 patch level 006
+      WHEN '2'.
+        TRY.
+            _json_2_abap(
+             EXPORTING
+              json_string = iv_json
+              var_name    = 'DATA'
+             CHANGING
+              abap_data   = ex_data ).
+
+            " Ok
+            ev_ok = abap_true.
+          CATCH zcx_eui_exception.
+            ev_ok = abap_false.
+        ENDTRY.
+    ENDCASE.
+
+    " All done
+    IF ev_ok = abap_true.
+      EXIT.
+    ENDIF.
+  ENDLOOP.
+
+  " Is not procced in caller!
+  IF ev_ok <> abap_true AND ev_ok IS NOT REQUESTED.
+    " Jump to code below to get file
+    zcx_eui_exception=>raise_dump( iv_message = `Error in 'IV_JSON'` ). "#EC NOTEXT
+
+    " For debug
+    DATA lo_file TYPE REF TO zcl_eui_file.
+    lo_file->import_from_string( iv_json ).
+    TRY.
+        lo_file->download( iv_full_path   = 'dump_json.txt'
+                           iv_save_dialog = abap_true ).
+        lo_file->open( ).
+      CATCH zcx_eui_exception.
+    ENDTRY.
+  ENDIF.
+ENDMETHOD.
+
+
+METHOD get_grid_from_salv.
+  DATA lo_error TYPE REF TO cx_salv_msg.
+
+  TRY.
+      ro_gui_alv = lcl_salv_util=>_get_grid_from_salv( io_salv ).
+    CATCH cx_salv_msg INTO lo_error.
+      MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
+  ENDTRY.
+ENDMETHOD.
+
+
+METHOD get_grid_table.
+  rr_table = lcl_grid_util=>_get_grid_table( io_alv ).
+ENDMETHOD.
+
+
+METHOD guid_create.
+  " nearly same approach as in ABAP2XLSX, ZCL_EXCEL_OBSOLETE_FUNC_WRAP:
+  TRY.
+      rv_guid = cl_system_uuid=>create_uuid_c32_static( ).
+    CATCH cx_uuid_error.
+      CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
+                  sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO rv_guid.
+  ENDTRY.
+
+*--------------------------------------------------------------------*
+*If you are on a release that does not yet have the class cl_system_uuid
+*please use the following coding instead which is using the function
+*call that was used before but which has been flagged as obsolete
+*in newer SAP releases
+*--------------------------------------------------------------------*
+
+*  CALL FUNCTION 'GUID_CREATE'
+*    IMPORTING
+*      ev_guid_32 = rv_guid.
+ENDMETHOD.
+
+
+METHOD MOVE_CORRESPONDING.
+  DATA:
+    lo_struc  TYPE REF TO cl_abap_structdescr,
+    lt_except TYPE STANDARD TABLE OF fieldname WITH DEFAULT KEY.
+  FIELD-SYMBOLS:
+    <ls_component> LIKE LINE OF ct_component,
+    <lv_src>       TYPE any,
+    <lv_dest>      TYPE any.
+
+  " Could be slow in the loops
+  IF ct_component IS INITIAL.
+    lo_struc ?= cl_abap_typedescr=>describe_by_data( is_source ).
+    ct_component = lo_struc->components.
+  ENDIF.
+
+  " Just iqnore fields. No need to optimize
+  IF iv_except IS NOT INITIAL.
+    SPLIT iv_except AT ';' INTO TABLE lt_except.
+    SORT lt_except BY table_line.
+  ENDIF.
+
+  LOOP AT ct_component ASSIGNING <ls_component>.
+    " №1 - ignore
+    IF iv_except IS NOT INITIAL.
+      READ TABLE lt_except TRANSPORTING NO FIELDS BINARY SEARCH
+       WITH KEY table_line = <ls_component>-name.
+      CHECK sy-subrc <> 0.
+    ENDIF.
+
+    ASSIGN COMPONENT:
+     <ls_component>-name OF STRUCTURE is_source      TO <lv_src>,
+     <ls_component>-name OF STRUCTURE cs_destination TO <lv_dest>.
+    CHECK sy-subrc = 0.
+
+    " №2 - ignore
+    IF iv_except_initial = abap_true.
+      CHECK <lv_src> IS NOT INITIAL.
+    ENDIF.
+
+    <lv_dest> = <lv_src>.
+  ENDLOOP.
+ENDMETHOD.
+
+
+METHOD STRING_TO_XSTRING.
+  " rv_xstring = cl_bcs_convert=>string_to_xstring( iv_string = iv_string iv_codepage = IV_ENCODING ).
+  CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
+    EXPORTING
+      text     = iv_string
+      encoding = iv_encoding
+    IMPORTING
+      buffer   = rv_xstring.
+ENDMETHOD.
+
+
+METHOD STR_TO_XML.
+  DATA:
+    lo_xml     TYPE REF TO if_ixml,
+    lo_factory TYPE REF TO if_ixml_stream_factory,
+    lo_stream  TYPE REF TO if_ixml_istream,
+    lo_parser  TYPE REF TO if_ixml_parser.
+
+  lo_xml      = cl_ixml=>create( ).
+  lo_factory  = lo_xml->create_stream_factory( ).
+
+  " From xstring
+  IF iv_xstr IS SUPPLIED.
+    lo_stream   = lo_factory->create_istream_xstring( iv_xstr ).
+  ELSEIF iv_str IS SUPPLIED. " From string
+    lo_stream   = lo_factory->create_istream_cstring( iv_str ).
+  ELSE.
+    RETURN.
+  ENDIF.
+
+  " Parse a document and return re_doc
+  ro_doc = lo_xml->create_document( ).
+  lo_parser = lo_xml->create_parser(
+    stream_factory  = lo_factory
+    istream         = lo_stream
+    document        = ro_doc ).
+  lo_parser->set_normalizing( ).
+  lo_parser->set_validating( mode = if_ixml_parser=>co_no_validation ).
+  lo_parser->parse( ).
+ENDMETHOD.
+
+
+METHOD to_json.
+  DATA:
+    lv_end TYPE i,
+    lv_beg TYPE i.
+
+  rv_json = _abap_2_json( im_data = im_data iv_name = 'DATA' ).
+  CONCATENATE `{` rv_json `}` INTO rv_json.
+
+  " delete surroundin DATA
+  IF iv_pure = abap_true.
+    lv_end = strlen( rv_json ).
+
+    IF rv_json(9) CP `{"DATA":"`.
+      lv_beg = 9.
+      lv_end = lv_end - 11.
+    ELSE.
+      lv_beg = 8.
+      lv_end = lv_end - 9.
+    ENDIF.
+
+    rv_json = rv_json+lv_beg(lv_end).
+  ENDIF.
+ENDMETHOD.
+
+
+METHOD XML_FROM_ZIP.
+  DATA:
+    lv_value TYPE xstring.
+
+  " As a string
+  IF ev_sdoc IS REQUESTED.
+    CLEAR ev_sdoc.
+  ENDIF.
+
+  " As an object
+  IF eo_xmldoc IS REQUESTED.
+    CLEAR eo_xmldoc.
+  ENDIF.
+
+  " Try to read the document from archive
+  io_zip->get(
+   EXPORTING
+    name                    = iv_name
+   IMPORTING
+    content                 = lv_value
+   EXCEPTIONS
+    OTHERS                  = 1 ).
+  CHECK sy-subrc = 0.
+
+  " As a string
+  IF ev_sdoc IS REQUESTED.
+    ev_sdoc = xstring_to_string( lv_value ).
+  ENDIF.
+
+  " As an object
+  IF eo_xmldoc IS REQUESTED.
+    eo_xmldoc = str_to_xml( iv_xstr = lv_value ).
+  ENDIF.
+ENDMETHOD.
+
+
+METHOD XML_TO_STR.
+  DATA:
+    lo_xml     TYPE REF TO if_ixml,
+    lo_encode  TYPE REF TO if_ixml_encoding,
+    lo_factory TYPE REF TO if_ixml_stream_factory,
+    lo_stream  TYPE REF TO if_ixml_ostream,
+    lo_rendr   TYPE REF TO if_ixml_renderer.
+
+  lo_xml    = cl_ixml=>create( ).
+
+*    In a different encoding
+*    IF im_charset IS NOT INITIAL.
+  lo_encode = lo_xml->create_encoding( byte_order    = if_ixml_encoding=>co_platform_endian
+                                       character_set = 'UTF-8' ).
+  io_doc->set_encoding( lo_encode ).
+*    ENDIF.
+
+  lo_factory = lo_xml->create_stream_factory( ).
+
+  " Return a xtring
+  IF ev_xstr IS REQUESTED.
+    CLEAR ev_xstr.
+    lo_stream = lo_factory->create_ostream_xstring( string = ev_xstr ).
+  ELSEIF ev_str IS REQUESTED. " Return a string
+    CLEAR ev_str.
+    lo_stream = lo_factory->create_ostream_cstring( string = ev_str ).
+  ELSE.
+    RETURN.
+  ENDIF.
+
+  lo_rendr = lo_xml->create_renderer( ostream  = lo_stream document = io_doc ).
+  lo_rendr->render( ).
+
+  " Change encoding. still utf-16 in header
+  IF ev_str IS REQUESTED.
+    REPLACE FIRST OCCURRENCE OF 'utf-16' IN ev_str WITH 'UTF-8'.
+  ENDIF.
+ENDMETHOD.
+
+
+METHOD XML_TO_ZIP.
+  DATA:
+   lv_value TYPE xstring.
+
+  " From string
+  IF iv_xdoc IS SUPPLIED.
+    lv_value = iv_xdoc.
+  ELSEIF iv_sdoc IS SUPPLIED.
+    " Transform string to xString
+    lv_value = string_to_xstring( iv_sdoc ).
+  ELSEIF io_xmldoc IS SUPPLIED. " From object
+    " Transform document to xString
+    xml_to_str(
+     EXPORTING
+       io_doc     = io_xmldoc
+     IMPORTING
+       ev_xstr    = lv_value ).
+  ELSE.
+    RETURN.
+  ENDIF.
+
+  " Delete from ZIP
+  io_zip->delete( EXPORTING name = iv_name EXCEPTIONS OTHERS = 1 ).
+
+  " Add to ZIP
+  io_zip->add( name = iv_name content = lv_value ).
+ENDMETHOD.
+
+
+METHOD XSTRING_TO_BINARY.
+  " et_table = cl_bcs_convert=>xstring_to_solix( iv_xstring ).
+  " ev_length = xstrlen( iv_xstring ).
+  CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
+    EXPORTING
+      buffer        = iv_xstring
+    IMPORTING
+      output_length = ev_length
+    TABLES
+      binary_tab    = et_table.
+ENDMETHOD.
+
+
+METHOD XSTRING_TO_STRING.
+  DATA:
+    lo_conv  TYPE REF TO cl_abap_conv_in_ce.
+
+  lo_conv = cl_abap_conv_in_ce=>create(
+   encoding = iv_encoding
+   input    = iv_xstring ).
+
+  lo_conv->read(
+   IMPORTING
+    data =  rv_string ).
+ENDMETHOD.
+
+
+METHOD _abap_2_json.
   CONSTANTS:
     c_comma TYPE c VALUE ',',
     c_colon TYPE c VALUE ':',
@@ -328,7 +746,7 @@ METHOD abap_2_json.
     LOOP AT <itab> ASSIGNING <comp>.
       ADD 1 TO l_index.
 *> Recursive call for each table row:
-      rec_rv_json = abap_2_json( im_data = <comp> ).
+      rec_rv_json = _abap_2_json( im_data = <comp> ).
       APPEND rec_rv_json TO json_fragments.
       CLEAR rec_rv_json.
       IF l_index < l_lines.
@@ -338,6 +756,22 @@ METHOD abap_2_json.
     APPEND ']' TO json_fragments.
 * ']' JSON table closing bracket
 
+***************************************************
+*  Objects
+***************************************************
+  ELSEIF lo_type->type_kind EQ cl_abap_typedescr=>typekind_oref.
+    " Dump in 7.02 Only for jekyll info
+    TRY.
+        CALL METHOD ('/UI2/CL_JSON')=>serialize
+          EXPORTING
+            data   = <abap_data>
+          RECEIVING
+            r_json = rec_rv_json.
+      CATCH cx_sy_dyn_call_error.
+        rec_rv_json = '{}'.
+    ENDTRY.
+    APPEND rec_rv_json TO json_fragments.
+    CLEAR rec_rv_json.
 
 ***************************************************
 *  Structures
@@ -358,7 +792,7 @@ METHOD abap_2_json.
         IF lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_table   OR lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_dref OR
            lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_struct1 OR lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_struct2.
 *> Recursive call for non-scalars:
-          rec_rv_json = abap_2_json( im_data = <comp> iv_name = l_name ).
+          rec_rv_json = _abap_2_json( im_data = <comp> iv_name = l_name ).
         ELSE.
           IF lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_oref OR lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_iref.
             rec_rv_json = '"REF UNSUPPORTED"'.
@@ -396,166 +830,7 @@ METHOD abap_2_json.
 ENDMETHOD.
 
 
-METHOD assert_differs.
-  " Could use assert ?
-  DATA lv_class_name TYPE seoclass-clsname.
-  lv_class_name = lcl_assert_util=>get_class_name( ).
-  CHECK lv_class_name IS NOT INITIAL.
-
-  CALL METHOD (lv_class_name)=>assert_differs
-    EXPORTING
-      exp              = exp
-      act              = act
-      msg              = msg
-      level            = level
-      tol              = tol
-      quit             = quit
-    RECEIVING
-      assertion_failed = assertion_failed.
-ENDMETHOD.
-
-
-METHOD assert_equals.
-  " Could use assert ?
-  DATA lv_class_name TYPE seoclass-clsname.
-  lv_class_name = lcl_assert_util=>get_class_name( ).
-  CHECK lv_class_name IS NOT INITIAL.
-
-  CALL METHOD (lv_class_name)=>assert_equals
-    EXPORTING
-      exp                  = exp
-      act                  = act
-      msg                  = msg
-      level                = level
-      tol                  = tol
-      quit                 = quit
-      ignore_hash_sequence = ignore_hash_sequence
-    RECEIVING
-      assertion_failed     = assertion_failed.
-ENDMETHOD.
-
-
-METHOD BINARY_TO_STRING.
-  CALL FUNCTION 'SCMS_BINARY_TO_STRING'
-    EXPORTING
-      input_length = iv_length
-      encoding     = iv_encoding
-    IMPORTING
-      text_buffer  = rv_string
-    TABLES
-      binary_tab   = it_table.
-ENDMETHOD.
-
-
-METHOD BINARY_TO_XSTRING.
-  " cl_bcs_convert=>solix_to_xstring( )
-  CALL FUNCTION 'SCMS_BINARY_TO_XSTRING'
-    EXPORTING
-      input_length = iv_length
-    IMPORTING
-      buffer       = rv_xstring
-    TABLES
-      binary_tab   = it_table.
-ENDMETHOD.
-
-
-METHOD from_json.
-  DATA:
-    lv_xstring TYPE xstring,
-    lv_length  TYPE i,
-    lt_table   TYPE w3mimetabtype.
-
-  CLEAR:
-   ev_ok,
-   ex_data.
-
-  " No need. Always have {"DATA":} ?
-  CHECK iv_json IS NOT INITIAL.
-
-  TRY.
-      " in most cases it works fine regardless the fact that in system there is no if_sxml=>co_xt_json declared
-      CALL TRANSFORMATION id SOURCE XML iv_json
-                             RESULT data = ex_data.
-      " Ok
-      ev_ok = abap_true.
-    CATCH cx_transformation_error.
-      ev_ok = abap_false.
-  ENDTRY.
-
-  " For version ABAP 7.02 patch level 006
-  IF ev_ok <> abap_true AND ex_data IS INITIAL.
-    TRY.
-        json_2_abap(
-         EXPORTING
-          json_string = iv_json
-          var_name    = 'DATA'
-         CHANGING
-          abap_data   = ex_data ).
-
-        " Ok
-        ev_ok = abap_true.
-      CATCH zcx_eui_exception.
-        ev_ok = abap_false.
-    ENDTRY.
-  ENDIF.
-
-  " Is not procced in caller!
-  IF ev_ok <> abap_true AND ev_ok IS NOT REQUESTED.
-    " Jump to code below to get file
-    zcx_eui_exception=>raise_dump( iv_message = `Error in 'IV_JSON'` ). "#EC NOTEXT
-
-    " For debug
-    DATA lo_file TYPE REF TO zcl_eui_file.
-    lo_file->import_from_string( iv_json ).
-    TRY.
-        lo_file->download( iv_full_path   = 'dump_json.txt'
-                           iv_save_dialog = abap_true ).
-        lo_file->open( ).
-      CATCH zcx_eui_exception.
-    ENDTRY.
-  ENDIF.
-ENDMETHOD.
-
-
-METHOD get_grid_from_salv.
-  DATA lo_error TYPE REF TO cx_salv_msg.
-
-  TRY.
-      ro_gui_alv = lcl_salv_util=>_get_grid_from_salv( io_salv ).
-    CATCH cx_salv_msg INTO lo_error.
-      MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
-  ENDTRY.
-ENDMETHOD.
-
-
-METHOD get_grid_table.
-  rr_table = lcl_grid_util=>_get_grid_table( io_alv ).
-ENDMETHOD.
-
-
-METHOD guid_create.
-  " nearly same approach as in ABAP2XLSX, ZCL_EXCEL_OBSOLETE_FUNC_WRAP:
-  TRY.
-      rv_guid = cl_system_uuid=>create_uuid_c32_static( ).
-    CATCH cx_uuid_error.
-      CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
-                  sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO rv_guid.
-  ENDTRY.
-
-*--------------------------------------------------------------------*
-*If you are on a release that does not yet have the class cl_system_uuid
-*please use the following coding instead which is using the function
-*call that was used before but which has been flagged as obsolete
-*in newer SAP releases
-*--------------------------------------------------------------------*
-
-*  CALL FUNCTION 'GUID_CREATE'
-*    IMPORTING
-*      ev_guid_32 = rv_guid.
-ENDMETHOD.
-
-
-METHOD json_2_abap.
+METHOD _json_2_abap.
 */************************************************/*
 */ Input any abap data and this method tries to   /*
 */ fill it with the data in the JSON string.      /*
@@ -762,7 +1037,7 @@ METHOD json_2_abap.
                  OR cl_abap_typedescr=>typekind_table.   " 'h' (may need a different treatment one day)
               CONCATENATE l_property_path <jsprop>-name INTO item_path SEPARATED BY '.'.
 *> Recursive call here
-              json_2_abap( EXPORTING property_path = item_path CHANGING abap_data = <comp> js_object = js_object ).
+              _json_2_abap( EXPORTING property_path = item_path CHANGING abap_data = <comp> js_object = js_object ).
 
             WHEN OTHERS.
 * Process scalars in structures (same as the kind_elem above)
@@ -790,7 +1065,7 @@ METHOD json_2_abap.
               CONCATENATE l_property_path js_property-name INTO item_path SEPARATED BY '.'.
               CONDENSE item_path.
 *> Recursive call here
-              json_2_abap( EXPORTING property_path = item_path CHANGING abap_data = newline js_object = js_object ).
+              _json_2_abap( EXPORTING property_path = item_path CHANGING abap_data = newline js_object = js_object ).
             WHEN OTHERS. " Assume scalars, 'S', 'I', or other JS types
               " Process scalars in plain table components(same as the kind_elem above)
               assign_scalar_value <comp> js_property-value.
@@ -805,247 +1080,4 @@ METHOD json_2_abap.
 
   ENDCASE.
 ENDMETHOD.                                               "#EC CI_VALPAR
-
-
-METHOD MOVE_CORRESPONDING.
-  DATA:
-    lo_struc  TYPE REF TO cl_abap_structdescr,
-    lt_except TYPE STANDARD TABLE OF fieldname WITH DEFAULT KEY.
-  FIELD-SYMBOLS:
-    <ls_component> LIKE LINE OF ct_component,
-    <lv_src>       TYPE any,
-    <lv_dest>      TYPE any.
-
-  " Could be slow in the loops
-  IF ct_component IS INITIAL.
-    lo_struc ?= cl_abap_typedescr=>describe_by_data( is_source ).
-    ct_component = lo_struc->components.
-  ENDIF.
-
-  " Just iqnore fields. No need to optimize
-  IF iv_except IS NOT INITIAL.
-    SPLIT iv_except AT ';' INTO TABLE lt_except.
-    SORT lt_except BY table_line.
-  ENDIF.
-
-  LOOP AT ct_component ASSIGNING <ls_component>.
-    " №1 - ignore
-    IF iv_except IS NOT INITIAL.
-      READ TABLE lt_except TRANSPORTING NO FIELDS BINARY SEARCH
-       WITH KEY table_line = <ls_component>-name.
-      CHECK sy-subrc <> 0.
-    ENDIF.
-
-    ASSIGN COMPONENT:
-     <ls_component>-name OF STRUCTURE is_source      TO <lv_src>,
-     <ls_component>-name OF STRUCTURE cs_destination TO <lv_dest>.
-    CHECK sy-subrc = 0.
-
-    " №2 - ignore
-    IF iv_except_initial = abap_true.
-      CHECK <lv_src> IS NOT INITIAL.
-    ENDIF.
-
-    <lv_dest> = <lv_src>.
-  ENDLOOP.
-ENDMETHOD.
-
-
-METHOD STRING_TO_XSTRING.
-  " rv_xstring = cl_bcs_convert=>string_to_xstring( iv_string = iv_string iv_codepage = IV_ENCODING ).
-  CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
-    EXPORTING
-      text     = iv_string
-      encoding = iv_encoding
-    IMPORTING
-      buffer   = rv_xstring.
-ENDMETHOD.
-
-
-METHOD STR_TO_XML.
-  DATA:
-    lo_xml     TYPE REF TO if_ixml,
-    lo_factory TYPE REF TO if_ixml_stream_factory,
-    lo_stream  TYPE REF TO if_ixml_istream,
-    lo_parser  TYPE REF TO if_ixml_parser.
-
-  lo_xml      = cl_ixml=>create( ).
-  lo_factory  = lo_xml->create_stream_factory( ).
-
-  " From xstring
-  IF iv_xstr IS SUPPLIED.
-    lo_stream   = lo_factory->create_istream_xstring( iv_xstr ).
-  ELSEIF iv_str IS SUPPLIED. " From string
-    lo_stream   = lo_factory->create_istream_cstring( iv_str ).
-  ELSE.
-    RETURN.
-  ENDIF.
-
-  " Parse a document and return re_doc
-  ro_doc = lo_xml->create_document( ).
-  lo_parser = lo_xml->create_parser(
-    stream_factory  = lo_factory
-    istream         = lo_stream
-    document        = ro_doc ).
-  lo_parser->set_normalizing( ).
-  lo_parser->set_validating( mode = if_ixml_parser=>co_no_validation ).
-  lo_parser->parse( ).
-ENDMETHOD.
-
-
-METHOD TO_JSON.
-  DATA:
-    lv_end    TYPE i,
-    lv_beg    TYPE i.
-
-  rv_json = abap_2_json( im_data = im_data iv_name = 'DATA' ).
-  CONCATENATE `{` rv_json `}` INTO rv_json.
-
-  " delete surroundin DATA
-  IF iv_pure = abap_true.
-    lv_end = strlen( rv_json ).
-
-    IF rv_json(9) CP `{"DATA":"`.
-      lv_beg = 9.
-      lv_end = lv_end - 11.
-    ELSE.
-      lv_beg = 8.
-      lv_end = lv_end - 9.
-    ENDIF.
-
-    rv_json = rv_json+lv_beg(lv_end).
-  ENDIF.
-ENDMETHOD.
-
-
-METHOD XML_FROM_ZIP.
-  DATA:
-    lv_value TYPE xstring.
-
-  " As a string
-  IF ev_sdoc IS REQUESTED.
-    CLEAR ev_sdoc.
-  ENDIF.
-
-  " As an object
-  IF eo_xmldoc IS REQUESTED.
-    CLEAR eo_xmldoc.
-  ENDIF.
-
-  " Try to read the document from archive
-  io_zip->get(
-   EXPORTING
-    name                    = iv_name
-   IMPORTING
-    content                 = lv_value
-   EXCEPTIONS
-    OTHERS                  = 1 ).
-  CHECK sy-subrc = 0.
-
-  " As a string
-  IF ev_sdoc IS REQUESTED.
-    ev_sdoc = xstring_to_string( lv_value ).
-  ENDIF.
-
-  " As an object
-  IF eo_xmldoc IS REQUESTED.
-    eo_xmldoc = str_to_xml( iv_xstr = lv_value ).
-  ENDIF.
-ENDMETHOD.
-
-
-METHOD XML_TO_STR.
-  DATA:
-    lo_xml     TYPE REF TO if_ixml,
-    lo_encode  TYPE REF TO if_ixml_encoding,
-    lo_factory TYPE REF TO if_ixml_stream_factory,
-    lo_stream  TYPE REF TO if_ixml_ostream,
-    lo_rendr   TYPE REF TO if_ixml_renderer.
-
-  lo_xml    = cl_ixml=>create( ).
-
-*    In a different encoding
-*    IF im_charset IS NOT INITIAL.
-  lo_encode = lo_xml->create_encoding( byte_order    = if_ixml_encoding=>co_platform_endian
-                                       character_set = 'UTF-8' ).
-  io_doc->set_encoding( lo_encode ).
-*    ENDIF.
-
-  lo_factory = lo_xml->create_stream_factory( ).
-
-  " Return a xtring
-  IF ev_xstr IS REQUESTED.
-    CLEAR ev_xstr.
-    lo_stream = lo_factory->create_ostream_xstring( string = ev_xstr ).
-  ELSEIF ev_str IS REQUESTED. " Return a string
-    CLEAR ev_str.
-    lo_stream = lo_factory->create_ostream_cstring( string = ev_str ).
-  ELSE.
-    RETURN.
-  ENDIF.
-
-  lo_rendr = lo_xml->create_renderer( ostream  = lo_stream document = io_doc ).
-  lo_rendr->render( ).
-
-  " Change encoding. still utf-16 in header
-  IF ev_str IS REQUESTED.
-    REPLACE FIRST OCCURRENCE OF 'utf-16' IN ev_str WITH 'UTF-8'.
-  ENDIF.
-ENDMETHOD.
-
-
-METHOD XML_TO_ZIP.
-  DATA:
-   lv_value TYPE xstring.
-
-  " From string
-  IF iv_xdoc IS SUPPLIED.
-    lv_value = iv_xdoc.
-  ELSEIF iv_sdoc IS SUPPLIED.
-    " Transform string to xString
-    lv_value = string_to_xstring( iv_sdoc ).
-  ELSEIF io_xmldoc IS SUPPLIED. " From object
-    " Transform document to xString
-    xml_to_str(
-     EXPORTING
-       io_doc     = io_xmldoc
-     IMPORTING
-       ev_xstr    = lv_value ).
-  ELSE.
-    RETURN.
-  ENDIF.
-
-  " Delete from ZIP
-  io_zip->delete( EXPORTING name = iv_name EXCEPTIONS OTHERS = 1 ).
-
-  " Add to ZIP
-  io_zip->add( name = iv_name content = lv_value ).
-ENDMETHOD.
-
-
-METHOD XSTRING_TO_BINARY.
-  " et_table = cl_bcs_convert=>xstring_to_solix( iv_xstring ).
-  " ev_length = xstrlen( iv_xstring ).
-  CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
-    EXPORTING
-      buffer        = iv_xstring
-    IMPORTING
-      output_length = ev_length
-    TABLES
-      binary_tab    = et_table.
-ENDMETHOD.
-
-
-METHOD XSTRING_TO_STRING.
-  DATA:
-    lo_conv  TYPE REF TO cl_abap_conv_in_ce.
-
-  lo_conv = cl_abap_conv_in_ce=>create(
-   encoding = iv_encoding
-   input    = iv_xstring ).
-
-  lo_conv->read(
-   IMPORTING
-    data =  rv_string ).
-ENDMETHOD.
 ENDCLASS.
