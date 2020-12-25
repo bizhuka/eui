@@ -16,6 +16,7 @@ public section.
         " For editing in ALV
         rollname    TYPE zdeui_db_field,
         label       TYPE dfies-fieldtext,
+        f4_table    TYPE zdeui_f4_table,
         " Table description
         table_kind  TYPE abap_tablekind,
         unique      TYPE abap_bool,
@@ -107,6 +108,11 @@ public section.
     changing
       !CV_ROLLNAME type CSEQUENCE
       !CV_LABEL type CSEQUENCE optional .
+  class-methods GET_SUB_FIELD_DESC
+    importing
+      !IS_FIELD_DESC type TS_FIELD_DESC
+    returning
+      value(RT_FIELD_DESC) type TT_FIELD_DESC .
 protected section.
 private section.
 ENDCLASS.
@@ -878,6 +884,16 @@ METHOD get_field_desc.
   IF rs_field_desc-label IS INITIAL.
     rs_field_desc-label = rs_field_desc-name.
   ENDIF.
+ENDMETHOD.
+
+
+METHOD get_sub_field_desc.
+  DATA lv_ok TYPE abap_bool.
+  zcl_eui_conv=>from_json( EXPORTING iv_json = is_field_desc-sub_fdesc
+                           IMPORTING ev_ok   = lv_ok
+                                     ex_data = rt_field_desc ).
+  CHECK lv_ok <> abap_true.
+  MESSAGE s017(zaqo_message) WITH is_field_desc-name DISPLAY LIKE 'E'.
 ENDMETHOD.
 
 

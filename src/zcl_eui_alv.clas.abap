@@ -6,6 +6,14 @@ class ZCL_EUI_ALV definition
 
 public section.
 
+  types:
+    BEGIN OF ts_f4_table,
+        field TYPE string,
+        tab   TYPE REF TO data,
+      END OF ts_f4_table .
+  types:
+    tt_f4_table TYPE SORTED TABLE OF ts_f4_table WITH UNIQUE KEY field .
+
   methods CONSTRUCTOR
     importing
       !IR_TABLE type ref to DATA
@@ -15,16 +23,19 @@ public section.
       !IS_VARIANT type DISVARIANT optional
       !IT_FILTER type LVC_T_FILT optional
       !IT_SORT type LVC_T_SORT optional
-      !IV_TOP_OF_PAGE_HEIGHT type I default 12
-      !IV_STATUS_NAME type GUI_STATUS optional
-      !IV_STATUS_PROG type SYREPID optional
-      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
-      !IV_STATUS_TITLE type CSEQUENCE optional
-      !IV_READ_ONLY type ABAP_BOOL default ABAP_TRUE
-      !IS_FIELD_DESC type ref to ZCL_EUI_TYPE=>TS_FIELD_DESC optional .
+      !IV_READ_ONLY type ABAP_BOOL default ABAP_TRUE .
   methods GET_GRID
     returning
       value(RO_GRID) type ref to CL_GUI_ALV_GRID .
+  methods SET_FIELD_DESC
+    importing
+      !IS_FIELD_DESC type ref to ZCL_EUI_TYPE=>TS_FIELD_DESC .
+  methods SET_F4_TABLE
+    importing
+      !IT_F4_TABLE type TT_F4_TABLE .
+  methods SET_TOP_OF_PAGE_HEIGHT
+    importing
+      !IV_TOP_OF_PAGE_HEIGHT type I default 12 .
   class-methods UPDATE_COMPLEX_FIELDS
     importing
       !IR_TABLE type ref to DATA
@@ -47,7 +58,6 @@ private section.
   data MT_FILTER type LVC_T_FILT .
   data MT_SORT type LVC_T_SORT .
   data MO_HELPER type ref to LCL_HELPER .
-  data MV_TOP_OF_PAGE_HEIGHT type I .
 ENDCLASS.
 
 
@@ -56,12 +66,7 @@ CLASS ZCL_EUI_ALV IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor(
-   iv_status_name    = iv_status_name
-   iv_status_prog    = iv_status_prog
-   it_status_exclude = it_status_exclude
-   iv_status_title   = iv_status_title
-   iv_read_only      = iv_read_only ).
+  super->constructor( iv_read_only = iv_read_only ).
 
   mr_table              = ir_table.
   mt_toolbar            = it_toolbar.
@@ -70,22 +75,35 @@ METHOD constructor.
   ms_variant            = is_variant.
   mt_filter             = it_filter.
   mt_sort               = it_sort.
-  mv_top_of_page_height = iv_top_of_page_height.
 
   " Just check
   IF ms_layout-edit = abap_true AND iv_read_only IS NOT SUPPLIED.
-    MESSAGE `Please also specify 'IV_READ_ONLY' parameter` TYPE 'S' DISPLAY LIKE 'W'.
+    MESSAGE 'Please also specify `IV_READ_ONLY` parameter'(pro) TYPE 'S' DISPLAY LIKE 'W'.
   ENDIF.
 
   CREATE OBJECT mo_helper
     EXPORTING
-      io_eui_alv    = me
-      is_field_desc = is_field_desc.
+      io_eui_alv = me.
 ENDMETHOD.
 
 
 METHOD get_grid.
   ro_grid = mo_grid.
+ENDMETHOD.
+
+
+METHOD set_f4_table.
+  mo_helper->mt_f4_table = it_f4_table.
+ENDMETHOD.
+
+
+METHOD set_field_desc.
+  mo_helper->set_field_desc( is_field_desc ).
+ENDMETHOD.
+
+
+METHOD set_top_of_page_height.
+  mo_helper->mv_top_of_page_height = iv_top_of_page_height.
 ENDMETHOD.
 
 

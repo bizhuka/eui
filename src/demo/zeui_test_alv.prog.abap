@@ -36,25 +36,25 @@ CLASS lcl_report DEFINITION FINAL.
 
       on_hotspot_click FOR EVENT hotspot_click OF cl_gui_alv_grid
         IMPORTING
-            sender
-            e_row_id
-            e_column_id,
+          sender
+          e_row_id
+          e_column_id,
 
       on_user_command FOR EVENT user_command OF cl_gui_alv_grid
         IMPORTING
-            e_ucomm,
+          e_ucomm,
 
       on_top_of_page FOR EVENT top_of_page OF cl_gui_alv_grid
         IMPORTING
-            e_dyndoc_id,
+          e_dyndoc_id,
 
       on_pbo_event FOR EVENT pbo_event OF zif_eui_manager
         IMPORTING
-            sender,
+          sender,
 
       on_toolbar FOR EVENT toolbar OF cl_gui_alv_grid
         IMPORTING
-            e_object,
+          e_object,
 
       on_double_click FOR EVENT double_click OF cl_gui_alv_grid.
 
@@ -80,13 +80,13 @@ CLASS lcl_txt_editor DEFINITION INHERITING FROM zcl_eui_manager FINAL.
       " just set as self handler    pbo REDEFINITION
       on_pbo_event FOR EVENT pbo_event OF zif_eui_manager
         IMPORTING
-            sender
-            io_container,
+          sender
+          io_container,
 
       " just set as self handler    pai REDEFINITION
       on_pai_event FOR EVENT pai_event OF zif_eui_manager
         IMPORTING
-            iv_command.
+          iv_command.
 ENDCLASS.
 
 
@@ -203,7 +203,7 @@ CLASS lcl_report IMPLEMENTATION.
 **********************************************************************
     " Main table & ALV manager
 **********************************************************************
-    DATA lo_eui_alv TYPE REF TO zcl_eui_alv.
+    DATA lo_alv TYPE REF TO zcl_eui_alv.
 
     " Show top of page ?
     DATA lv_height TYPE i VALUE 12.
@@ -213,24 +213,24 @@ CLASS lcl_report IMPLEMENTATION.
 
     " Pass by reference
     GET REFERENCE OF mt_alv INTO lr_table.
-    CREATE OBJECT lo_eui_alv
+    CREATE OBJECT lo_alv
       EXPORTING
-        ir_table              = lr_table
+        ir_table       = lr_table
         " grid parameters
-        is_layout             = ls_layout
-        it_mod_catalog        = lt_mod_catalog
-        it_toolbar            = lt_toolbar
-        it_sort               = lt_sort
-        iv_read_only          = p_reado
-        iv_top_of_page_height = lv_height.
+        is_layout      = ls_layout
+        it_mod_catalog = lt_mod_catalog
+        it_toolbar     = lt_toolbar
+        it_sort        = lt_sort
+        iv_read_only   = p_reado.
+    lo_alv->set_top_of_page_height( lv_height ).
 
     " Popup?
     IF p_popup = abap_true.
-      lo_eui_alv->popup( ).
+      lo_alv->popup( ).
     ENDIF.
 
     " Instead of set handler
-    lo_eui_alv->show(
+    lo_alv->show(
      io_handler        = me
      " If omit map all  (Could be several nad nested ON_USER_COMMAND)
 *     iv_handlers_map   = 'ON_HOTSPOT_CLICK;ON_USER_COMMAND;ON_PBO_EVENT'
@@ -338,20 +338,20 @@ CLASS lcl_report IMPLEMENTATION.
 **********************************************************************
     " Main table & ALV manager
 **********************************************************************
-    DATA lo_eui_alv TYPE REF TO zcl_eui_alv.
+    DATA lo_alv TYPE REF TO zcl_eui_alv.
 
     " Pass by reference
-    CREATE OBJECT lo_eui_alv
+    CREATE OBJECT lo_alv
       EXPORTING
         ir_table       = lr_table
         " grid parameters
         is_layout      = ls_layout
         it_mod_catalog = lt_mod_catalog
         iv_read_only   = p_reado.
-    lo_eui_alv->popup( ).
+    lo_alv->popup( ).
 
     " Instead of set handler
-    lo_eui_alv->show(
+    lo_alv->show(
      " Update title bar only
      io_handler      = me
      iv_handlers_map = 'ON_PBO_EVENT' " ;ON_PAI_EVENT for 'OK' command

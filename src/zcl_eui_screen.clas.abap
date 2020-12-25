@@ -10,62 +10,58 @@ public section.
   type-pools VRM .
 
   types:
-    BEGIN OF TS_SCREEN.
-     INCLUDE TYPE screen.
+    BEGIN OF ts_screen.
+        INCLUDE TYPE screen.
+      TYPES:
+        t_listbox TYPE vrm_values,
+      END OF ts_screen .
   types:
-     t_listbox TYPE vrm_values,
-    END OF TS_SCREEN .
-  types:
-    TT_SCREEN type STANDARD TABLE OF TS_SCREEN WITH DEFAULT KEY .
+    tt_screen TYPE STANDARD TABLE OF ts_screen WITH DEFAULT KEY .
   types:
     BEGIN OF ts_map.
-    INCLUDE TYPE zcl_eui_type=>ts_field_desc AS field_desc.
-  types:
+        INCLUDE TYPE zcl_eui_type=>ts_field_desc AS field_desc.
+      TYPES:
 *     @see get_screen_by_map
 *    input       TYPE char1,
 *    required    TYPE char1,
 
-    cur_value   TYPE REF TO DATA,
-    par_name    TYPE string,
-    is_list_box TYPE abap_bool,
-   END OF ts_map .
+        cur_value   TYPE REF TO data,
+        par_name    TYPE string,
+        is_list_box TYPE abap_bool,
+      END OF ts_map .
   types:
     tt_map TYPE STANDARD TABLE OF ts_map WITH DEFAULT KEY .
   types:
     BEGIN OF ts_customize,
-      name         TYPE screen-name,
-      group1       TYPE screen-group1,
-      group2       TYPE screen-group2,
-      required     TYPE screen-required,
-      input        TYPE screen-input,
-      output       TYPE screen-output,
-      invisible    TYPE screen-invisible,
-      active       TYPE screen-active,
-      t_listbox    TYPE vrm_values,
+        name       TYPE screen-name,
+        group1     TYPE screen-group1,
+        group2     TYPE screen-group2,
+        required   TYPE screen-required,
+        input      TYPE screen-input,
+        output     TYPE screen-output,
+        invisible  TYPE screen-invisible,
+        active     TYPE screen-active,
+        t_listbox  TYPE vrm_values,
 
-      " For map
-      label        TYPE zcl_eui_type=>ts_field_desc-label,
-      sub_fdesc    TYPE zcl_eui_type=>ts_field_desc-sub_fdesc,
-    END OF ts_customize .
+        " For map
+        label      TYPE zcl_eui_type=>ts_field_desc-label,
+        sub_fdesc  TYPE zcl_eui_type=>ts_field_desc-sub_fdesc,
+      END OF ts_customize .
   types:
     tt_customize TYPE STANDARD TABLE OF ts_customize WITH DEFAULT KEY .
 
   constants:
-    BEGIN OF MC_DYNNR,
-     FREE_SEL  type SYDYNNR VALUE 'FREE',
-     AUTO_GEN  type SYDYNNR VALUE 'AUTO',
-     DYN_POPUP type SYDYNNR VALUE 'DPOP',
-   END OF MC_DYNNR .
+    BEGIN OF mc_dynnr,
+        free_sel  TYPE sydynnr VALUE 'FREE',
+        auto_gen  TYPE sydynnr VALUE 'AUTO',
+        dyn_popup TYPE sydynnr VALUE 'DPOP',
+      END OF mc_dynnr .
 
   methods CONSTRUCTOR
     importing
       !IV_DYNNR type SYDYNNR
       !IV_CPROG type SYCPROG default SY-CPROG
       !IR_CONTEXT type ref to DATA optional
-      !IV_STATUS_NAME type GUI_STATUS optional
-      !IV_STATUS_PROG type SYREPID optional
-      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
-      !IV_STATUS_TITLE type CSEQUENCE optional
       !IV_READ_ONLY type ABAP_BOOL optional
     raising
       ZCX_EUI_EXCEPTION .
@@ -196,12 +192,7 @@ METHOD constructor.
   DATA lv_number TYPE i.
   DATA lo_err    TYPE REF TO cx_root.
 
-  super->constructor(
-   iv_status_name    = iv_status_name
-   iv_status_prog    = iv_status_prog
-   it_status_exclude = it_status_exclude
-   iv_status_title   = iv_status_title
-   iv_read_only      = iv_read_only ).
+  super->constructor( iv_read_only = iv_read_only ).
 
   " Screen info
   ms_screen-dynnr = iv_dynnr.
@@ -249,15 +240,15 @@ METHOD customize.
     lt_all[]  = it_[].
   ELSE.
     " Pass as 1 parameter
-    ls_param-name      = name.
-    ls_param-group1    = group1.
-    ls_param-group2    = group2.
-    ls_param-input     = input.    " ls_map-input
-    ls_param-required  = required. " ls_map-required
-    ls_param-output    = output.
-    ls_param-invisible = invisible.
-    ls_param-active    = active.
-    ls_param-t_listbox = it_listbox.
+    ls_param-name       = name.
+    ls_param-group1     = group1.
+    ls_param-group2     = group2.
+    ls_param-input      = input.    " ls_map-input
+    ls_param-required   = required. " ls_map-required
+    ls_param-output     = output.
+    ls_param-invisible  = invisible.
+    ls_param-active     = active.
+    ls_param-t_listbox  = it_listbox.
 
     " For map
     ls_param-label     = iv_label.

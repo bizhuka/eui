@@ -9,10 +9,6 @@ public section.
   methods CONSTRUCTOR
     importing
       !IR_TEXT type ref to STRING
-      !IV_STATUS_NAME type GUI_STATUS optional
-      !IV_STATUS_PROG type SYREPID optional
-      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
-      !IV_STATUS_TITLE type CSEQUENCE optional
       !IV_READ_ONLY type ABAP_BOOL optional .
 
   methods ZIF_EUI_MANAGER~PAI
@@ -32,12 +28,7 @@ CLASS ZCL_EUI_MEMO IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor(
-   iv_status_name    = iv_status_name
-   iv_status_prog    = iv_status_prog
-   it_status_exclude = it_status_exclude
-   iv_status_title   = iv_status_title
-   iv_read_only      = iv_read_only ).
+  super->constructor( iv_read_only = iv_read_only ).
 
   mr_text      = ir_text.
 ENDMETHOD.

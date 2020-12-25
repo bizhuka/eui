@@ -23,16 +23,19 @@ public section.
     for ZIF_EUI_MANAGER~POPUP .
   aliases SHOW
     for ZIF_EUI_MANAGER~SHOW .
+  aliases TS_STATUS
+    for ZIF_EUI_MANAGER~TS_STATUS .
 
   constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN' ##NO_TEXT. "#EC NO_TEXT
 
   methods CONSTRUCTOR
     importing
-      !IV_STATUS_NAME type GUI_STATUS optional
-      !IV_STATUS_PROG type SYREPID optional
-      !IT_STATUS_EXCLUDE type ZIF_EUI_MANAGER=>TT_STATUS_EXCLUDE optional
-      !IV_STATUS_TITLE type CSEQUENCE optional
       !IV_READ_ONLY type ABAP_BOOL .
+  methods SET_STATUS
+    importing
+      !IS_STATUS type TS_STATUS
+    returning
+      value(RO_MANAGER) type ref to ZIF_EUI_MANAGER .
 protected section.
 
   data MO_EVENT_CALLER type ref to ZCL_EUI_EVENT_CALLER .
@@ -48,26 +51,16 @@ CLASS ZCL_EUI_MANAGER IMPLEMENTATION.
 
 METHOD constructor.
   mv_read_only = iv_read_only.
+ENDMETHOD.
 
-  IF iv_status_name IS NOT INITIAL.
-    ms_status-name = iv_status_name.
+
+METHOD set_status.
+  ms_status = is_status.
+  IF ms_status IS NOT INITIAL.
     ms_status-is_fixed = abap_true.
   ENDIF.
 
-  IF iv_status_prog IS NOT INITIAL.
-    ms_status-prog = iv_status_prog.
-    ms_status-is_fixed = abap_true.
-  ENDIF.
-
-  IF it_status_exclude IS NOT INITIAL.
-    ms_status-exclude = it_status_exclude.
-    ms_status-is_fixed = abap_true.
-  ENDIF.
-
-  IF iv_status_title IS NOT INITIAL.
-    ms_status-title = iv_status_title.
-    ms_status-is_fixed = abap_true.
-  ENDIF.
+  ro_manager = me.
 ENDMETHOD.
 
 

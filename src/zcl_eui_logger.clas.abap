@@ -474,7 +474,8 @@ METHOD show_as_button.
       EXPORTING
         io_handler = me.
   ENDIF.
-  mo_menu->create_toolbar( lt_menu ).
+  mo_menu->create_toolbar( it_menu        = lt_menu
+                           iv_check_tcode = abap_false ).
 
   " New screen
   CHECK iv_write_message IS NOT INITIAL.
@@ -488,11 +489,23 @@ METHOD show_as_button.
    WITH KEY blocktype = 'METHOD' blockname = 'INVOKE_TEST_METHOD' flag_system = 'X'.
   CHECK sy-subrc <> 0.
 
-  IF ls_menu->icon = icon_error_protocol.
-    WRITE / iv_write_message COLOR COL_NEGATIVE.
-  ELSE.
-    WRITE / iv_write_message COLOR COL_KEY.
+  " Selection screen ?
+  IF sy-dynnr = 1000.
+    IF ls_menu->icon = icon_error_protocol.
+      WRITE / iv_write_message COLOR COL_NEGATIVE.
+    ELSE.
+      WRITE / iv_write_message COLOR COL_KEY.
+    ENDIF.
+
+    RETURN.
   ENDIF.
+
+  " Other screens
+  DATA lv_type TYPE symsgty VALUE 'W'.
+  IF ls_menu->icon = icon_error_protocol.
+    lv_type = 'E'.
+  ENDIF.
+  MESSAGE iv_write_message TYPE 'S' DISPLAY LIKE lv_type.
 ENDMETHOD.
 
 

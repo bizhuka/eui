@@ -115,8 +115,8 @@ CLASS lcl_screen IMPLEMENTATION.
       MOVE-CORRESPONDING lr_customize->* TO ls_screen.
 
       " For map
-      ls_map-label     = lr_customize->label.
-      ls_map-sub_fdesc = lr_customize->sub_fdesc.
+      ls_map-label      = lr_customize->label.
+      ls_map-sub_fdesc  = lr_customize->sub_fdesc.
 
       "№ 1
       IF   ls_screen-name IS NOT INITIAL
@@ -191,7 +191,7 @@ CLASS lcl_screen IMPLEMENTATION.
     DATA lv_rem                   TYPE string.
     DATA ls_screen_dst            TYPE screen.
     DATA ls_screen_src            LIKE LINE OF mt_screen.
-    DATA lt_scr_fields            TYPE abap_compdescr_tab. " Filled 1 time with all ls_screen fields
+    DATA lt_scr_fields TYPE abap_compdescr_tab. " Filled 1 time with all ls_screen fields
     DATA lv_input                 TYPE screen-input.
     DATA ls_screen                TYPE zcl_eui_screen=>ts_screen.
 
@@ -420,15 +420,20 @@ CLASS lcl_screen IMPLEMENTATION.
 
     CASE ls_map->ui_type.
       WHEN zcl_eui_type=>mc_ui_type-table.
+        DATA lo_alv TYPE REF TO zcl_eui_alv.
+        CREATE OBJECT lo_alv
+          EXPORTING
+            ir_table     = ls_map->cur_value
+            is_layout    = ls_layout
+            iv_read_only = lv_read_only.
+        lo_manager = lo_alv.
+
         " As refernce
         GET REFERENCE OF ls_map->field_desc INTO lr_field_desc.
+        lo_alv->set_field_desc( lr_field_desc ).
 
-        CREATE OBJECT lo_manager TYPE zcl_eui_alv
-          EXPORTING
-            ir_table      = ls_map->cur_value
-            is_field_desc = lr_field_desc
-            is_layout     = ls_layout
-            iv_read_only  = lv_read_only.
+        _find_f4_tables( is_field_desc = lr_field_desc->*
+                         io_alv        = lo_alv ).
 
       WHEN zcl_eui_type=>mc_ui_type-string.
         lr_text ?= ls_map->cur_value.
@@ -447,6 +452,31 @@ CLASS lcl_screen IMPLEMENTATION.
     lo_manager->popup( ).
 
     lo_manager->show( ).
+  ENDMETHOD.
+
+  METHOD _find_f4_tables.
+    DATA lt_sub_fld  TYPE zcl_eui_type=>tt_field_desc.
+    DATA lr_sub_fld  TYPE REF TO zcl_eui_type=>ts_field_desc.
+    DATA lt_f4_table TYPE zcl_eui_alv=>tt_f4_table.
+    DATA ls_f4_table TYPE zcl_eui_alv=>ts_f4_table.
+
+    " Find all F4 tables
+    lt_sub_fld = zcl_eui_type=>get_sub_field_desc( is_field_desc ).
+    LOOP AT lt_sub_fld REFERENCE INTO lr_sub_fld WHERE f4_table IS NOT INITIAL. "#EC CI_HASHSEQ
+      DATA lr_f4_map TYPE REF TO zcl_eui_screen=>ts_map.
+      READ TABLE mt_map REFERENCE INTO lr_f4_map
+       WITH KEY name = lr_sub_fld->f4_table.
+      CHECK sy-subrc = 0.
+
+      CLEAR ls_f4_table.
+      ls_f4_table-field = lr_sub_fld->name.
+      ls_f4_table-tab   = lr_f4_map->cur_value.
+      INSERT ls_f4_table INTO TABLE lt_f4_table.
+    ENDLOOP.
+
+    " And set
+    CHECK lt_f4_table IS NOT INITIAL.
+    io_alv->set_f4_table( lt_f4_table ).
   ENDMETHOD.
 ENDCLASS.
 

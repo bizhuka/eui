@@ -78,7 +78,12 @@ CLASS lcl_screen DEFINITION.
 
       read_from_screen
         IMPORTING
-          ir_map TYPE REF TO zcl_eui_screen=>ts_map.
+          ir_map TYPE REF TO zcl_eui_screen=>ts_map,
+
+      _find_f4_tables
+        IMPORTING
+          is_field_desc TYPE zcl_eui_type=>ts_field_desc
+          io_alv        TYPE REF TO zcl_eui_alv.
 ENDCLASS.
 
 CLASS lcl_scr_free DEFINITION INHERITING FROM lcl_screen.

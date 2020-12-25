@@ -6,6 +6,11 @@
 CLASS lcl_helper IMPLEMENTATION.
 
   METHOD constructor.
+    mo_eui_alv    = io_eui_alv.
+    mr_table      = io_eui_alv->mr_table.
+  ENDMETHOD.
+
+  METHOD set_field_desc.
     DATA lv_ok                    TYPE abap_bool.
     DATA lt_sub_field             TYPE STANDARD TABLE OF zcl_eui_type=>ts_field_desc.
     DATA ls_sub_field             TYPE REF TO zcl_eui_type=>ts_field_desc.
@@ -20,12 +25,8 @@ CLASS lcl_helper IMPLEMENTATION.
     FIELD-SYMBOLS <lt_table_src>  TYPE ANY TABLE.
     FIELD-SYMBOLS <lt_table_dest> TYPE STANDARD TABLE.
 
-    mo_eui_alv    = io_eui_alv.
-    mr_table      = io_eui_alv->mr_table.
-    ms_field_desc = is_field_desc.
-
     " Based on field description
-    CHECK ms_field_desc IS NOT INITIAL.
+    ms_field_desc = is_field_desc.
 
     " Transform to catalog
     zcl_eui_conv=>from_json(
@@ -141,16 +142,15 @@ CLASS lcl_helper IMPLEMENTATION.
 
     CHECK ms_field_desc IS NOT INITIAL.
     IF mo_eui_alv->mv_read_only = abap_true.
-      CONCATENATE `View values of ` ms_field_desc->name INTO cs_layout-grid_title.
+      CONCATENATE 'View values of'(vvo) ms_field_desc->name INTO cs_layout-grid_title SEPARATED BY space.
     ELSE.
-      CONCATENATE `Edit values of ` ms_field_desc->name INTO cs_layout-grid_title.
+      CONCATENATE 'Edit values of'(evo) ms_field_desc->name INTO cs_layout-grid_title SEPARATED BY space.
     ENDIF.
     cs_layout-smalltitle = abap_true.
   ENDMETHOD.
 
   METHOD get_field_catalog.
-    DATA lt_catalog_fields         TYPE abap_compdescr_tab. " Filled 1 time with all LVC_S_FCAT fields
-    DATA lv_drdn_hndl              TYPE i.
+    DATA lt_catalog_fields TYPE abap_compdescr_tab. " Filled 1 time with all LVC_S_FCAT fields
     DATA ls_mod_catalog            LIKE LINE OF mo_eui_alv->mt_mod_catalog.
     DATA ls_sub_field              TYPE REF TO zcl_eui_type=>ts_field_desc.
     FIELD-SYMBOLS <ls_fieldcat>    LIKE LINE OF rt_fieldcat.
@@ -236,9 +236,83 @@ CLASS lcl_helper IMPLEMENTATION.
           io_grid      = mo_eui_alv->mo_grid
          CHANGING
           cs_fieldcat  = <ls_fieldcat>
-          cv_drdn_hndl = lv_drdn_hndl ).
+          cv_drdn_hndl = mv_drdn_hndl ).
       ENDIF.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD _check_f4_table.
+    FIELD-SYMBOLS <ls_f4_table> LIKE LINE OF mt_f4_table.
+    LOOP AT mt_f4_table ASSIGNING <ls_f4_table>.
+      " Delete from F4 ?
+      DATA lv_tabix TYPE sy-tabix.
+      lv_tabix = sy-tabix.
+
+      FIELD-SYMBOLS <ls_fieldcat> LIKE LINE OF ct_fieldcat.
+      READ TABLE ct_fieldcat ASSIGNING <ls_fieldcat>  "##WARN_OK
+       WITH KEY fieldname = <ls_f4_table>-field.
+      CHECK sy-subrc = 0.
+
+      FIELD-SYMBOLS <lt_f4_any_table> TYPE ANY TABLE.
+      ASSIGN <ls_f4_table>-tab->* TO <lt_f4_any_table>.
+      CHECK sy-subrc = 0 AND lines( <lt_f4_any_table> ) <= 16.
+
+      DATA lt_std_field TYPE tttext255.
+      DATA lr_std_table TYPE REF TO data.
+      _get_std_table( EXPORTING ir_ant_table = <ls_f4_table>-tab
+                      IMPORTING et_std_field = lt_std_field
+                                er_std_table = lr_std_table ).
+
+      DATA lv_key_fld TYPE text255.
+      DATA lv_txt_fld TYPE text255.
+      CLEAR: lv_key_fld, lv_txt_fld.
+
+      DATA lr_field    TYPE REF TO text255.
+      LOOP AT lt_std_field REFERENCE INTO lr_field.
+        CASE sy-tabix.
+          WHEN 1.
+            lv_key_fld = lv_txt_fld = lr_field->*.
+          WHEN 2.
+            lv_txt_fld = lr_field->*.
+          WHEN 3. " Or 4 ?
+            CLEAR lv_key_fld.
+            EXIT.
+        ENDCASE.
+      ENDLOOP.
+
+      " All conditions passed. Convert to dropbox
+      CHECK lv_key_fld IS NOT INITIAL.
+      ADD 1 TO mv_drdn_hndl.
+      <ls_fieldcat>-drdn_hndl = mv_drdn_hndl.
+      <ls_fieldcat>-drdn_alias = abap_true.
+
+      DATA lt_dropdown             TYPE lvc_t_dral.
+      DATA lr_dropdown             TYPE REF TO lvc_s_dral.
+      FIELD-SYMBOLS <lt_std_table> TYPE STANDARD TABLE.
+      FIELD-SYMBOLS <ls_item>      TYPE any.
+      FIELD-SYMBOLS <lv_key_fld>   TYPE any.
+      FIELD-SYMBOLS <lv_txt_fld>   TYPE any.
+
+      ASSIGN lr_std_table->* TO <lt_std_table>.
+      LOOP AT <lt_std_table> ASSIGNING <ls_item>.
+        ASSIGN COMPONENT: lv_key_fld OF STRUCTURE <ls_item> TO <lv_key_fld>,
+                          lv_txt_fld OF STRUCTURE <ls_item> TO <lv_txt_fld>.
+
+        APPEND INITIAL LINE TO lt_dropdown REFERENCE INTO lr_dropdown.
+        lr_dropdown->handle    = mv_drdn_hndl.
+        lr_dropdown->int_value = <lv_key_fld>.
+        lr_dropdown->value     = <lv_txt_fld>.
+
+        " Key + Text
+        CHECK lr_dropdown->int_value <> lr_dropdown->value.
+        CONCATENATE lr_dropdown->int_value ` - ` lr_dropdown->value INTO lr_dropdown->value.
+      ENDLOOP.
+
+      DELETE mt_f4_table INDEX lv_tabix.
+    ENDLOOP.
+
+    CHECK lt_dropdown IS NOT INITIAL.
+    io_grid->set_drop_down_table( it_drop_down_alias = lt_dropdown ).
   ENDMETHOD.
 
   METHOD pbo_init.
@@ -265,7 +339,7 @@ CLASS lcl_helper IMPLEMENTATION.
     lv_has_top = mo_eui_alv->mo_event_caller->has_handler(
         iv_of_class  = 'CL_GUI_ALV_GRID'
         iv_for_event = 'TOP_OF_PAGE' ).
-    IF mo_eui_alv->mv_top_of_page_height IS INITIAL.
+    IF mv_top_of_page_height IS INITIAL.
       CLEAR lv_has_top.
     ENDIF.
 
@@ -282,7 +356,7 @@ CLASS lcl_helper IMPLEMENTATION.
       lo_container = lo_splitter->get_container( row       = 2
                                                  column    = 1 ).
       lo_splitter->set_row_height( id     = 1
-                                   height = mo_eui_alv->mv_top_of_page_height ).
+                                   height = mv_top_of_page_height ).
     ENDIF.
 
     CREATE OBJECT mo_eui_alv->mo_grid
@@ -322,6 +396,34 @@ CLASS lcl_helper IMPLEMENTATION.
 **********************************************************************
     " Get field catalog
     lt_fieldcat = get_field_catalog( ).
+    _check_f4_table( EXPORTING io_grid     = mo_eui_alv->mo_grid
+                     CHANGING  ct_fieldcat = lt_fieldcat ).
+
+**********************************************************************
+    " Has event handler for ONF4
+    DATA lv_has_f4   TYPE abap_bool.
+    DATA lt_f4       TYPE lvc_t_f4.
+    DATA ls_f4       TYPE lvc_s_f4.
+    DATA lr_fieldcat TYPE REF TO lvc_s_fcat.
+
+    DO 1 TIMES.
+      lv_has_f4 = mo_eui_alv->mo_event_caller->has_handler(
+              iv_of_class  = 'CL_GUI_ALV_GRID'
+              iv_for_event = 'ONF4' ).
+      IF mt_f4_table IS NOT INITIAL.
+        lv_has_f4 = abap_true.
+      ENDIF.
+      CHECK lv_has_f4 = abap_true.
+
+      LOOP AT lt_fieldcat REFERENCE INTO lr_fieldcat WHERE f4availabl = abap_true.
+        ls_f4-fieldname = lr_fieldcat->fieldname.
+        ls_f4-register  = abap_true.
+        INSERT ls_f4 INTO TABLE lt_f4.
+      ENDLOOP.
+
+      CHECK lt_f4[] IS NOT INITIAL.
+      mo_eui_alv->mo_grid->register_f4_for_fields( it_f4 = lt_f4 ).
+    ENDDO.
 
 **********************************************************************
     " Editable? Set additional Events if editable
@@ -343,30 +445,6 @@ CLASS lcl_helper IMPLEMENTATION.
 
       mo_eui_alv->mo_grid->set_ready_for_input( 1 ).
     ENDIF.
-
-**********************************************************************
-    " Has event handler for ONF4
-    DATA lv_has_f4   TYPE abap_bool.
-    DATA lt_f4       TYPE lvc_t_f4.
-    DATA ls_f4       TYPE lvc_s_f4.
-    DATA lr_fieldcat TYPE REF TO lvc_s_fcat.
-
-    DO 1 TIMES.
-      lv_has_f4 = mo_eui_alv->mo_event_caller->has_handler(
-              iv_of_class  = 'CL_GUI_ALV_GRID'
-              iv_for_event = 'ONF4' ).
-      CHECK lv_has_f4 = abap_true.
-
-      LOOP AT lt_fieldcat REFERENCE INTO lr_fieldcat WHERE f4availabl = abap_true.
-        ls_f4-fieldname = lr_fieldcat->fieldname.
-        ls_f4-register  = abap_true.
-        INSERT ls_f4 INTO TABLE lt_f4.
-      ENDLOOP.
-
-      CHECK lt_f4[] IS NOT INITIAL.
-      mo_eui_alv->mo_grid->register_f4_for_fields(
-        it_f4 = lt_f4 ).
-    ENDDO.
 
 **********************************************************************
     DATA lv_save TYPE char01 VALUE 'A'. " restrict_none
@@ -486,7 +564,8 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_for_event    = 'DOUBLE_CLICK'
      iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
      iv_param_nam_01 = 'E_ROW'           iv_param_val_01 = e_row
-     iv_param_nam_02 = 'E_COLUMN'        iv_param_val_02 = e_column ).
+     iv_param_nam_02 = 'E_COLUMN'        iv_param_val_02 = e_column
+     iv_param_nam_03 = 'ES_ROW_NO'       iv_param_val_03 = es_row_no ).
   ENDMETHOD.
 
 
@@ -522,7 +601,7 @@ CLASS lcl_helper IMPLEMENTATION.
     CHECK sy-subrc = 0.
 
     " Get from field catalog
-    READ TABLE mt_sub_field ASSIGNING <ls_sub_field>
+    READ TABLE mt_sub_field ASSIGNING <ls_sub_field> "##WARN_OK
      WITH TABLE KEY name = e_column_id.
     CHECK sy-subrc = 0.
 
@@ -562,13 +641,14 @@ CLASS lcl_helper IMPLEMENTATION.
           ls_layout-edit = abap_true.
         ENDIF.
 
-        CREATE OBJECT lo_manager TYPE zcl_eui_alv
+        DATA lo_alv TYPE REF TO zcl_eui_alv.
+        CREATE OBJECT lo_alv
           EXPORTING
-            ir_table      = lr_cur_value
-            is_field_desc = ls_field_desc
-            is_layout     = ls_layout
-            iv_read_only  = mo_eui_alv->mv_read_only.
-
+            ir_table     = lr_cur_value
+            is_layout    = ls_layout
+            iv_read_only = mo_eui_alv->mv_read_only.
+        lo_alv->set_field_desc( ls_field_desc ).
+        lo_manager = lo_alv.
 **********************************************************************
         " Show range for table item
       WHEN zcl_eui_type=>mc_ui_type-range.
@@ -630,6 +710,10 @@ CLASS lcl_helper IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_f4.
+    CHECK _self_f4( io_grid      = sender
+                    iv_fieldname = e_fieldname
+                    is_row_no    = es_row_no ) <> abap_true.
+
     mo_eui_alv->mo_event_caller->call_handlers(
      iv_of_class     = 'CL_GUI_ALV_GRID'
      iv_for_event    = 'ONF4'
@@ -642,4 +726,119 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_param_nam_06 = 'E_DISPLAY'       iv_param_val_06 = e_display ).
   ENDMETHOD.
 
+  METHOD _self_f4.
+    " self process ?
+    DATA lr_f4_table TYPE REF TO zcl_eui_alv=>ts_f4_table.
+    READ TABLE mt_f4_table REFERENCE INTO lr_f4_table
+     WITH TABLE KEY field = iv_fieldname.
+    CHECK sy-subrc = 0.
+    rv_self = abap_true.
+
+    " Get STD table
+    DATA lr_std_table  TYPE REF TO data.
+    DATA lt_std_field  TYPE tttext255.
+    DATA lv_key_field  TYPE dfies-fieldname.
+    _get_std_table( EXPORTING ir_ant_table = lr_f4_table->tab
+                    IMPORTING er_std_table = lr_std_table
+                              et_std_field = lt_std_field ).
+    CHECK lr_std_table IS NOT INITIAL.
+
+    FIELD-SYMBOLS <lt_std_table> TYPE STANDARD TABLE.
+    ASSIGN lr_std_table->* TO <lt_std_table>.
+
+    " Key is alwasy first
+    READ TABLE lt_std_field INTO lv_key_field INDEX 1.
+    CHECK lv_key_field IS NOT INITIAL.
+
+    DATA lt_return TYPE STANDARD TABLE OF ddshretval WITH DEFAULT KEY.
+    DATA lr_return TYPE REF TO ddshretval.
+    CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+      EXPORTING
+        retfield   = lv_key_field
+        value_org  = 'S'
+      TABLES
+        value_tab  = <lt_std_table>
+        return_tab = lt_return
+      EXCEPTIONS
+        OTHERS     = 3.
+    CHECK sy-subrc = 0.
+
+    " Only 1 value
+    READ TABLE lt_return REFERENCE INTO lr_return INDEX 1.
+    CHECK sy-subrc = 0.
+
+    FIELD-SYMBOLS <lt_table> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <ls_item>  TYPE any.
+    FIELD-SYMBOLS <lv_dest>  TYPE any.
+
+    " Get current row
+    ASSIGN mr_table->* TO <lt_table>.
+    READ TABLE <lt_table> ASSIGNING <ls_item> INDEX is_row_no-row_id.
+    CHECK sy-subrc = 0.
+
+    ASSIGN COMPONENT iv_fieldname OF STRUCTURE <ls_item> TO <lv_dest>.
+    <lv_dest> = lr_return->fieldval.
+    io_grid->refresh_table_display( ).
+  ENDMETHOD.
+
+  METHOD _get_std_table.
+    CLEAR: er_std_table,
+           et_std_field.
+
+    FIELD-SYMBOLS <lt_f4_any_table> TYPE ANY TABLE.
+    ASSIGN ir_ant_table->* TO <lt_f4_any_table>.
+    CHECK <lt_f4_any_table> IS ASSIGNED.
+
+    " Get table info
+    DATA lr_tdesc TYPE REF TO cl_abap_tabledescr.
+    DATA lr_sdesc TYPE REF TO cl_abap_structdescr.
+    lr_tdesc ?= cl_abap_tabledescr=>describe_by_data( <lt_f4_any_table> ).
+    lr_sdesc ?= lr_tdesc->get_table_line_type( ).
+
+    " Always 1 field
+    DATA ls_key LIKE LINE OF lr_tdesc->key.
+    READ TABLE lr_tdesc->key INTO ls_key INDEX 1.
+    APPEND ls_key-name TO et_std_field.
+
+    " For new structure
+    DATA lr_comp      TYPE REF TO abap_compdescr.
+    DATA lt_any_comp  TYPE cl_abap_structdescr=>component_table.
+    DATA lt_std_comp  TYPE cl_abap_structdescr=>component_table.
+    DATA ls_component LIKE LINE OF lt_any_comp.
+
+    " For ignoring fields
+    lt_any_comp = lr_sdesc->get_components( ).
+    LOOP AT lr_sdesc->components REFERENCE INTO lr_comp WHERE type_kind <> cl_abap_typedescr=>typekind_table
+                                                          AND type_kind <> cl_abap_typedescr=>typekind_string.
+      READ TABLE lt_any_comp INTO ls_component WITH KEY name = lr_comp->name.
+      APPEND ls_component TO lt_std_comp.
+
+      CHECK lr_comp->name <> ls_key-name.
+      APPEND lr_comp->name TO et_std_field.
+    ENDLOOP.
+    lr_sdesc = cl_abap_structdescr=>create( lt_std_comp ).
+
+    " Result
+    lr_tdesc = cl_abap_tabledescr=>create( p_line_type = lr_sdesc  ).
+    CREATE DATA er_std_table TYPE HANDLE lr_tdesc.
+
+    " Fill STD from ANY
+    _fill_std_corresponding( ir_any_f4_table = ir_ant_table
+                             ir_std_f4_table = er_std_table ).
+  ENDMETHOD.
+
+  METHOD _fill_std_corresponding.
+    FIELD-SYMBOLS <lt_f4_any_table> TYPE ANY TABLE.
+    FIELD-SYMBOLS <lt_f4_std_table> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <ls_src>          TYPE any.
+    FIELD-SYMBOLS <ls_dest>         TYPE any.
+
+    ASSIGN ir_any_f4_table->* TO <lt_f4_any_table>.
+    ASSIGN ir_std_f4_table->* TO <lt_f4_std_table>.
+
+    LOOP AT <lt_f4_any_table> ASSIGNING <ls_src>.
+      APPEND INITIAL LINE TO <lt_f4_std_table> ASSIGNING <ls_dest>.
+      MOVE-CORRESPONDING <ls_src> TO <ls_dest>.
+    ENDLOOP.
+  ENDMETHOD.
 ENDCLASS.

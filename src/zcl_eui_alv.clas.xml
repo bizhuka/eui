@@ -24,6 +24,24 @@
      <ENTRY>Edit</ENTRY>
      <LENGTH>14</LENGTH>
     </item>
+    <item>
+     <ID>I</ID>
+     <KEY>EVO</KEY>
+     <ENTRY>Edit values of</ENTRY>
+     <LENGTH>24</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>PRO</KEY>
+     <ENTRY>Please also specify `IV_READ_ONLY` parameter</ENTRY>
+     <LENGTH>88</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>VVO</KEY>
+     <ENTRY>View values of</ENTRY>
+     <LENGTH>24</LENGTH>
+    </item>
    </TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>

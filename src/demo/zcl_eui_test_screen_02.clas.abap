@@ -137,11 +137,14 @@ METHOD show_initial_screen.
         " Pass params
         CREATE OBJECT lo_screen_main
           EXPORTING
-            iv_dynnr        = zcl_eui_screen=>mc_dynnr-free_sel
-            iv_status_prog  = c_cprog
-            iv_status_name  = 'START_STATUS'
-            iv_status_title = 'Start screen'
-            ir_context      = lr_context_main.
+            iv_dynnr   = zcl_eui_screen=>mc_dynnr-free_sel
+            ir_context = lr_context_main.
+
+        DATA ls_status TYPE zcl_eui_manager=>ts_status.
+        ls_status-prog  = c_cprog.
+        ls_status-name  = 'START_STATUS'.
+        ls_status-title = 'Start screen'.
+        lo_screen_main->set_status( ls_status ).
       CATCH zcx_eui_exception INTO lo_error.
         MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
         RETURN.
@@ -213,8 +216,10 @@ METHOD show_initial_screen.
           EXPORTING
             iv_dynnr        = lv_dynnr
             iv_cprog        = lv_prog
-            iv_status_title = 'Test dynamic screens' " <--- status & title is fixed
             ir_context      = ls_context.            " <--- Set initial values
+        " title is fixed
+        lo_screen->ms_status-is_fixed = abap_true.
+        lo_screen->ms_status-title    = 'Test dynamic screens'.
       CATCH zcx_eui_exception INTO lo_error.
         MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
         RETURN.
