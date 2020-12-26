@@ -19,6 +19,8 @@ public section.
       END OF ts_msg .
   types:
     tt_unique_msg TYPE SORTED TABLE OF ts_msg WITH UNIQUE KEY table_line .
+  types:
+    tt_skip_msg TYPE SORTED TABLE OF ts_msg WITH UNIQUE KEY msgid msgno msgty .
 
   constants:
     BEGIN OF mc_msg_types,
@@ -121,6 +123,11 @@ public section.
     returning
       value(RV_OK) type ABAP_BOOL .
   methods CLEAR .
+  methods SKIP
+    importing
+      !IV_MSGID type SYMSGID
+      !IV_MSGNO type SYMSGNO
+      !IV_MSGTY type SYMSGTY .
 protected section.
 private section.
 
@@ -130,6 +137,7 @@ private section.
   data MO_MENU type ref to ZCL_EUI_MENU .
   data MV_UNIQUE type ABAP_BOOL .
   data MT_UNIQUE_MSG type TT_UNIQUE_MSG .
+  data MT_SKIP_MSG type TT_SKIP_MSG .
 
   methods _ON_BUTTON_PRESSED
     for event FUNCTION_SELECTED of CL_GUI_TOOLBAR
@@ -180,11 +188,20 @@ METHOD add.
 
   CHECK _is_msg_ok( ls_msg-msgty ) = abap_true.
 
+  " Skip by 3 fields
+  READ TABLE mt_skip_msg TRANSPORTING NO FIELDS
+   WITH TABLE KEY msgid = ls_msg-msgid
+                  msgno = ls_msg-msgno
+                  msgty = ls_msg-msgty.
+  CHECK sy-subrc <> 0.
+
   " Short list of messages
   IF mv_unique = abap_true.
     DATA ls_unique_msg TYPE ts_msg.
     MOVE-CORRESPONDING ls_msg TO ls_unique_msg.
     INSERT ls_unique_msg INTO TABLE mt_unique_msg.
+
+    " 1 time only
     CHECK sy-subrc = 0.
   ENDIF.
 
@@ -506,6 +523,16 @@ METHOD show_as_button.
     lv_type = 'E'.
   ENDIF.
   MESSAGE iv_write_message TYPE 'S' DISPLAY LIKE lv_type.
+ENDMETHOD.
+
+
+METHOD skip.
+  DATA ls_skip LIKE LINE OF mt_skip_msg.
+  ls_skip-msgid = iv_msgid.
+  ls_skip-msgno = iv_msgno.
+  ls_skip-msgty = iv_msgty.
+
+  INSERT ls_skip INTO TABLE mt_skip_msg.
 ENDMETHOD.
 
 
