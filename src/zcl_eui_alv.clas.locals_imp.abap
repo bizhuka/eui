@@ -675,7 +675,9 @@ CLASS lcl_helper IMPLEMENTATION.
       zcl_eui_alv=>update_complex_fields(
        ir_table     = mr_table
        it_sub_field = mt_sub_field ).
-      sender->refresh_table_display( ).
+      DATA ls_stable TYPE lvc_s_stbl.
+      ls_stable-col = ls_stable-row = abap_true.
+      sender->refresh_table_display( is_stable = ls_stable ).
     ENDIF.
   ENDMETHOD.
 
@@ -778,7 +780,10 @@ CLASS lcl_helper IMPLEMENTATION.
 
     ASSIGN COMPONENT iv_fieldname OF STRUCTURE <ls_item> TO <lv_dest>.
     <lv_dest> = lr_return->fieldval.
-    io_grid->refresh_table_display( ).
+
+    DATA ls_stable TYPE lvc_s_stbl.
+    ls_stable-col = ls_stable-row = abap_true.
+    io_grid->refresh_table_display( is_stable = ls_stable ).
   ENDMETHOD.
 
   METHOD _get_std_table.
