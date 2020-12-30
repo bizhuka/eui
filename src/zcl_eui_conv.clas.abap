@@ -714,9 +714,13 @@ METHOD _abap_2_json.
 ***************************************************
   IF lo_type->type_kind EQ cl_abap_typedescr=>typekind_dref.
     ASSIGN im_data->* TO <abap_data>.
-    lo_type = cl_abap_typedescr=>describe_by_data( <abap_data> ).
+    IF sy-subrc = 0.
+      lo_type = cl_abap_typedescr=>describe_by_data( <abap_data> ).
+    ELSE.
+      CLEAR lo_type.
+    ENDIF.
 
-    IF sy-subrc NE 0.
+    IF sy-subrc <> 0 OR lo_type IS INITIAL.
       APPEND '{}' TO json_fragments.
       CONCATENATE LINES OF json_fragments INTO rv_json.
       EXIT.

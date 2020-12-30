@@ -41,8 +41,10 @@ public section.
     DATETIME type STRING value 'datetime',
     " Complext UI types
     STRING type STRING value 'string',
-    RANGE type STRING value 'range',
-    TABLE type STRING value 'table',
+    RANGE  type STRING value 'range',
+    TABLE  type STRING value 'table',
+    " For tech only
+    STRUCT type STRING value 'struct',
    END OF MC_UI_TYPE .
 
   class-methods GET_CATALOG
@@ -80,6 +82,7 @@ public section.
       !IV_DATA type ANY optional
       !IS_SH_FIELD type DFIES optional
       !IR_UNIQUE_TYPE type ref to TT_UNIQUE_TYPE optional
+      !IV_TECH type ABAP_BOOL optional
     returning
       value(RS_FIELD_DESC) type TS_FIELD_DESC
     raising
@@ -115,6 +118,17 @@ public section.
       value(RT_FIELD_DESC) type TT_FIELD_DESC .
 protected section.
 private section.
+
+  class-methods _ADD_COMP_INFO
+    importing
+      !IO_STRUC type ref to CL_ABAP_STRUCTDESCR
+      !IS_ROW type ANY
+      !IV_TECH type ABAP_BOOL
+      !IR_UNIQUE_TYPE type ref to TT_UNIQUE_TYPE
+    changing
+      !CS_FIELD_DESC type TS_FIELD_DESC
+    raising
+      ZCX_EUI_EXCEPTION .
 ENDCLASS.
 
 
@@ -224,7 +238,7 @@ METHOD create_type_descr.
           ENDTRY.
         ENDIF.
 
-        IF ro_type IS INITIAL.
+        IF ro_type IS INITIAL AND is_field_desc-ui_type <> mc_ui_type-struct.
           lv_sys_type = is_field_desc-sys_type.
 
           " For old option wrong is_field_desc-sys_type
@@ -285,6 +299,9 @@ METHOD create_type_descr.
               p_unique      = is_field_desc-unique
               p_key         = is_field_desc-key
               p_key_kind    = is_field_desc-key_defkind ).
+
+          WHEN mc_ui_type-struct.
+            ro_type = create_structure( iv_sub_fdesc = is_field_desc-sub_fdesc ).
         ENDCASE.
       ENDIF.
 
@@ -706,21 +723,7 @@ ENDMETHOD.
 
 
 METHOD get_field_desc.
-  DATA:
-    ls_header       TYPE x030l,
-    lr_table_descr  TYPE REF TO cl_abap_tabledescr,
-    lr_struct_descr TYPE REF TO cl_abap_structdescr,
-    lv_cnt          TYPE i,
-    lr_row          TYPE REF TO data,
-    lo_type         TYPE REF TO cl_abap_typedescr,
-    lt_sub_fdesc    TYPE tt_field_desc,
-    " lv_find_db_field TYPE abap_bool,
-    ls_subfield     TYPE ts_field_desc.
-  FIELD-SYMBOLS:
-    <ls_comp_tab> TYPE abap_compdescr,
-    <ls_row>      TYPE any,
-    <lv_subvalue> TYPE any,
-    <ls_subfield> LIKE ls_subfield.
+  FIELD-SYMBOLS <lv_row> TYPE  any.
 
   IF is_sh_field IS NOT INITIAL.
     rs_field_desc-name     = is_sh_field-fieldname.
@@ -730,7 +733,21 @@ METHOD get_field_desc.
     rs_field_desc-label    = is_sh_field-fieldtext.
     rs_field_desc-rollname = is_sh_field-rollname.
   ELSE.
+    DATA lo_type TYPE REF TO cl_abap_typedescr.
+
+    " №1 Type & value
     lo_type = cl_abap_typedescr=>describe_by_data( iv_data ).
+    ASSIGN iv_data TO <lv_row>.
+
+    " With tech info
+    IF    lo_type->type_kind = cl_abap_typedescr=>typekind_dref
+      AND iv_data IS NOT INITIAL
+      AND iv_tech = abap_true.
+      " №2 Type & value
+      lo_type = cl_abap_typedescr=>describe_by_data_ref( iv_data ).
+      ASSIGN iv_data->* TO <lv_row>.
+    ENDIF.
+
     rs_field_desc-name     = iv_field_name.
     rs_field_desc-sys_type = lo_type->type_kind. "kind.
     rs_field_desc-length   = lo_type->length.
@@ -766,7 +783,16 @@ METHOD get_field_desc.
       rs_field_desc-ui_type  = mc_ui_type-string.
       rs_field_desc-rollname = 'STRINGVAL'.
 
+    WHEN cl_abap_typedescr=>typekind_struct1 OR cl_abap_typedescr=>typekind_struct2.
+      DATA lr_struct_descr TYPE REF TO cl_abap_structdescr.
+      IF iv_tech = abap_true.
+        lr_struct_descr ?= lo_type.
+        rs_field_desc-ui_type = mc_ui_type-struct.
+      ENDIF.
+
     WHEN cl_abap_typedescr=>typekind_table.
+      DATA lr_table_descr  TYPE REF TO cl_abap_tabledescr.
+
       rs_field_desc-ui_type  = mc_ui_type-table.
       lr_table_descr ?= lo_type.
 
@@ -788,58 +814,21 @@ METHOD get_field_desc.
           zcx_eui_exception=>raise_sys_error( ).
       ENDTRY.
 
-      " For speed creation
-      IF lr_struct_descr->is_ddic_type( ) = abap_true.
-        ls_header = lr_struct_descr->get_ddic_header( ).
-        rs_field_desc-rollname     = ls_header-tabname.
-      ENDIF.
-
-      " Create STANDARD table for field catalog!
-      CREATE DATA lr_row TYPE HANDLE lr_struct_descr.
-      ASSIGN lr_row->* TO <ls_row>.
-
-      CLEAR:
-       rs_field_desc-sub_fdesc,
-       lt_sub_fdesc.
-      LOOP AT lr_struct_descr->components ASSIGNING <ls_comp_tab>.
-        ASSIGN COMPONENT <ls_comp_tab>-name OF STRUCTURE <ls_row> TO <lv_subvalue>.
-
-        " Recursion
-        ls_subfield = get_field_desc( iv_field_name  = <ls_comp_tab>-name
-                                      iv_data        = <lv_subvalue>
-                                      ir_unique_type = ir_unique_type ).
-
-        INSERT ls_subfield INTO TABLE lt_sub_fdesc.
+      " Get first row
+      FIELD-SYMBOLS <lt_value> TYPE ANY TABLE.
+      ASSIGN <lv_row> TO <lt_value>.
+      UNASSIGN <lv_row>.
+      LOOP AT <lt_value> ASSIGNING <lv_row>.
+        EXIT.
       ENDLOOP.
 
-      rs_field_desc-sub_fdesc = zcl_eui_conv=>to_json( im_data = lt_sub_fdesc ).
-
-      " Select option ?
-      DO 1 TIMES.
-        lv_cnt = lines( lt_sub_fdesc ).
-
-        CHECK lv_cnt = 4.
-        " Check by name
-        LOOP AT lt_sub_fdesc TRANSPORTING NO FIELDS WHERE
-           name = 'SIGN' OR name = 'OPTION' OR name = 'LOW' OR name = 'HIGH'. "#EC CI_HASHSEQ
-          lv_cnt = lv_cnt - 1.
-        ENDLOOP.
-
-        " Select-option
-        CHECK lv_cnt = 0.
-        rs_field_desc-ui_type  = mc_ui_type-range.
-
-        " No need in components
-        CLEAR rs_field_desc-sub_fdesc.
-
-        " Where to find TABLE-FIELDNAME
-        READ TABLE lt_sub_fdesc ASSIGNING <ls_subfield>
-         WITH TABLE KEY name = 'LOW'.
-        rs_field_desc-rollname = <ls_subfield>-rollname.
-        rs_field_desc-label    = <ls_subfield>-label.
-        " TODO Old options!!!  rs_field_desc-sys_type = <ls_subfield>-sys_type.
-        " lv_find_db_field = abap_true.
-      ENDDO.
+      " Create 1 row on a fly
+      IF <lv_row> IS NOT ASSIGNED.
+        " Create STANDARD table for field catalog!
+        DATA lr_row TYPE REF TO data.
+        CREATE DATA lr_row TYPE HANDLE lr_struct_descr.
+        ASSIGN lr_row->* TO <lv_row>.
+      ENDIF.
 
       " Date
     WHEN cl_abap_typedescr=>typekind_date.
@@ -861,6 +850,14 @@ METHOD get_field_desc.
     WHEN OTHERS.
 
   ENDCASE.
+
+  IF lr_struct_descr IS NOT INITIAL.
+    _add_comp_info( EXPORTING io_struc       = lr_struct_descr
+                              iv_tech        = iv_tech
+                              ir_unique_type = ir_unique_type
+                              is_row         = <lv_row>
+                    CHANGING  cs_field_desc  = rs_field_desc ).
+  ENDIF.
 
   " TABLE-FIELDNAME from search help
   IF is_sh_field-reffield IS NOT INITIAL.
@@ -932,5 +929,70 @@ METHOD split_type.
        ev_table,
        ev_field.
   ENDTRY.
+ENDMETHOD.
+
+
+METHOD _add_comp_info.
+  " For speed creation
+  IF io_struc->is_ddic_type( ) = abap_true.
+    DATA ls_header TYPE x030l.
+    ls_header = io_struc->get_ddic_header( ).
+    cs_field_desc-rollname = ls_header-tabname.
+  ENDIF.
+
+  CLEAR cs_field_desc-sub_fdesc.
+
+  DATA lt_sub_fdesc    TYPE tt_field_desc. " lv_find_db_field TYPE abap_bool
+  DATA ls_subfield     TYPE ts_field_desc.
+  FIELD-SYMBOLS <ls_comp_tab> TYPE abap_compdescr.
+  FIELD-SYMBOLS <lv_subvalue> TYPE any.
+  LOOP AT io_struc->components ASSIGNING <ls_comp_tab>.
+    ASSIGN COMPONENT <ls_comp_tab>-name OF STRUCTURE is_row TO <lv_subvalue>.
+
+    " Recursion
+    ls_subfield = get_field_desc( iv_field_name  = <ls_comp_tab>-name
+                                  iv_data        = <lv_subvalue>
+                                  ir_unique_type = ir_unique_type
+                                  iv_tech        = iv_tech ).
+
+    " No need to save
+    IF    cs_field_desc-ui_type = mc_ui_type-table AND iv_tech = abap_true
+      AND ls_subfield-ui_type IS INITIAL AND ls_subfield-sys_type = cl_abap_typedescr=>typekind_dref.
+      CONTINUE.
+    ENDIF.
+
+    INSERT ls_subfield INTO TABLE lt_sub_fdesc.
+  ENDLOOP.
+
+  cs_field_desc-sub_fdesc = zcl_eui_conv=>to_json( im_data = lt_sub_fdesc ).
+
+**********************************************************************
+  " Select option ?
+  DATA lv_cnt TYPE i. "DO 1 TIMES.
+  lv_cnt = lines( lt_sub_fdesc ).
+
+  CHECK lv_cnt = 4
+    AND cs_field_desc-ui_type = mc_ui_type-table.
+  " Check by name
+  LOOP AT lt_sub_fdesc TRANSPORTING NO FIELDS WHERE
+     name = 'SIGN' OR name = 'OPTION' OR name = 'LOW' OR name = 'HIGH'. "#EC CI_HASHSEQ
+    lv_cnt = lv_cnt - 1.
+  ENDLOOP.
+
+  " Select-option
+  CHECK lv_cnt = 0.
+  cs_field_desc-ui_type  = mc_ui_type-range.
+
+  " No need in components
+  CLEAR cs_field_desc-sub_fdesc.
+
+  " Where to find TABLE-FIELDNAME
+  FIELD-SYMBOLS <ls_subfield> LIKE ls_subfield.
+  READ TABLE lt_sub_fdesc ASSIGNING <ls_subfield>
+   WITH TABLE KEY name = 'LOW'.
+  cs_field_desc-rollname = <ls_subfield>-rollname.
+  cs_field_desc-label    = <ls_subfield>-label.
+  " TODO Old options!!!  cs_field_desc-sys_type = <ls_subfield>-sys_type.
+  " lv_find_db_field = abap_true.
 ENDMETHOD.
 ENDCLASS.
