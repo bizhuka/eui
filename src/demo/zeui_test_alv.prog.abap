@@ -2,6 +2,9 @@
 *&---------------------------------------------------------------------*
 REPORT zeui_test_alv.
 
+TYPE-POOLS:
+ abap.
+
 SELECTION-SCREEN BEGIN OF BLOCK bl_grp WITH FRAME.
 PARAMETERS:
   p_popup AS CHECKBOX DEFAULT 'X',

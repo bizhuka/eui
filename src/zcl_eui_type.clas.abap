@@ -293,12 +293,18 @@ METHOD create_type_descr.
               ro_type = create_structure( iv_sub_fdesc = is_field_desc-sub_fdesc ).
             ENDIF.
 
-            ro_type = cl_abap_tabledescr=>create(
-              p_line_type   = ro_type
-              p_table_kind  = is_field_desc-table_kind
-              p_unique      = is_field_desc-unique
-              p_key         = is_field_desc-key
-              p_key_kind    = is_field_desc-key_defkind ).
+            IF     is_field_desc-table_kind = cl_abap_tabledescr=>tablekind_std
+               AND is_field_desc-key_defkind = 'U' " From 7.40 KEYDEFKIND_USER
+               AND is_field_desc-key IS INITIAL.
+              ro_type = cl_abap_tabledescr=>create( p_line_type = ro_type ). " 'D' - KEYDEFKIND_DEFAULT
+            ELSE.
+              ro_type = cl_abap_tabledescr=>create(
+                p_line_type   = ro_type
+                p_table_kind  = is_field_desc-table_kind
+                p_unique      = is_field_desc-unique
+                p_key         = is_field_desc-key
+                p_key_kind    = is_field_desc-key_defkind ).
+            ENDIF.
 
           WHEN mc_ui_type-struct.
             ro_type = create_structure( iv_sub_fdesc = is_field_desc-sub_fdesc ).

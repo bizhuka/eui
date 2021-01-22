@@ -6,6 +6,7 @@ class ZCL_EUI_LOGGER definition
   global friends ZCL_EUI_EVENT_CALLER .
 
 public section.
+  type-pools ABAP .
 
   types:
     BEGIN OF ts_msg,
@@ -128,6 +129,11 @@ public section.
       !IV_MSGID type SYMSGID
       !IV_MSGNO type SYMSGNO
       !IV_MSGTY type SYMSGTY .
+  class-methods CORRESPONDING_MSG
+    importing
+      !IS_MSG type ANY
+    returning
+      value(RS_MSG) type BAL_S_MSG .
 protected section.
 private section.
 
@@ -148,11 +154,6 @@ private section.
       !IV_MSGTY type SYMSGTY
     returning
       value(RV_OK) type ABAP_BOOL .
-  methods _CORRESPONDING
-    importing
-      !IS_MSG type ANY
-    returning
-      value(RS_MSG) type BAL_S_MSG .
 ENDCLASS.
 
 
@@ -166,7 +167,7 @@ METHOD add.
 
   DATA ls_msg TYPE bal_s_msg. "LIKE is_msg.
   IF is_msg IS NOT INITIAL.
-    ls_msg = _corresponding( is_msg ).
+    ls_msg = corresponding_msg( is_msg ).
   ELSE.
     ls_msg-msgty     = sy-msgty.
     ls_msg-msgid     = sy-msgid.
@@ -347,6 +348,50 @@ METHOD constructor.
 
   CHECK sy-subrc <> 0.
   zcx_eui_no_check=>raise_sys_error( ).
+ENDMETHOD.
+
+
+METHOD corresponding_msg.
+  " Majority of structures
+  MOVE-CORRESPONDING is_msg TO rs_msg.
+
+  " Second attempt
+  CHECK rs_msg-msgno IS INITIAL.
+
+  TYPES:
+    BEGIN OF ts_minority,
+      type       TYPE sy-msgty,
+      id         TYPE sy-msgid,
+      number     TYPE sy-msgno,
+      message_v1 TYPE sy-msgv1,
+      message_v2 TYPE sy-msgv2,
+      message_v3 TYPE sy-msgv3,
+      message_v4 TYPE sy-msgv4,
+
+      " Only BDCMSGCOLL
+      msgtyp     TYPE sy-msgty,
+      msgnr      TYPE sy-msgno,
+    END OF ts_minority.
+
+  " Next attempt
+  DATA ls_minority TYPE ts_minority.
+  MOVE-CORRESPONDING is_msg TO ls_minority.
+
+  " Only BDCMSGCOLL
+  IF ls_minority-msgtyp IS NOT INITIAL.
+    set_default rs_msg-msgty ls_minority-msgtyp.
+    set_default rs_msg-msgno ls_minority-msgnr.
+    RETURN.
+  ENDIF.
+
+  " Last case
+  rs_msg-msgty = ls_minority-type.
+  rs_msg-msgid = ls_minority-id.
+  rs_msg-msgno = ls_minority-number.
+  rs_msg-msgv1 = ls_minority-message_v1.
+  rs_msg-msgv2 = ls_minority-message_v2.
+  rs_msg-msgv3 = ls_minority-message_v3.
+  rs_msg-msgv4 = ls_minority-message_v4.
 ENDMETHOD.
 
 
@@ -533,50 +578,6 @@ METHOD skip.
   ls_skip-msgty = iv_msgty.
 
   INSERT ls_skip INTO TABLE mt_skip_msg.
-ENDMETHOD.
-
-
-METHOD _corresponding.
-  " Majority of structures
-  MOVE-CORRESPONDING is_msg TO rs_msg.
-
-  " Second attempt
-  CHECK rs_msg-msgno IS INITIAL.
-
-  TYPES:
-    BEGIN OF ts_minority,
-      type       TYPE sy-msgty,
-      id         TYPE sy-msgid,
-      number     TYPE sy-msgno,
-      message_v1 TYPE sy-msgv1,
-      message_v2 TYPE sy-msgv2,
-      message_v3 TYPE sy-msgv3,
-      message_v4 TYPE sy-msgv4,
-
-      " Only BDCMSGCOLL
-      msgtyp     TYPE sy-msgty,
-      msgnr      TYPE sy-msgno,
-    END OF ts_minority.
-
-  " Next attempt
-  DATA ls_minority TYPE ts_minority.
-  MOVE-CORRESPONDING is_msg TO ls_minority.
-
-  " Only BDCMSGCOLL
-  IF ls_minority-msgtyp IS NOT INITIAL.
-    set_default rs_msg-msgty ls_minority-msgtyp.
-    set_default rs_msg-msgno ls_minority-msgnr.
-    RETURN.
-  ENDIF.
-
-  " Last case
-  rs_msg-msgty = ls_minority-type.
-  rs_msg-msgid = ls_minority-id.
-  rs_msg-msgno = ls_minority-number.
-  rs_msg-msgv1 = ls_minority-message_v1.
-  rs_msg-msgv2 = ls_minority-message_v2.
-  rs_msg-msgv3 = ls_minority-message_v3.
-  rs_msg-msgv4 = ls_minority-message_v4.
 ENDMETHOD.
 
 

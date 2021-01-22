@@ -5,6 +5,7 @@ class ZCL_EUI_ALV definition
   create public .
 
 public section.
+  type-pools ABAP .
 
   types:
     BEGIN OF ts_f4_table,

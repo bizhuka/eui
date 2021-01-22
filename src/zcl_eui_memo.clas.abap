@@ -5,6 +5,7 @@ class ZCL_EUI_MEMO definition
   create public .
 
 public section.
+  type-pools ABAP .
 
   methods CONSTRUCTOR
     importing

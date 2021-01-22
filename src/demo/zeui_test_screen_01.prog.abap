@@ -2,6 +2,9 @@
 *&---------------------------------------------------------------------*
 REPORT zeui_test_screen_01.
 
+TYPE-POOLS:
+ abap.
+
 " Screen 1000
 PARAMETERS:
   p_01_gry AS CHECKBOX DEFAULT ' ',

@@ -8,6 +8,7 @@ public section.
   type-pools SSCR .
   type-pools SYDB0 .
   type-pools VRM .
+  class ZCL_EUI_TYPE definition load .
 
   types:
     BEGIN OF ts_screen.

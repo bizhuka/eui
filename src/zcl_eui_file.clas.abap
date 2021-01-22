@@ -4,6 +4,7 @@ class ZCL_EUI_FILE definition
   create public .
 
 public section.
+  type-pools ABAP .
   type-pools OLE2 .
 
   types:

@@ -2,6 +2,9 @@
 *&---------------------------------------------------------------------*
 REPORT zeui_test_menu.
 
+TYPE-POOLS:
+ abap.
+
 SELECTION-SCREEN BEGIN OF BLOCK bl_grp WITH FRAME.
 PARAMETERS:
   p_scr0 AS CHECKBOX DEFAULT 'X'.

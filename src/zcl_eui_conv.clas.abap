@@ -4,7 +4,10 @@ class ZCL_EUI_CONV definition
   create public .
 
 public section.
+  type-pools ABAP .
   type-pools JS .
+
+  types ABAP_ENCODING type CHAR20 .
 
   constants:
     BEGIN OF mc_encoding,
@@ -306,9 +309,9 @@ ENDMETHOD.
 
 
 METHOD guid_create.
-  " nearly same approach as in ABAP2XLSX, ZCL_EXCEL_OBSOLETE_FUNC_WRAP:
+  " Use CALL FUNCTION 'GUID_CREATE' in old systems
   TRY.
-      rv_guid = cl_system_uuid=>create_uuid_c32_static( ).
+      rv_guid = cl_system_uuid=>if_system_uuid_static~create_uuid_c32( ).
     CATCH cx_uuid_error.
       CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
                   sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO rv_guid.

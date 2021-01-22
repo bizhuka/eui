@@ -26,7 +26,7 @@ public section.
   aliases TS_STATUS
     for ZIF_EUI_MANAGER~TS_STATUS .
 
-  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN' ##NO_TEXT. "#EC NO_TEXT
+  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN'. "#EC NOTEXT
 
   methods CONSTRUCTOR
     importing
