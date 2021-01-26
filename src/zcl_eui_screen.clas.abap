@@ -114,6 +114,7 @@ public section.
       !IV_READ_ONLY type ABAP_BOOL
     returning
       value(RV_UPDATE) type ABAP_BOOL .
+  class-methods TOP_PBO .
 
   methods ZIF_EUI_MANAGER~PAI
     redefinition .
@@ -389,6 +390,11 @@ METHOD SHOW_RANGE.
 
   " ok
   rv_update = abap_true.
+ENDMETHOD.
+
+
+METHOD top_pbo.
+  CALL FUNCTION 'ZFM_EUI_PBO'.
 ENDMETHOD.
 
 

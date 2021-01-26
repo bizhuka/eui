@@ -679,6 +679,8 @@ METHOD get_catalog.
       " Create table
       CREATE DATA lr_table LIKE STANDARD TABLE OF <ls_data>.
       ASSIGN lr_table->* TO <lt_table>.
+    ELSE. " zcx_eui_no_check=>raise_sys_error ?
+      zcx_eui_exception=>raise_dump( iv_message = `Pass 'IR_TABLE' or 'IR_STRUC' parameter` ).
     ENDIF.
 
     " Create temporary SALV control

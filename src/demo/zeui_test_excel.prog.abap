@@ -159,8 +159,7 @@ CLASS lcl_report IMPLEMENTATION.
         iv_read_only   = abap_true.
 
     " Instead of set handler
-    lo_eui_alv->show(
-     io_handler        = me ).
+    lo_eui_alv->show( io_handler = me ).
   ENDMETHOD.
 
   METHOD on_user_command.

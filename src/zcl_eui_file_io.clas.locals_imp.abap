@@ -11,6 +11,9 @@ CLASS lcl_helper IMPLEMENTATION.
       <lt_excel_map> TYPE zcl_eui_file_io=>tt_excel_map,
       <ls_excel_map> TYPE zcl_eui_file_io=>ts_excel_map,
       <ls_fieldcat>  TYPE lvc_s_fcat.
+    IF ir_table IS INITIAL. " zcx_eui_no_check=>raise_sys_error ?
+      zcx_eui_exception=>raise_dump( iv_message = `Pass 'IR_TABLE' parameter to ZCL_EUI_FILE_IO` ).
+    ENDIF.
 
     " Use exiting
     IF ir_excel_map IS NOT INITIAL.

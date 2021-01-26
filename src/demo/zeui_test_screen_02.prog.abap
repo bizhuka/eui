@@ -57,5 +57,5 @@ INITIALIZATION.
 AT SELECTION-SCREEN OUTPUT.
   " For 01 & 04 only
   IF sy-dynnr = '1020' OR sy-dynnr = '9999'.
-    CALL FUNCTION 'ZFM_EUI_PBO'.
+    zcl_eui_screen=>top_pbo( ).
   ENDIF.
