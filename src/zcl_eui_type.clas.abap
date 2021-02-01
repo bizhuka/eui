@@ -45,6 +45,7 @@ public section.
     TABLE  type STRING value 'table',
     " For tech only
     STRUCT type STRING value 'struct',
+    OBJECT type STRING value 'object',
    END OF MC_UI_TYPE .
 
   class-methods GET_CATALOG
@@ -118,11 +119,23 @@ public section.
       value(RT_FIELD_DESC) type TT_FIELD_DESC .
 protected section.
 private section.
+*"* private components of class ZCL_EUI_TYPE
+*"* do not include other source files here!!!
 
   class-methods _ADD_COMP_INFO
     importing
       !IO_STRUC type ref to CL_ABAP_STRUCTDESCR
       !IS_ROW type ANY
+      !IV_TECH type ABAP_BOOL
+      !IR_UNIQUE_TYPE type ref to TT_UNIQUE_TYPE
+    changing
+      !CS_FIELD_DESC type TS_FIELD_DESC
+    raising
+      ZCX_EUI_EXCEPTION .
+  class-methods _ADD_COMP_INFO_CLASS
+    importing
+      !IO_CLASS type ref to CL_ABAP_CLASSDESCR
+      !IO_INST type ANY
       !IV_TECH type ABAP_BOOL
       !IR_UNIQUE_TYPE type ref to TT_UNIQUE_TYPE
     changing
@@ -587,7 +600,7 @@ METHOD find_table_fieldname.
   CHECK cv_rollname IS NOT INITIAL.
   lv_rollname = cv_rollname.
 
-  SELECT d~tabname d~fieldname d~shlporigin INTO CORRESPONDING FIELDS OF TABLE lt_dd03l
+  SELECT d~tabname d~fieldname d~shlporigin INTO CORRESPONDING FIELDS OF TABLE lt_dd03l ##too_many_itab_fields
   FROM dd03l AS d UP TO 100 ROWS
   WHERE d~rollname = lv_rollname AND d~as4local = 'A' AND d~tabname NOT LIKE '/%' AND d~depth = 0.
 
@@ -798,6 +811,13 @@ METHOD get_field_desc.
         rs_field_desc-ui_type = mc_ui_type-struct.
       ENDIF.
 
+    WHEN cl_abap_typedescr=>typekind_oref.
+      DATA lr_class_descr TYPE REF TO cl_abap_classdescr.
+      IF iv_tech = abap_true AND iv_data IS NOT INITIAL.
+        lr_class_descr ?= cl_abap_classdescr=>describe_by_object_ref( iv_data ).
+        rs_field_desc-ui_type = mc_ui_type-object.
+      ENDIF.
+
     WHEN cl_abap_typedescr=>typekind_table.
       DATA lr_table_descr  TYPE REF TO cl_abap_tabledescr.
 
@@ -814,7 +834,7 @@ METHOD get_field_desc.
         CLEAR rs_field_desc-key.
       ENDIF.
 
-      " Only for structures
+      " Only for structures & objects
       TRY.
           lr_struct_descr ?= lr_table_descr->get_table_line_type( ).
         CATCH cx_sy_move_cast_error.
@@ -859,12 +879,19 @@ METHOD get_field_desc.
 
   ENDCASE.
 
+  " Structure & tables
   IF lr_struct_descr IS NOT INITIAL.
     _add_comp_info( EXPORTING io_struc       = lr_struct_descr
                               iv_tech        = iv_tech
                               ir_unique_type = ir_unique_type
                               is_row         = <lv_row>
                     CHANGING  cs_field_desc  = rs_field_desc ).
+  ELSEIF lr_class_descr IS NOT INITIAL.
+    _add_comp_info_class( EXPORTING io_class       = lr_class_descr
+                                    iv_tech        = iv_tech
+                                    ir_unique_type = ir_unique_type
+                                    io_inst        = <lv_row>
+                          CHANGING  cs_field_desc  = rs_field_desc ).
   ENDIF.
 
   " TABLE-FIELDNAME from search help
@@ -1002,5 +1029,43 @@ METHOD _add_comp_info.
   cs_field_desc-label    = <ls_subfield>-label.
   " TODO Old options!!!  cs_field_desc-sys_type = <ls_subfield>-sys_type.
   " lv_find_db_field = abap_true.
+ENDMETHOD.
+
+
+METHOD _add_comp_info_class.
+  " For speed creation
+  IF io_class->is_ddic_type( ) = abap_true.
+    DATA ls_header TYPE x030l.
+    ls_header = io_class->get_ddic_header( ).
+    cs_field_desc-rollname = ls_header-tabname.
+  ENDIF.
+
+  CLEAR cs_field_desc-sub_fdesc.
+
+  DATA lt_sub_fdesc    TYPE tt_field_desc. " lv_find_db_field TYPE abap_bool
+  DATA ls_subfield     TYPE ts_field_desc.
+  FIELD-SYMBOLS <ls_attr>     TYPE abap_attrdescr.
+  FIELD-SYMBOLS <lv_subvalue> TYPE any.
+  LOOP AT io_class->attributes ASSIGNING <ls_attr> WHERE visibility = cl_abap_objectdescr=>public.
+    DATA lv_field TYPE string.
+    CONCATENATE 'IO_INST->' <ls_attr>-name INTO lv_field.
+    ASSIGN (lv_field) TO <lv_subvalue>.
+
+    " Recursion
+    ls_subfield = get_field_desc( iv_field_name  = <ls_attr>-name
+                                  iv_data        = <lv_subvalue>
+                                  ir_unique_type = ir_unique_type
+                                  iv_tech        = iv_tech ).
+
+    " No need to save
+    IF    cs_field_desc-ui_type = mc_ui_type-table AND iv_tech = abap_true
+      AND ls_subfield-ui_type IS INITIAL AND ls_subfield-sys_type = cl_abap_typedescr=>typekind_dref.
+      CONTINUE.
+    ENDIF.
+
+    INSERT ls_subfield INTO TABLE lt_sub_fdesc.
+  ENDLOOP.
+
+  cs_field_desc-sub_fdesc = zcl_eui_conv=>to_json( im_data = lt_sub_fdesc ).
 ENDMETHOD.
 ENDCLASS.

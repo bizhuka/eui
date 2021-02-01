@@ -321,12 +321,14 @@ CLASS lcl_screen IMPLEMENTATION.
       AND t_listbox IS NOT INITIAL.
 
       " Get name
+      DATA lv_id TYPE char80.
       READ TABLE mt_map REFERENCE INTO ls_map
        WITH KEY name = <ls_screen_src>-name.
-      CHECK sy-subrc = 0.
-
-      DATA lv_id TYPE char80.
-      lv_id = ls_map->par_name.
+      IF sy-subrc = 0.
+        lv_id = ls_map->par_name.
+      ELSE.
+        lv_id = <ls_screen_src>-name.
+      ENDIF.
 
       " Initialize 1 time only
       DATA lt_listbox TYPE vrm_values.
