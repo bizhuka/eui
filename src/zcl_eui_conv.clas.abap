@@ -49,6 +49,11 @@ public section.
     exporting
       !EV_LENGTH type I
       !ET_TABLE type SOLIX_TAB .
+  class-methods XSTRING_TO_BASE64
+    importing
+      !IV_XSTRING type XSTRING
+    returning
+      value(RV_BASE64) type STRING .
   class-methods XSTRING_TO_STRING
     importing
       !IV_XSTRING type XSTRING
@@ -201,15 +206,25 @@ METHOD assert_equals.
 ENDMETHOD.
 
 
-METHOD BINARY_TO_STRING.
-  CALL FUNCTION 'SCMS_BINARY_TO_STRING'
-    EXPORTING
-      input_length = iv_length
-      encoding     = iv_encoding
-    IMPORTING
-      text_buffer  = rv_string
-    TABLES
-      binary_tab   = it_table.
+METHOD binary_to_string.
+  TRY.
+      CALL FUNCTION 'SCMS_BINARY_TO_STRING'
+        EXPORTING
+          input_length = iv_length
+          encoding     = iv_encoding
+        IMPORTING
+          text_buffer  = rv_string
+        TABLES
+          binary_tab   = it_table.
+    CATCH cx_sy_dyn_call_error. " TODO CONV classes?
+      CALL FUNCTION 'SCMS_BINARY_TO_STRING'
+        EXPORTING
+          input_length = iv_length
+        IMPORTING
+          text_buffer  = rv_string
+        TABLES
+          binary_tab   = it_table.
+  ENDTRY.
 ENDMETHOD.
 
 
@@ -309,24 +324,28 @@ ENDMETHOD.
 
 
 METHOD guid_create.
-  " Use CALL FUNCTION 'GUID_CREATE' in old systems
+  " № 1
   TRY.
-      rv_guid = cl_system_uuid=>if_system_uuid_static~create_uuid_c32( ).
-    CATCH cx_uuid_error.
-      CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
-                  sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO rv_guid.
+      CALL METHOD ('CL_SYSTEM_UUID')=>('IF_SYSTEM_UUID_STATIC~CREATE_UUID_C32')
+        RECEIVING
+          uuid = rv_guid.
+    CATCH cx_root.                                       "#EC CATCH_ALL
+      CLEAR rv_guid.
   ENDTRY.
+  CHECK rv_guid IS INITIAL.
 
-*--------------------------------------------------------------------*
-*If you are on a release that does not yet have the class cl_system_uuid
-*please use the following coding instead which is using the function
-*call that was used before but which has been flagged as obsolete
-*in newer SAP releases
-*--------------------------------------------------------------------*
+  " № 2
+  TRY.
+      CALL FUNCTION 'GUID_CREATE'
+        IMPORTING
+          ev_guid_32 = rv_guid.
+    CATCH cx_root.                                       "#EC CATCH_ALL
+      CLEAR rv_guid.
+  ENDTRY.
+  CHECK rv_guid IS INITIAL.
 
-*  CALL FUNCTION 'GUID_CREATE'
-*    IMPORTING
-*      ev_guid_32 = rv_guid.
+  CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
+              sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) INTO rv_guid.
 ENDMETHOD.
 
 
@@ -546,6 +565,27 @@ METHOD XML_TO_ZIP.
 ENDMETHOD.
 
 
+METHOD xstring_to_base64.
+  TRY.
+      CALL METHOD ('CL_HTTP_UTILITY')=>('ENCODE_X_BASE64')
+        EXPORTING
+          unencoded = iv_xstring
+        RECEIVING
+          encoded   = rv_base64.
+    CATCH cx_sy_dyn_call_error.
+      " 7.00 doesn't have cl_http_utility=>encode_x_base64( ).
+      DATA lv_error TYPE i.
+      SYSTEM-CALL ict  "#EC CI_SYSTEMCALL
+        DID
+          86 " ihttp_scid_base64_escape_x
+        PARAMETERS
+          iv_xstring
+          rv_base64
+          lv_error.                      " < return code
+  ENDTRY.
+ENDMETHOD.
+
+
 METHOD XSTRING_TO_BINARY.
   " et_table = cl_bcs_convert=>xstring_to_solix( iv_xstring ).
   " ev_length = xstrlen( iv_xstring ).
@@ -678,8 +718,7 @@ METHOD _abap_2_json.
         ENDIF.
 
       WHEN 'y'.  " XSTRING
-* Put the XSTRING in Base64
-        &1 = cl_http_utility=>encode_x_base64( &2 ).
+        &1 = xstring_to_base64( &2 ).
 
       WHEN OTHERS.
 * Don't hesitate to add and modify scalar abap types to suit your taste.

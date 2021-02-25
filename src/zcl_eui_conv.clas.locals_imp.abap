@@ -13,7 +13,7 @@ CLASS lcl_json_util IMPLEMENTATION.
     " Get all boolean types
     SELECT rollname INTO TABLE mt_xsdboolean
     FROM dd04l
-    WHERE domname = 'XSDBOOLEAN' AND as4local = 'A'.
+    WHERE ( domname = 'XSDBOOLEAN' OR domname = 'OS_BOOLEAN' ) AND as4local = 'A'.
 
     " Add text for speed
     LOOP AT mt_xsdboolean ASSIGNING <lv_type>.

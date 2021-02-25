@@ -3,7 +3,8 @@
 REPORT zeui_test_menu.
 
 TYPE-POOLS:
- abap.
+ abap,
+ icon.
 
 SELECTION-SCREEN BEGIN OF BLOCK bl_grp WITH FRAME.
 PARAMETERS:

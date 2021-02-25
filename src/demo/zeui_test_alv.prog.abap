@@ -24,7 +24,7 @@ CLASS lcl_report DEFINITION FINAL.
         sum_2    TYPE bf_rbetr,
         fld_tech TYPE string,
         hide2    TYPE string,
-        ok       TYPE xsdboolean, " IV_GUESS_TYPE ?
+        ok       TYPE abap_bool, " checkbox ---> auto detect for domain XSDBOOLEAN
         bdc_mode TYPE ettcd_mode,
       END OF ts_alv.
 
@@ -166,7 +166,8 @@ CLASS lcl_report IMPLEMENTATION.
     <ls_mod_catalog>-hotspot   = abap_true.
 
     APPEND INITIAL LINE TO lt_mod_catalog ASSIGNING <ls_mod_catalog>.
-    <ls_mod_catalog>-fieldname = 'OK'. " checkbox = 'X' auto detect for domain XSDBOOLEAN
+    <ls_mod_catalog>-fieldname = 'OK'.
+    <ls_mod_catalog>-checkbox  = 'X'.  " auto detect for domain XSDBOOLEAN
     <ls_mod_catalog>-scrtext_s = <ls_mod_catalog>-scrtext_m = <ls_mod_catalog>-scrtext_l = <ls_mod_catalog>-coltext = 'Ok'.
 
     APPEND INITIAL LINE TO lt_mod_catalog ASSIGNING <ls_mod_catalog>.

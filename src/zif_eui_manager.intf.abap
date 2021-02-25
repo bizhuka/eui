@@ -1,6 +1,7 @@
 interface ZIF_EUI_MANAGER
   public .
 
+  type-pools ABAP .
 
   types:
     BEGIN OF TS_POPUP,

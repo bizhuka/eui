@@ -600,7 +600,7 @@ METHOD find_table_fieldname.
   CHECK cv_rollname IS NOT INITIAL.
   lv_rollname = cv_rollname.
 
-  SELECT d~tabname d~fieldname d~shlporigin INTO CORRESPONDING FIELDS OF TABLE lt_dd03l ##too_many_itab_fields
+  SELECT d~tabname d~fieldname d~shlporigin INTO CORRESPONDING FIELDS OF TABLE lt_dd03l "#EC TOO_MANY_ITAB_FIELDS
   FROM dd03l AS d UP TO 100 ROWS
   WHERE d~rollname = lv_rollname AND d~as4local = 'A' AND d~tabname NOT LIKE '/%' AND d~depth = 0.
 
@@ -783,7 +783,7 @@ METHOD get_field_desc.
     WHEN cl_abap_typedescr=>typekind_char.
       " Also CHAR
       CASE rs_field_desc-rollname.
-        WHEN 'XSDBOOLEAN'.
+        WHEN 'XSDBOOLEAN' OR 'OS_BOOLEAN'.
           rs_field_desc-ui_type = mc_ui_type-boolean.
 
         WHEN 'XSDDATETIME_Z' OR 'XSDDATETIME_LONG_Z' OR

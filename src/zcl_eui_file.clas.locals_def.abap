@@ -2,8 +2,11 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
+TYPE-POOLS:
+ abap.
+
 CLASS lcl_doi DEFINITION FINAL.
- PUBLIC SECTION.
+  PUBLIC SECTION.
     CLASS-METHODS:
 
       show_in_browser

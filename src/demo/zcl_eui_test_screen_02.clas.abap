@@ -57,9 +57,9 @@ METHOD show_initial_screen.
 
     " Start screen
     BEGIN OF ts_context_main,
-      v_make_gray     TYPE xsdboolean,
-      v_make_required TYPE xsdboolean,
-      v_make_lsitbox  TYPE xsdboolean,
+      v_make_gray     TYPE os_boolean,
+      v_make_required TYPE os_boolean,
+      v_make_lsitbox  TYPE os_boolean,
     END OF ts_context_main,
 
     " Tested screen context
@@ -76,7 +76,7 @@ METHOD show_initial_screen.
       p_mandt  TYPE char3,
 
       " Checkbox
-      p_check  TYPE xsdboolean,
+      p_check  TYPE os_boolean,
 
       " Range <-- cl_ci_query_attributes no SH
       s_user   TYPE offline_log_user_itab,
@@ -214,9 +214,9 @@ METHOD show_initial_screen.
         " Pass params
         CREATE OBJECT lo_screen
           EXPORTING
-            iv_dynnr        = lv_dynnr
-            iv_cprog        = lv_prog
-            ir_context      = ls_context.            " <--- Set initial values
+            iv_dynnr   = lv_dynnr
+            iv_cprog   = lv_prog
+            ir_context = ls_context.            " <--- Set initial values
         " title is fixed
         lo_screen->ms_status-is_fixed = abap_true.
         lo_screen->ms_status-title    = 'Test dynamic screens'.
