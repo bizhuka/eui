@@ -78,8 +78,7 @@ CLASS lcl_stack IMPLEMENTATION.
     DATA lv_shift   TYPE i.
 
     " ### NO_CALL
-    IF io_manager->ms_screen-dynnr = zcl_eui_screen=>mc_dynnr-free_sel OR
-       io_manager->ms_screen-dynnr = zcl_eui_screen=>mc_dynnr-dyn_popup.
+    IF io_manager->ms_screen-dynnr = zcl_eui_screen=>mc_dynnr-free_sel.
       go_free_manager = io_manager.
       RETURN.
     ENDIF.

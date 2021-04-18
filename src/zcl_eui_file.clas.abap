@@ -132,7 +132,7 @@ CLASS ZCL_EUI_FILE IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor( iv_read_only = abap_true ).
+  super->constructor( iv_editable = abap_false ).
 
   mv_xstring = iv_xstring.
   set_full_path( iv_file_name ).

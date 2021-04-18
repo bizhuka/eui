@@ -110,32 +110,18 @@ CLASS lcl_scr_free DEFINITION INHERITING FROM lcl_screen.
       read_from_screen   REDEFINITION.
 ENDCLASS.
 
-CLASS lcl_scr_auto DEFINITION INHERITING FROM lcl_screen.
+CLASS lcl_scr_dync DEFINITION INHERITING FROM lcl_screen.
   PUBLIC SECTION.
-    CONSTANTS:
-      mc_auto_gen_head TYPE string  VALUE `*********ZCL_EUI_SCREEN-AUTO_GEN*********`.
-
     METHODS:
-      check_can_update
-        RETURNING VALUE(rv_ok) TYPE abap_bool,
+      _make_screen_code
+        RETURNING VALUE(rt_code) TYPE stringtab,
 
       get_parameter_name REDEFINITION,
-      pbo                REDEFINITION,
+      show               REDEFINITION,
       check_pai          REDEFINITION,
-      show               REDEFINITION.
-ENDCLASS.
-
-CLASS lcl_scr_dpop DEFINITION INHERITING FROM lcl_screen.
-  PUBLIC SECTION.
-    METHODS:
-      create_dyn_popup
-        RETURNING VALUE(rt_attr) TYPE sci_atttab
-        RAISING   zcx_eui_exception,
-
-      show               REDEFINITION.
+      pbo                REDEFINITION.
 ENDCLASS.
 
 CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_screen.
 CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_scr_free.
-CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_scr_auto.
-CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_scr_dpop.
+CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_scr_dync.

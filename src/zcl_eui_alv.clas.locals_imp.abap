@@ -632,7 +632,7 @@ CLASS lcl_helper IMPLEMENTATION.
         CREATE OBJECT lo_manager TYPE zcl_eui_memo
           EXPORTING
             ir_text      = lr_text
-            iv_read_only = mo_eui_alv->mv_read_only.
+            iv_editable  = mo_eui_alv->ms_layout-edit.
 
 **********************************************************************
         " Edit sub table in alv editor
@@ -645,8 +645,7 @@ CLASS lcl_helper IMPLEMENTATION.
         CREATE OBJECT lo_alv
           EXPORTING
             ir_table     = lr_cur_value
-            is_layout    = ls_layout
-            iv_read_only = mo_eui_alv->mv_read_only.
+            is_layout    = ls_layout.
         lo_alv->set_field_desc( ls_field_desc ).
         lo_manager = lo_alv.
 **********************************************************************

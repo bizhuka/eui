@@ -28,25 +28,6 @@ PARAMETERS:
 SELECTION-SCREEN END OF BLOCK bl_1020.
 SELECTION-SCREEN END OF SCREEN 1020.
 
-**********************************************************************
-" CMD_04 -> 04-Dynamically decl. screen
-**********************************************************************
-
-SELECTION-SCREEN BEGIN OF SCREEN 9999 AS SUBSCREEN.
-SELECTION-SCREEN BEGIN OF BLOCK bl_main WITH FRAME TITLE s_title.
-PARAMETERS p_01 TYPE tcury-bukrs.
-PARAMETERS p_02 TYPE ettcd-mode AS LISTBOX VISIBLE LENGTH 50.
-PARAMETERS p_03 TYPE syst-mandt AS LISTBOX VISIBLE LENGTH 50.
-PARAMETERS p_04 AS CHECKBOX.
-SELECT-OPTIONS p_05 FOR usr02-bname. " <--- Change SH
-PARAMETERS p_06 TYPE t005t-land1.
-PARAMETERS p_07 TYPE syst-index.
-PARAMETERS p_08 TYPE syst-tabix.
-
-SELECTION-SCREEN END OF BLOCK bl_main.
-SELECTION-SCREEN END OF SCREEN 9999.
-
-
 
 **********************************************************************
 **********************************************************************

@@ -23,8 +23,7 @@ public section.
       !IS_LAYOUT type LVC_S_LAYO optional
       !IS_VARIANT type DISVARIANT optional
       !IT_FILTER type LVC_T_FILT optional
-      !IT_SORT type LVC_T_SORT optional
-      !IV_READ_ONLY type ABAP_BOOL default ABAP_TRUE .
+      !IT_SORT type LVC_T_SORT optional .
   methods GET_GRID
     returning
       value(RO_GRID) type ref to CL_GUI_ALV_GRID .
@@ -67,7 +66,7 @@ CLASS ZCL_EUI_ALV IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor( iv_read_only = iv_read_only ).
+  super->constructor( iv_editable = is_layout-edit ).
 
   mr_table              = ir_table.
   mt_toolbar            = it_toolbar.
@@ -76,11 +75,6 @@ METHOD constructor.
   ms_variant            = is_variant.
   mt_filter             = it_filter.
   mt_sort               = it_sort.
-
-  " Just check
-  IF ms_layout-edit = abap_true AND iv_read_only IS NOT SUPPLIED.
-    MESSAGE 'Please also specify `IV_READ_ONLY` parameter'(pro) TYPE 'S' DISPLAY LIKE 'W'.
-  ENDIF.
 
   CREATE OBJECT mo_helper
     EXPORTING

@@ -155,8 +155,7 @@ CLASS lcl_report IMPLEMENTATION.
         " grid parameters
         is_layout      = ls_layout
         it_mod_catalog = lt_mod_catalog
-        it_toolbar     = lt_toolbar
-        iv_read_only   = abap_true.
+        it_toolbar     = lt_toolbar.
 
     " Instead of set handler
     lo_eui_alv->show( io_handler = me ).

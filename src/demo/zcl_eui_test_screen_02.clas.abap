@@ -4,6 +4,7 @@ class ZCL_EUI_TEST_SCREEN_02 definition
   create public .
 
 public section.
+  type-pools ABAP .
 
   class-methods SHOW_INITIAL_SCREEN .
   methods ON_START_PAI
@@ -89,7 +90,8 @@ METHOD show_initial_screen.
       p_fld_i2 TYPE sytabix,
 
       " String & tables also Ok
-      " p_memo     TYPE stringval,
+      p_memo   TYPE stringval,
+      t_table  TYPE STANDARD TABLE OF t005t WITH DEFAULT KEY,
     END OF ts_context,
 
     " For listbox
@@ -195,19 +197,8 @@ METHOD show_initial_screen.
         lv_dynnr = zcl_eui_screen=>mc_dynnr-free_sel.
 
       WHEN 'CMD_03'.
-        " prog name less than 30 symbols (sy-cprog 40 chars)
-        " @see CL_CI_QUERY_ATTRIBUTES=>GENERIC
-        lv_dynnr = zcl_eui_screen=>mc_dynnr-dyn_popup.
-        CONCATENATE c_cprog '_ZZZ1' INTO lv_prog.
-
-      WHEN 'CMD_04'.
-        " mc_dynnr-auto_gen in testing (do not use it)
-        " Cannot use GENERATE SUBROUTINE :(
-
-        " Create unqique name for program
-        " For test ->  lv_prog = 'ZZZ_SCREEN' -> follow the instructions
-        lv_dynnr = zcl_eui_screen=>mc_dynnr-auto_gen.
-        CONCATENATE c_cprog '^9999' INTO lv_prog.
+        lv_dynnr = zcl_eui_screen=>mc_dynnr-dynamic.
+        lv_prog  = c_cprog.
     ENDCASE.
 
     TRY.
@@ -256,14 +247,14 @@ METHOD show_initial_screen.
 
     " Set listbox
     lo_screen->customize( name = 'P_MANDT' required   = '1'
-                                           iv_label   = 'Client number'
+                                           iv_label   = 'Client number (mandt)'
                                            it_listbox = lt_listbox ).
 
     lo_screen->customize( name = 'P_CHECK' iv_label = 'Checkbox' ).
     lo_screen->customize( name = 'P_BDC_M' iv_label = 'BDC mode' ).
 
     " As popup
-    lo_screen->popup( iv_col_end = 118 ).
+    lo_screen->popup( iv_col_end = 114 ).
 
     " If pressed OK
     CHECK lo_screen->show( ) = 'OK'.

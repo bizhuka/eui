@@ -219,7 +219,7 @@ CLASS lcl_screen IMPLEMENTATION.
         ENDIF.
 
         lv_input = ''.
-        IF ls_screen-input = '0'. " AND ls_screen_dst-group3 <> 'VPU'. " But not for tables
+        IF ls_screen-input = '0' OR mo_eui_screen->mv_read_only = 'X'. " AND ls_screen_dst-group3 <> 'VPU' 'PBU'. " But not for tables
           lv_input = '0'.
         ENDIF.
 
@@ -235,7 +235,7 @@ CLASS lcl_screen IMPLEMENTATION.
 
         " Do not edit
         IF lv_input = '0'.
-          ls_screen_dst-input     = '0'.
+          ls_screen_dst-input = '0'.
         ENDIF.
       ENDIF.
 
@@ -274,7 +274,7 @@ CLASS lcl_screen IMPLEMENTATION.
       ENDLOOP.
 
       " Special case for selection push button
-      IF ls_screen_dst-group3 = 'VPU' AND ls_screen_dst-active = '1'.
+      IF ( ls_screen_dst-group3 = 'VPU' OR ls_screen_dst-group3 = 'PBU' ) AND ls_screen_dst-active = '1'.
         ls_screen_dst-input = '1'.
       ENDIF.
 
@@ -402,7 +402,6 @@ CLASS lcl_screen IMPLEMENTATION.
     DATA lr_text       TYPE REF TO string.
     DATA lo_manager    TYPE REF TO zif_eui_manager.
     DATA lr_field_desc TYPE REF TO zcl_eui_type=>ts_field_desc.
-    DATA lv_read_only  TYPE abap_bool.
     DATA ls_layout     TYPE lvc_s_layo.
     DATA ls_screen     TYPE zcl_eui_screen=>ts_screen.
 
@@ -414,9 +413,7 @@ CLASS lcl_screen IMPLEMENTATION.
     ls_screen = get_screen_by_map( ls_map->name ).
 
     " Edit or not
-    IF mo_eui_screen->mv_read_only = abap_true OR ls_screen-input = '0'.
-      lv_read_only   = abap_true.
-    ELSE.
+    IF mo_eui_screen->mv_read_only <> abap_true AND ls_screen-input <> '0'.
       ls_layout-edit = abap_true.
     ENDIF.
 
@@ -426,8 +423,7 @@ CLASS lcl_screen IMPLEMENTATION.
         CREATE OBJECT lo_alv
           EXPORTING
             ir_table     = ls_map->cur_value
-            is_layout    = ls_layout
-            iv_read_only = lv_read_only.
+            is_layout    = ls_layout.
         lo_manager = lo_alv.
 
         " As refernce
@@ -441,8 +437,8 @@ CLASS lcl_screen IMPLEMENTATION.
         lr_text ?= ls_map->cur_value.
         CREATE OBJECT lo_manager TYPE zcl_eui_memo
           EXPORTING
-            ir_text      = lr_text
-            iv_read_only = lv_read_only.
+            ir_text     = lr_text
+            iv_editable = ls_layout-edit.
 
       WHEN OTHERS.
         RETURN.
@@ -1025,9 +1021,110 @@ ENDCLASS.
 
 **********************************************************************
 **********************************************************************
-CLASS lcl_scr_auto IMPLEMENTATION.
+CLASS lcl_scr_dync IMPLEMENTATION.
+  METHOD show.
+    CHECK iv_before = abap_true.
+
+    " Text of parameters
+    mv_pbo_set_labels = abap_true.
+
+    DATA lo_prog TYPE REF TO zcl_eui_prog.
+    CREATE OBJECT lo_prog EXPORTING iv_cprog = mo_eui_screen->ms_screen-prog.
+
+    DATA: lo_crc64 TYPE REF TO zcl_eui_crc64, lv_hash TYPE string.
+    CREATE OBJECT lo_crc64 EXPORTING iv_dref = zcl_eui_crc64=>mc_dref-no_info.
+    " Version of screen code
+    lo_crc64->add_to_hash( '001' ).
+    lo_crc64->add_to_hash( mt_map ).
+    lv_hash = lo_crc64->get_hash( ).
+
+    " Already created?
+    mo_eui_screen->ms_screen-dynnr = '9999'.
+    IF lv_hash = lo_prog->get_attribute( 'HASH').
+      mo_eui_screen->ms_screen-prog = lo_prog->mv_cprog.
+      RETURN.
+    ENDIF.
+
+    DATA: lt_code      TYPE stringtab, lv_tech_info TYPE string.
+    lt_code = _make_screen_code( ).
+    CONCATENATE '"EUI=X,GENERATE-DATE=' sy-datum ',HASH=' lv_hash INTO lv_tech_info.
+    INSERT lv_tech_info INTO lt_code INDEX 1.
+
+    mo_eui_screen->ms_screen-prog  = lo_prog->generate( it_code  = lt_code
+                                                        iv_cprog = lo_prog->mv_cprog ).
+  ENDMETHOD.
+
+  METHOD _make_screen_code.
+    " No data is passed
+    IF mt_map IS INITIAL.
+      zcx_eui_no_check=>raise_sys_error( iv_message = 'Pass IR_CONTEXT param!' ).
+    ENDIF.
+
+    APPEND `REPORT DYNAMIC_SUBSCR.`                                            TO rt_code.
+    APPEND ``                                                                  TO rt_code.
+    APPEND `SELECTION-SCREEN BEGIN OF SCREEN 9999 AS SUBSCREEN.`               TO rt_code.
+    APPEND `SELECTION-SCREEN BEGIN OF BLOCK bl_main WITH FRAME TITLE s_title.` TO rt_code.
+
+    DATA lr_map        TYPE REF TO zcl_eui_screen=>ts_map.
+    DATA: l_par_name TYPE sychar08 VALUE 'X', l_for_name TYPE sychar08 VALUE 'F', l_cmt_name TYPE sychar08 VALUE 'T'.
+    DATA l_line        TYPE string.
+
+    LOOP AT mt_map REFERENCE INTO lr_map.
+      UNPACK sy-tabix TO l_par_name+1(*).
+
+      CASE lr_map->ui_type.
+        WHEN zcl_eui_type=>mc_ui_type-table OR zcl_eui_type=>mc_ui_type-string.
+          APPEND `SELECTION-SCREEN BEGIN OF LINE.` TO rt_code.
+
+          l_cmt_name+1 = l_par_name+1.
+          CONCATENATE `SELECTION-SCREEN COMMENT 1(31) `  l_cmt_name `.` INTO l_line.
+          APPEND l_line  TO rt_code.
+
+          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON 33(15) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
+          APPEND l_line TO rt_code.
+          APPEND `SELECTION-SCREEN END OF LINE.` TO rt_code.
+
+        WHEN zcl_eui_type=>mc_ui_type-range.
+          l_for_name+1 = l_par_name+1.
+          CONCATENATE `DATA ` l_for_name ` TYPE ` lr_map->rollname `.` INTO l_line.
+          APPEND l_line TO rt_code.
+          CONCATENATE `SELECT-OPTIONS ` l_par_name ` FOR ` l_for_name `.` INTO l_line.
+          APPEND l_line TO rt_code.
+
+        WHEN OTHERS. " Parameter
+          CONCATENATE `PARAMETERS ` l_par_name ` TYPE ` lr_map->rollname INTO l_line.
+
+          IF lr_map->ui_type = zcl_eui_type=>mc_ui_type-boolean.
+            CONCATENATE l_line ` AS CHECKBOX` INTO l_line.
+          ELSEIF lr_map->is_list_box = abap_true.
+            CONCATENATE l_line ` AS LISTBOX VISIBLE LENGTH 50` INTO l_line.
+          ENDIF.
+          CONCATENATE l_line `.` INTO l_line.
+
+          APPEND l_line TO rt_code.
+      ENDCASE.
+    ENDLOOP.
+
+    APPEND `SELECTION-SCREEN END OF BLOCK bl_main.`  TO rt_code.
+    APPEND `SELECTION-SCREEN END OF SCREEN 9999.`    TO rt_code.
+    APPEND ``                                        TO rt_code.
+    APPEND `AT SELECTION-SCREEN OUTPUT.`             TO rt_code.
+    APPEND `zcl_eui_screen=>top_pbo( ).`             TO rt_code.
+  ENDMETHOD.
+
   METHOD get_parameter_name.
-    CONCATENATE `P_` iv_index INTO rv_name.
+    DATA lv_index TYPE n LENGTH 7.
+    lv_index = iv_index.
+    CONCATENATE `X` lv_index INTO rv_name.
+  ENDMETHOD.
+
+  METHOD check_pai.
+    super->check_pai( EXPORTING iv_command    = iv_command
+                      CHANGING  cv_close      = cv_close
+                                cv_read_after = cv_read_after
+                                cv_map_index  = cv_map_index ).
+    CHECK iv_command CP 'X*'.
+    cv_map_index = iv_command+1.
   ENDMETHOD.
 
   METHOD pbo.
@@ -1047,7 +1144,33 @@ CLASS lcl_scr_auto IMPLEMENTATION.
     LOOP AT mt_map REFERENCE INTO ls_map
        WHERE ui_type = zcl_eui_type=>mc_ui_type-table
           OR ui_type = zcl_eui_type=>mc_ui_type-string.
-      DELETE <ls_current_screen>-selopts WHERE name = ls_map->par_name.
+      DATA l_name TYPE string.
+      FIELD-SYMBOLS <l_scr_field> TYPE csequence.
+
+      " Comment
+      CONCATENATE `(` mo_eui_screen->ms_screen-prog `)T` ls_map->par_name+1 INTO l_name.
+      ASSIGN (l_name) TO <l_scr_field>.
+      <l_scr_field> = ls_map->label.
+
+      " Button icon
+      CONCATENATE `(` mo_eui_screen->ms_screen-prog `)` ls_map->par_name INTO l_name.
+      ASSIGN (l_name) TO <l_scr_field>.
+
+      CASE ls_map->ui_type.
+        WHEN zcl_eui_type=>mc_ui_type-table.
+          FIELD-SYMBOLS <lt_table> TYPE ANY TABLE.
+          ASSIGN ls_map->cur_value->* TO <lt_table>.
+          <l_scr_field> = lines( <lt_table> ).
+          CONDENSE <l_scr_field>.
+          CONCATENATE icon_wd_table 'Rows'(row) ` ` <l_scr_field> INTO <l_scr_field>.
+
+        WHEN zcl_eui_type=>mc_ui_type-string.
+          FIELD-SYMBOLS <lv_string> TYPE string.
+          ASSIGN ls_map->cur_value->* TO <lv_string>.
+          <l_scr_field> = strlen( <lv_string> ).
+          CONDENSE <l_scr_field>.
+          CONCATENATE icon_change_text 'Chars'(chr) ` ` <l_scr_field> INTO <l_scr_field>.
+      ENDCASE.
     ENDLOOP.
 
     " Set title
@@ -1059,278 +1182,5 @@ CLASS lcl_scr_auto IMPLEMENTATION.
 
     " And call parent method
     super->pbo( iv_after = iv_after ).
-  ENDMETHOD.
-
-  METHOD check_pai.
-    super->check_pai(
-     EXPORTING
-       iv_command    = iv_command
-     CHANGING
-       cv_close      = cv_close
-       cv_read_after = cv_read_after
-       cv_map_index  = cv_map_index ).
-
-    CHECK cv_map_index = 0.
-    cv_map_index = iv_command+1(3) - 1.
-  ENDMETHOD.
-
-  METHOD show.
-    CONSTANTS c_dynnr_auto  TYPE sydynnr VALUE '9999'.
-
-    CHECK iv_before = abap_true.
-
-    " Text of parameters
-    me->mv_pbo_set_labels = abap_true.
-
-    " Detect dynnr
-    CLEAR mo_eui_screen->ms_screen-dynnr.
-    SPLIT mo_eui_screen->ms_screen-prog AT `^` INTO
-      mo_eui_screen->ms_screen-prog
-      mo_eui_screen->ms_screen-dynnr.
-
-    " Use default
-    IF mo_eui_screen->ms_screen-dynnr IS INITIAL.
-      mo_eui_screen->ms_screen-dynnr = c_dynnr_auto.
-    ENDIF.
-
-    " No data is passed
-    IF mt_map IS INITIAL.
-      zcx_eui_exception=>raise_sys_error( iv_message = 'Pass IR_CONTEXT param!' ).
-    ENDIF.
-
-    " SUBSCREEN declaration
-    DATA lt_code       TYPE stringtab.
-    DATA lv_code       TYPE string.
-    DATA lv_table_name TYPE string.
-    DATA lr_map        TYPE REF TO zcl_eui_screen=>ts_map.
-
-    APPEND mc_auto_gen_head         TO lt_code.
-    APPEND `*CAN_UPDATE=TRUE`       TO lt_code.
-    APPEND `REPORT DYNAMIC_SUBSCR.` TO lt_code.
-
-    " Add table declrations
-    IF mt_unq_table IS NOT INITIAL.
-      APPEND `TABLES:` TO lt_code.
-      LOOP AT mt_unq_table INTO lv_table_name.
-        lv_code = ``.
-        IF sy-tabix <> 1.
-          lv_code = `, `.
-        ENDIF.
-
-        CONCATENATE lv_code lv_table_name INTO lv_code.
-        APPEND lv_code TO lt_code.
-      ENDLOOP.
-      " Last dot
-      APPEND `.` TO lt_code.
-    ENDIF.
-
-**********************************************************************
-    " Begin of screen
-    APPEND `` TO lt_code.
-    CONCATENATE `SELECTION-SCREEN BEGIN OF SCREEN ` mo_eui_screen->ms_screen-dynnr ` AS SUBSCREEN.` INTO lv_code.
-    APPEND lv_code TO lt_code.
-    APPEND `SELECTION-SCREEN BEGIN OF BLOCK bl_main WITH FRAME TITLE s_title.` TO lt_code.
-
-    LOOP AT mt_map REFERENCE INTO lr_map.
-      CASE lr_map->ui_type.
-        WHEN zcl_eui_type=>mc_ui_type-table OR zcl_eui_type=>mc_ui_type-string.
-          CONCATENATE `SELECT-OPTIONS ` lr_map->par_name ` FOR SYST-INDEX.` INTO lv_code.
-
-        WHEN zcl_eui_type=>mc_ui_type-range.
-          CONCATENATE `SELECT-OPTIONS ` lr_map->par_name ` FOR ` lr_map->rollname  `.`  INTO lv_code.
-
-        WHEN OTHERS.
-          IF lr_map->ui_type = zcl_eui_type=>mc_ui_type-boolean.
-            CONCATENATE `PARAMETERS ` lr_map->par_name ` AS CHECKBOX.` INTO lv_code.
-          ELSEIF lr_map->is_list_box = abap_true.
-            CONCATENATE `PARAMETERS ` lr_map->par_name ` TYPE ` lr_map->rollname ` AS LISTBOX VISIBLE LENGTH 50.` INTO lv_code.
-          ELSE.
-            CONCATENATE `PARAMETERS ` lr_map->par_name ` TYPE ` lr_map->rollname  `.`   INTO lv_code.
-          ENDIF.
-      ENDCASE.
-
-      APPEND lv_code TO lt_code.
-    ENDLOOP.
-
-**********************************************************************
-    " END ofd screen
-    APPEND `` TO lt_code.
-    APPEND `SELECTION-SCREEN END OF BLOCK bl_main.`           TO lt_code.
-    CONCATENATE `SELECTION-SCREEN END OF SCREEN ` mo_eui_screen->ms_screen-dynnr `.` INTO lv_code.
-    APPEND lv_code                                            TO lt_code.
-
-    " For EVENT call FM ZFM_EUI_PBO_SUB_SCREEN!
-    APPEND ``  TO lt_code.
-    APPEND `AT SELECTION-SCREEN OUTPUT.`              TO lt_code.
-    " PBO
-    APPEND `CALL FUNCTION 'ZFM_EUI_PBO'.` TO lt_code.
-
-    DATA lv_can_update TYPE abap_bool.
-    lv_can_update = check_can_update( ).
-    CASE lv_can_update.
-      WHEN abap_undefined.
-
-      WHEN abap_true.
-
-        " Created but now is in permanent package
-      WHEN abap_false.
-        RETURN.
-    ENDCASE.
-
-    " concat_lines_of( )
-    DATA lv_source TYPE string.
-    DATA lo_error  TYPE REF TO zcx_eui_exception.
-
-    LOOP AT lt_code INTO lv_code.
-      CONCATENATE lv_source lv_code cl_abap_char_utilities=>cr_lf INTO lv_source.
-    ENDLOOP.
-
-    " Save lt_code to file
-    DATA lo_file TYPE REF TO zcl_eui_file.
-    CREATE OBJECT lo_file.
-    lo_file->import_from_string( iv_string = lv_source ).
-
-    CONCATENATE mo_eui_screen->ms_screen-prog `_scr.txt` INTO lv_code.
-    TRY.
-        lo_file->download( iv_save_dialog = abap_true
-                           iv_full_path   = lv_code ).
-        lo_file->open( ).
-      CATCH zcx_eui_exception INTO lo_error.
-        MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
-        RETURN.
-    ENDTRY.
-**********************************************************************
-    " Create program
-    " Sorry but usally is strictly prohibited. Please create { mo_eui_screen->ms_screen-prog } by hand based on { lt_code }.
-**********************************************************************
-
-    " read text above
-    zcx_eui_exception=>raise_dump( iv_message = 'Cannot call INSERT REPORT' ).
-    " And then change second row to *CAN_UPDATE=FALSE
-
-*    INSERT REPORT mo_eui_screen->ms_screen-prog FROM lt_code.
-*    " wrong syntax in { lt_code }
-*    IF sy-subrc <> 0.
-*      zcx_eui_exception=>raise_sys_error( iv_message = 'Cannot generate report' ).
-*    ENDIF.
-
-    " SubRoutine pool cannot contain screens ???
-    " GENERATE SUBROUTINE POOL lt_code NAME ls_screen->prog  MESSAGE lv_message LINE lv_pos.  "#EC CI_GENERATE. <--- in lt_code[]
-
-    " Ooops!
-    COMMIT WORK AND WAIT.
-  ENDMETHOD.
-
-  METHOD check_can_update.
-    DATA lt_code       TYPE stringtab.
-    DATA lv_code       TYPE string.
-
-    " No include ok
-    rv_ok = abap_undefined.
-    READ REPORT mo_eui_screen->ms_screen-prog INTO lt_code.
-    IF sy-subrc <> 0.
-      RETURN.
-    ENDIF.
-
-    " have prefix ok
-    LOOP AT lt_code INTO lv_code TO 2.
-      CASE sy-tabix.
-        WHEN 1.
-          IF lv_code <> mc_auto_gen_head.
-            rv_ok = abap_false.
-            RETURN.
-          ENDIF.
-
-        WHEN 2.
-          IF lv_code = `*CAN_UPDATE=TRUE`.
-            rv_ok = abap_true.
-            RETURN.
-          ENDIF.
-
-      ENDCASE.
-    ENDLOOP.
-
-    rv_ok = abap_false.
-  ENDMETHOD.
-ENDCLASS.
-
-**********************************************************************
-**********************************************************************
-CLASS lcl_scr_dpop IMPLEMENTATION.
-  METHOD show.
-    DATA lv_prog      TYPE char30.
-    DATA lv_title     TYPE text255.
-    DATA lv_cancelled TYPE abap_bool.
-    DATA lt_attr      TYPE sci_atttab.
-
-    CHECK iv_before = abap_true.
-
-    lv_prog  = mo_eui_screen->ms_screen-prog.
-    lv_title = mo_eui_screen->ms_status-title.
-
-    " Create screen
-    lt_attr = me->create_dyn_popup(  ).
-
-    lv_cancelled = cl_ci_query_attributes=>generic(
-      p_name       = lv_prog
-      p_title      = lv_title
-      p_display    = mo_eui_screen->mv_read_only
-      p_attributes = lt_attr ).
-
-    IF lv_cancelled = abap_true.
-      cv_close_cmd = zif_eui_manager=>mc_cmd-cancel.
-    ELSE.
-      cv_close_cmd = zif_eui_manager=>mc_cmd-ok.
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD create_dyn_popup.
-    " No data is passed
-    IF mt_map IS INITIAL.
-      zcx_eui_exception=>raise_sys_error( iv_message = 'Pass IR_CONTEXT param!' ).
-    ENDIF.
-
-    " POPUP declaration
-    DATA lr_map        TYPE REF TO zcl_eui_screen=>ts_map.
-    DATA ls_screen     TYPE zcl_eui_screen=>ts_screen.
-    DATA ls_attr       TYPE sci_attent.
-
-    " Title group
-    ls_attr-kind = 'G'.
-    ls_attr-text = mo_eui_screen->ms_status-title.
-    GET REFERENCE OF sy-index INTO ls_attr-ref.
-    APPEND ls_attr TO rt_attr.
-
-    LOOP AT mt_map REFERENCE INTO lr_map.
-      CLEAR ls_attr.
-      ls_attr-text = lr_map->label.
-      ls_attr-ref  = lr_map->cur_value.
-
-      " Get by screen option
-      ls_screen = get_screen_by_map( lr_map->name ).
-      IF ls_screen-required = '1'.
-        ls_attr-obligatory = abap_true.
-      ENDIF.
-
-      CASE lr_map->ui_type.
-          " Not supported
-        WHEN zcl_eui_type=>mc_ui_type-table OR zcl_eui_type=>mc_ui_type-string.
-          CONTINUE.
-
-        WHEN zcl_eui_type=>mc_ui_type-range.
-          ls_attr-kind = 'S'. " Select-option
-
-        WHEN OTHERS.
-          IF lr_map->ui_type = zcl_eui_type=>mc_ui_type-boolean.
-            ls_attr-kind = 'С'. " Checkbox
-          ELSEIF lr_map->is_list_box = abap_true.
-            ls_attr-kind = 'L'. " Listbox
-          ELSE.
-            ls_attr-kind = 'T'. " Parameter
-          ENDIF.
-      ENDCASE.
-
-      APPEND ls_attr TO rt_attr.
-    ENDLOOP.
   ENDMETHOD.
 ENDCLASS.

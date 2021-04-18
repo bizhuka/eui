@@ -140,6 +140,12 @@
      <MSGNR>021</MSGNR>
      <TEXT>Error in FM &amp;1 sy-subrc &amp;2</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZEUI_MESSAGE</ARBGB>
+     <MSGNR>022</MSGNR>
+     <TEXT>Error in &amp;1 text</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

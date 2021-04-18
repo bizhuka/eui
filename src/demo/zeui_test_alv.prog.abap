@@ -8,7 +8,7 @@ TYPE-POOLS:
 SELECTION-SCREEN BEGIN OF BLOCK bl_grp WITH FRAME.
 PARAMETERS:
   p_popup AS CHECKBOX DEFAULT 'X',
-  p_reado AS CHECKBOX.
+  p_edit  AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF BLOCK bl_grp.
 
 
@@ -141,9 +141,7 @@ CLASS lcl_report IMPLEMENTATION.
 
     ls_layout-grid_title = 'Title for SALV'.
     ls_layout-smalltitle = abap_true.
-    IF p_reado <> abap_true.
-      ls_layout-edit = abap_true.
-    ENDIF.
+    ls_layout-edit       = p_edit.
 
 **********************************************************************
     " Change field catalog
@@ -188,7 +186,7 @@ CLASS lcl_report IMPLEMENTATION.
 **********************************************************************
     " Sort (Sort & filter - for read_only mode only ?)
 **********************************************************************
-    IF p_reado = abap_true.
+    IF p_edit <> abap_true.
       APPEND INITIAL LINE TO lt_sort REFERENCE INTO ls_sort.
       ls_sort->fieldname = 'TITLE'.
       ls_sort->down      = abap_true.
@@ -224,8 +222,7 @@ CLASS lcl_report IMPLEMENTATION.
         is_layout      = ls_layout
         it_mod_catalog = lt_mod_catalog
         it_toolbar     = lt_toolbar
-        it_sort        = lt_sort
-        iv_read_only   = p_reado.
+        it_sort        = lt_sort.
     lo_alv->set_top_of_page_height( lv_height ).
 
     " Popup?
@@ -329,6 +326,7 @@ CLASS lcl_report IMPLEMENTATION.
     " Prepare layout
 **********************************************************************
     ls_layout-grid_title = 'Sub GRID!'.
+    ls_layout-edit       = p_edit.
 
 **********************************************************************
     " Filter table
@@ -350,8 +348,7 @@ CLASS lcl_report IMPLEMENTATION.
         ir_table       = lr_table
         " grid parameters
         is_layout      = ls_layout
-        it_mod_catalog = lt_mod_catalog
-        iv_read_only   = p_reado.
+        it_mod_catalog = lt_mod_catalog.
     lo_alv->popup( ).
 
     " Instead of set handler
@@ -373,7 +370,7 @@ ENDCLASS.
 
 CLASS lcl_txt_editor IMPLEMENTATION.
   METHOD constructor.
-    super->constructor( iv_read_only = p_reado ).
+    super->constructor( iv_editable = p_edit ).
     mo_grid = io_grid.
     mr_text = ir_text.
   ENDMETHOD.
@@ -385,7 +382,7 @@ CLASS lcl_txt_editor IMPLEMENTATION.
     sender->ms_status-title = 'Text editor'.
 
     " Hide button
-    IF p_reado = abap_true.
+    IF p_edit <> abap_true.
       APPEND zcl_eui_manager=>mc_cmd-ok TO ms_status-exclude.
     ENDIF.
 
@@ -399,7 +396,7 @@ CLASS lcl_txt_editor IMPLEMENTATION.
 
       " Set text
       mo_textedit->set_textstream( mr_text->* ).
-      IF p_reado = abap_true.
+      IF p_edit <> abap_true.
         lv_mode = cl_gui_textedit=>true.
       ELSE.
         lv_mode = cl_gui_textedit=>false.
@@ -412,7 +409,7 @@ CLASS lcl_txt_editor IMPLEMENTATION.
     CHECK iv_command = 'OK'.
 
     " Update with new text
-    IF p_reado <> abap_true.
+    IF p_edit = abap_true.
       mo_textedit->get_textstream(
        IMPORTING
          text = mr_text->* ).

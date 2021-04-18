@@ -781,8 +781,16 @@ METHOD get_field_desc.
   CASE rs_field_desc-sys_type.
 
     WHEN cl_abap_typedescr=>typekind_char.
+      " Get all boolean types
+      DATA lv_domname TYPE dd04l-domname.
+      SELECT SINGLE domname INTO lv_domname
+      FROM dd04l
+      WHERE rollname = rs_field_desc-rollname
+        AND as4local = 'A'
+        AND as4vers  = 0000.
+
       " Also CHAR
-      CASE rs_field_desc-rollname.
+      CASE lv_domname.
         WHEN 'XSDBOOLEAN' OR 'OS_BOOLEAN'.
           rs_field_desc-ui_type = mc_ui_type-boolean.
 
@@ -925,7 +933,7 @@ METHOD get_sub_field_desc.
                            IMPORTING ev_ok   = lv_ok
                                      ex_data = rt_field_desc ).
   CHECK lv_ok <> abap_true.
-  MESSAGE s017(zaqo_message) WITH is_field_desc-name DISPLAY LIKE 'E'.
+  MESSAGE s022(zeui_message) WITH is_field_desc-name DISPLAY LIKE 'E'.
 ENDMETHOD.
 
 

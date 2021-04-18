@@ -77,7 +77,7 @@ CLASS lcl_main IMPLEMENTATION.
     ENDIF.
 
     " As popup
-    mo_screen->popup( iv_col_end = 118 ).
+    mo_screen->popup( iv_col_end = 114 ).
 
     " If pressed OK
     IF mo_screen->show( io_handler = me ) = 'OK'.

@@ -11,6 +11,20 @@
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
    </VSEOCLASS>
+   <TPOOL>
+    <item>
+     <ID>I</ID>
+     <KEY>CHR</KEY>
+     <ENTRY>Chars</ENTRY>
+     <LENGTH>15</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>ROW</KEY>
+     <ENTRY>Rows</ENTRY>
+     <LENGTH>14</LENGTH>
+    </item>
+   </TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>

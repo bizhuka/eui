@@ -53,9 +53,10 @@ public section.
 
   constants:
     BEGIN OF mc_dynnr,
+        dynamic   TYPE sydynnr VALUE 'DYNC',
         free_sel  TYPE sydynnr VALUE 'FREE',
-        auto_gen  TYPE sydynnr VALUE 'AUTO',
-        dyn_popup TYPE sydynnr VALUE 'DPOP',
+*        auto_gen  TYPE sydynnr VALUE 'AUTO',
+*        dyn_popup TYPE sydynnr VALUE 'DPOP',
       END OF mc_dynnr .
 
   methods CONSTRUCTOR
@@ -63,7 +64,7 @@ public section.
       !IV_DYNNR type SYDYNNR
       !IV_CPROG type SYCPROG default SY-CPROG
       !IR_CONTEXT type ref to DATA optional
-      !IV_READ_ONLY type ABAP_BOOL optional
+      !IV_EDITABLE type ABAP_BOOL default ABAP_TRUE
     raising
       ZCX_EUI_EXCEPTION .
   methods CUSTOMIZE
@@ -194,7 +195,7 @@ METHOD constructor.
   DATA lv_number TYPE i.
   DATA lo_err    TYPE REF TO cx_root.
 
-  super->constructor( iv_read_only = iv_read_only ).
+  super->constructor( iv_editable = iv_editable ).
 
   " Screen info
   ms_screen-dynnr = iv_dynnr.
@@ -320,7 +321,7 @@ METHOD edit_in_popup.
    required = lv_required
    iv_label = iv_label ).
 
-  lo_manager->popup( iv_col_end = 118 ).
+  lo_manager->popup( iv_col_end = 114 ).
 
   " Do not clear status & title
   lo_manager->ms_status-title    = iv_title.

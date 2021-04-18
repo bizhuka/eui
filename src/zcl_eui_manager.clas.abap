@@ -26,11 +26,11 @@ public section.
   aliases TS_STATUS
     for ZIF_EUI_MANAGER~TS_STATUS .
 
-  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN'. "#EC NOTEXT
+  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN' ##NO_TEXT.
 
   methods CONSTRUCTOR
     importing
-      !IV_READ_ONLY type ABAP_BOOL .
+      !IV_EDITABLE type ABAP_BOOL .
   methods SET_STATUS
     importing
       !IS_STATUS type TS_STATUS
@@ -50,7 +50,10 @@ CLASS ZCL_EUI_MANAGER IMPLEMENTATION.
 
 
 METHOD constructor.
-  mv_read_only = iv_read_only.
+  " Invert xsdbool( <> 'X' )
+  IF iv_editable <> abap_true.
+    mv_read_only = abap_true.
+  ENDIF.
 ENDMETHOD.
 
 

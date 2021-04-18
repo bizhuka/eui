@@ -10,7 +10,7 @@ public section.
   methods CONSTRUCTOR
     importing
       !IR_TEXT type ref to STRING
-      !IV_READ_ONLY type ABAP_BOOL optional .
+      !IV_EDITABLE type ABAP_BOOL default ABAP_TRUE .
 
   methods ZIF_EUI_MANAGER~PAI
     redefinition .
@@ -29,7 +29,7 @@ CLASS ZCL_EUI_MEMO IMPLEMENTATION.
 
 
 METHOD constructor.
-  super->constructor( iv_read_only = iv_read_only ).
+  super->constructor( iv_editable = iv_editable ).
 
   mr_text      = ir_text.
 ENDMETHOD.

@@ -41,7 +41,7 @@
       <CODE>CMD_03</CODE>
       <TEXTNO>001</TEXTNO>
       <TEXT_TYPE>S</TEXT_TYPE>
-      <FUN_TEXT>03-Standard dynamic popup</FUN_TEXT>
+      <FUN_TEXT>03-Dynamic popup</FUN_TEXT>
      </RSMPE_FUNT>
      <RSMPE_FUNT>
       <CODE>CMD_04</CODE>
@@ -78,12 +78,6 @@
       <CODE>0001</CODE>
       <NO>03</NO>
       <PFNO>27</PFNO>
-     </RSMPE_BUT>
-     <RSMPE_BUT>
-      <PFK_CODE>000002</PFK_CODE>
-      <CODE>0001</CODE>
-      <NO>04</NO>
-      <PFNO>28</PFNO>
      </RSMPE_BUT>
     </BUT>
     <PFK>
