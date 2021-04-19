@@ -188,12 +188,12 @@ CLASS lcl_screen IMPLEMENTATION.
 **********************************************************************
     " LOOP AT SCREEN
 
-    DATA lv_rem                   TYPE string.
-    DATA ls_screen_dst            TYPE screen.
-    DATA ls_screen_src            LIKE LINE OF mt_screen.
-    DATA lt_scr_fields TYPE abap_compdescr_tab. " Filled 1 time with all ls_screen fields
-    DATA lv_input                 TYPE screen-input.
-    DATA ls_screen                TYPE zcl_eui_screen=>ts_screen.
+    DATA lv_rem         TYPE string.
+    DATA ls_screen_dst  TYPE screen.
+    DATA ls_screen_src  LIKE LINE OF mt_screen.
+    DATA lt_scr_fields  TYPE abap_compdescr_tab. " Filled 1 time with all ls_screen fields
+    DATA lv_input       TYPE screen-input.
+    DATA ls_screen      TYPE zcl_eui_screen=>ts_screen.
 
     LOOP AT SCREEN.
       " Have rule or not ?
@@ -207,9 +207,11 @@ CLASS lcl_screen IMPLEMENTATION.
       ENDIF.
 
       " Find in map
-      READ TABLE mt_map REFERENCE INTO ls_map
-       WITH KEY par_name = lv_name.
-      IF sy-subrc = 0.
+      DO 1 TIMES.
+        READ TABLE mt_map REFERENCE INTO ls_map
+         WITH KEY par_name = lv_name.
+        CHECK sy-subrc = 0.
+
         " Get by screen option
         ls_screen = get_screen_by_map( ls_map->name ).
 
@@ -237,7 +239,19 @@ CLASS lcl_screen IMPLEMENTATION.
         IF lv_input = '0'.
           ls_screen_dst-input = '0'.
         ENDIF.
-      ENDIF.
+
+        " TODO change SCREEN-NAME instead ?
+        CHECK ls_screen_dst-name = ls_map->par_name
+          AND ls_map->ui_type <> zcl_eui_type=>mc_ui_type-table
+          AND ls_map->ui_type <> zcl_eui_type=>mc_ui_type-string.
+        CLEAR: ls_screen-name,
+               ls_screen-input,
+               ls_screen-required.
+        zcl_eui_conv=>move_corresponding( EXPORTING is_source         = ls_screen
+                                                    iv_except_initial = abap_true    " <--- Move-corresponding except initial
+                                          CHANGING  cs_destination    = ls_screen_dst
+                                                    ct_component      = lt_scr_fields ).
+      ENDDO.
 
       FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
       LOOP AT mt_screen ASSIGNING <ls_screen_src>.
@@ -278,7 +292,7 @@ CLASS lcl_screen IMPLEMENTATION.
         ls_screen_dst-input = '1'.
       ENDIF.
 
-      " And change ls_screen
+      " And change
       CHECK ls_screen_dst <> screen.
       screen = ls_screen_dst.
       MODIFY SCREEN.
@@ -422,8 +436,8 @@ CLASS lcl_screen IMPLEMENTATION.
         DATA lo_alv TYPE REF TO zcl_eui_alv.
         CREATE OBJECT lo_alv
           EXPORTING
-            ir_table     = ls_map->cur_value
-            is_layout    = ls_layout.
+            ir_table  = ls_map->cur_value
+            is_layout = ls_layout.
         lo_manager = lo_alv.
 
         " As refernce
