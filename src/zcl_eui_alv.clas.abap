@@ -79,6 +79,9 @@ METHOD constructor.
   CREATE OBJECT mo_helper
     EXPORTING
       io_eui_alv = me.
+
+  CHECK mo_helper->is_editable( ) = abap_true.
+  mv_read_only = abap_false.
 ENDMETHOD.
 
 

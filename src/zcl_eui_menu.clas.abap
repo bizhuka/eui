@@ -15,7 +15,7 @@ public section.
       ftype        TYPE cua_ftyp,
       hidden       TYPE cua_ftyp,
       accelerator  TYPE cua_path,
-      top          TYPE flag,
+      "top          TYPE flag,
       " Do not show
       hide         TYPE abap_bool,
       END OF ts_menu .
@@ -255,32 +255,17 @@ METHOD create_toolbar.
             accelerator = <ls_menu>-accelerator ).
 
         WHEN OTHERS.
-          TRY.
-              " From 7.02
-              CALL METHOD <ls_stb_menu>-ctmenu->('ADD_FUNCTION')
-                EXPORTING
-                  fcode             = <ls_menu>-function
-                  icon              = lv_icon
-                  disabled          = <ls_menu>-disabled
-                  text              = <ls_menu>-text
-                  checked           = <ls_menu>-checked
-                  ftype             = <ls_menu>-ftype
-                  hidden            = <ls_menu>-hidden
-                  accelerator       = <ls_menu>-accelerator
-                  insert_at_the_top = <ls_menu>-top.  " <--- no param older versions
-            CATCH cx_sy_dyn_call_error.
-              " 7.00
-              <ls_stb_menu>-ctmenu->add_function(
-                fcode             = <ls_menu>-function
-                icon              = lv_icon
-                disabled          = <ls_menu>-disabled
-                text              = <ls_menu>-text
-                checked           = <ls_menu>-checked
-                ftype             = <ls_menu>-ftype
-                hidden            = <ls_menu>-hidden
-                accelerator       = <ls_menu>-accelerator ).
-          ENDTRY.
-
+          <ls_stb_menu>-ctmenu->add_function( " CALL METHOD <ls_stb_menu>-ctmenu->('ADD_FUNCTION')
+            fcode             = <ls_menu>-function
+            icon              = lv_icon
+            disabled          = <ls_menu>-disabled
+            text              = <ls_menu>-text
+            checked           = <ls_menu>-checked
+            ftype             = <ls_menu>-ftype
+            hidden            = <ls_menu>-hidden
+            accelerator       = <ls_menu>-accelerator
+            " insert_at_the_top = <ls_menu>-top  " <---  From 7.02, no param older versions
+          ).
       ENDCASE.
 
       " Set menu or delete it

@@ -1048,7 +1048,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     DATA: lo_crc64 TYPE REF TO zcl_eui_crc64, lv_hash TYPE string.
     CREATE OBJECT lo_crc64 EXPORTING iv_dref = zcl_eui_crc64=>mc_dref-no_info.
     " Version of screen code
-    lo_crc64->add_to_hash( '001' ).
+    lo_crc64->add_to_hash( '002' ).
     lo_crc64->add_to_hash( mt_map ).
     lv_hash = lo_crc64->get_hash( ).
 
@@ -1108,9 +1108,13 @@ CLASS lcl_scr_dync IMPLEMENTATION.
         WHEN OTHERS. " Parameter
           CONCATENATE `PARAMETERS ` l_par_name ` TYPE ` lr_map->rollname INTO l_line.
 
+          " Get by screen option
+          DATA ls_screen TYPE zcl_eui_screen=>ts_screen.
+          ls_screen = get_screen_by_map( lr_map->name ).
+
           IF lr_map->ui_type = zcl_eui_type=>mc_ui_type-boolean.
             CONCATENATE l_line ` AS CHECKBOX` INTO l_line.
-          ELSEIF lr_map->is_list_box = abap_true.
+          ELSEIF lr_map->is_list_box = abap_true OR ls_screen-t_listbox[] IS NOT INITIAL.
             CONCATENATE l_line ` AS LISTBOX VISIBLE LENGTH 50` INTO l_line.
           ENDIF.
           CONCATENATE l_line `.` INTO l_line.

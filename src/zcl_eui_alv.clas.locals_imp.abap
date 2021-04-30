@@ -315,11 +315,19 @@ CLASS lcl_helper IMPLEMENTATION.
     io_grid->set_drop_down_table( it_drop_down_alias = lt_dropdown ).
   ENDMETHOD.
 
+  METHOD is_editable.
+    rv_editable = mo_eui_alv->ms_layout-edit.
+    CHECK rv_editable <> abap_true.
+
+    " Check in fied catalog
+    READ TABLE mo_eui_alv->mt_mod_catalog TRANSPORTING NO FIELDS
+     WITH KEY edit = abap_true.
+    CHECK sy-subrc = 0.
+    rv_editable = abap_true.
+  ENDMETHOD.
+
   METHOD pbo_init.
-    DATA lt_fieldcat   TYPE lvc_t_fcat.
-    DATA lv_editable   TYPE abap_bool.
-    FIELD-SYMBOLS:
-      <lt_table>       TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <lt_table> TYPE STANDARD TABLE.
 
     " Get from ref
     IF me->mr_table IS NOT INITIAL.
@@ -395,6 +403,7 @@ CLASS lcl_helper IMPLEMENTATION.
 
 **********************************************************************
     " Get field catalog
+    DATA lt_fieldcat TYPE lvc_t_fcat.
     lt_fieldcat = get_field_catalog( ).
     _check_f4_table( EXPORTING io_grid     = mo_eui_alv->mo_grid
                      CHANGING  ct_fieldcat = lt_fieldcat ).
@@ -427,19 +436,7 @@ CLASS lcl_helper IMPLEMENTATION.
 
 **********************************************************************
     " Editable? Set additional Events if editable
-    DO 1 TIMES.
-      lv_editable = mo_eui_alv->ms_layout-edit.
-      CHECK lv_editable <> abap_true.
-
-      " Check in fied catalog
-      READ TABLE lt_fieldcat TRANSPORTING NO FIELDS
-       WITH KEY edit = abap_true.
-      CHECK sy-subrc = 0.
-      lv_editable = abap_true.
-    ENDDO.
-
-    " Set events
-    IF lv_editable = abap_true.
+    IF is_editable( ) = abap_true.
       mo_eui_alv->mo_grid->register_edit_event( i_event_id = cl_gui_alv_grid=>mc_evt_modified ).
       mo_eui_alv->mo_grid->register_edit_event( i_event_id = cl_gui_alv_grid=>mc_evt_enter ).
 
@@ -631,8 +628,8 @@ CLASS lcl_helper IMPLEMENTATION.
         lr_text ?= lr_cur_value.
         CREATE OBJECT lo_manager TYPE zcl_eui_memo
           EXPORTING
-            ir_text      = lr_text
-            iv_editable  = mo_eui_alv->ms_layout-edit.
+            ir_text     = lr_text
+            iv_editable = mo_eui_alv->ms_layout-edit.
 
 **********************************************************************
         " Edit sub table in alv editor
@@ -644,8 +641,8 @@ CLASS lcl_helper IMPLEMENTATION.
         DATA lo_alv TYPE REF TO zcl_eui_alv.
         CREATE OBJECT lo_alv
           EXPORTING
-            ir_table     = lr_cur_value
-            is_layout    = ls_layout.
+            ir_table  = lr_cur_value
+            is_layout = ls_layout.
         lo_alv->set_field_desc( ls_field_desc ).
         lo_manager = lo_alv.
 **********************************************************************
