@@ -1048,8 +1048,9 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     DATA: lo_crc64 TYPE REF TO zcl_eui_crc64, lv_hash TYPE string.
     CREATE OBJECT lo_crc64 EXPORTING iv_dref = zcl_eui_crc64=>mc_dref-no_info.
     " Version of screen code
-    lo_crc64->add_to_hash( '002' ).
+    lo_crc64->add_to_hash( '003' ).
     lo_crc64->add_to_hash( mt_map ).
+    lo_crc64->add_to_hash( mo_eui_screen->ms_status ).
     lv_hash = lo_crc64->get_hash( ).
 
     " Already created?
@@ -1077,7 +1078,12 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     APPEND `REPORT DYNAMIC_SUBSCR.`                                            TO rt_code.
     APPEND ``                                                                  TO rt_code.
     APPEND `SELECTION-SCREEN BEGIN OF SCREEN 9999 AS SUBSCREEN.`               TO rt_code.
-    APPEND `SELECTION-SCREEN BEGIN OF BLOCK bl_main WITH FRAME TITLE s_title.` TO rt_code.
+
+    DATA lv_line TYPE string VALUE `SELECTION-SCREEN BEGIN OF BLOCK bl_main.`.
+    IF mo_eui_screen->ms_status-title IS NOT INITIAL.
+      REPLACE FIRST OCCURRENCE OF `.` IN lv_line WITH ` WITH FRAME TITLE s_title.`.
+    ENDIF.
+    APPEND lv_line TO rt_code.
 
     DATA lr_map        TYPE REF TO zcl_eui_screen=>ts_map.
     DATA: l_par_name TYPE sychar08 VALUE 'X', l_for_name TYPE sychar08 VALUE 'F', l_cmt_name TYPE sychar08 VALUE 'T'.
