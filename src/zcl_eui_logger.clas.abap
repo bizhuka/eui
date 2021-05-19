@@ -59,6 +59,7 @@ public section.
         standard TYPE funcname VALUE 'BAL_DSP_PROFILE_STANDARD_GET',
         none     TYPE funcname VALUE '',
       END OF mc_profile .
+  data MS_HEADER type BAL_S_LOG read-only .
 
   methods CONSTRUCTOR
     importing
@@ -137,7 +138,6 @@ public section.
 protected section.
 private section.
 
-  data MS_HEADER type BAL_S_LOG .
   data MV_MSG_TYPES type STRING .
   data MV_HANDLE type BALLOGHNDL .
   data MO_MENU type ref to ZCL_EUI_MENU .
