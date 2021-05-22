@@ -252,10 +252,18 @@ METHOD add_exception.
 
   CHECK _is_msg_ok( ls_exc-msgty ) = abap_true.
 
-  CALL FUNCTION 'BAL_LOG_EXCEPTION_ADD'
+  " Do not work in CALL FUNCTION 'BAL_GLB_SEARCH_MSG'
+*  CALL FUNCTION 'BAL_LOG_EXCEPTION_ADD'
+*    i_log_handle     = mv_handle
+*    i_s_exc          = ls_exc
+
+  " As free text
+  CALL FUNCTION 'BAL_LOG_EXC_ADD'
     EXPORTING
       i_log_handle     = mv_handle
-      i_s_exc          = ls_exc
+      i_msgty          = ls_exc-msgty
+      i_probclass      = ls_exc-probclass
+      i_exception      = ls_exc-exception
     EXCEPTIONS
       log_not_found    = 1
       msg_inconsistent = 2
