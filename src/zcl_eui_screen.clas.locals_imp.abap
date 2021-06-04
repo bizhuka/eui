@@ -1051,6 +1051,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     lo_crc64->add_to_hash( '003' ).
     lo_crc64->add_to_hash( mt_map ).
     lo_crc64->add_to_hash( mo_eui_screen->ms_status ).
+    lo_crc64->add_to_hash( mo_eui_screen->ms_popup ).
     lv_hash = lo_crc64->get_hash( ).
 
     " Already created?
@@ -1080,7 +1081,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     APPEND `SELECTION-SCREEN BEGIN OF SCREEN 9999 AS SUBSCREEN.`               TO rt_code.
 
     DATA lv_line TYPE string VALUE `SELECTION-SCREEN BEGIN OF BLOCK bl_main.`.
-    IF mo_eui_screen->ms_status-title IS NOT INITIAL.
+    IF mo_eui_screen->ms_status-title IS NOT INITIAL AND mo_eui_screen->ms_popup-col_end >= 100.
       REPLACE FIRST OCCURRENCE OF `.` IN lv_line WITH ` WITH FRAME TITLE s_title.`.
     ENDIF.
     APPEND lv_line TO rt_code.
@@ -1097,10 +1098,10 @@ CLASS lcl_scr_dync IMPLEMENTATION.
           APPEND `SELECTION-SCREEN BEGIN OF LINE.` TO rt_code.
 
           l_cmt_name+1 = l_par_name+1.
-          CONCATENATE `SELECTION-SCREEN COMMENT 1(31) `  l_cmt_name `.` INTO l_line.
+          CONCATENATE `SELECTION-SCREEN COMMENT 1(33) `  l_cmt_name `.` INTO l_line.
           APPEND l_line  TO rt_code.
 
-          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON 33(15) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
+          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON 35(15) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
           APPEND l_line TO rt_code.
           APPEND `SELECTION-SCREEN END OF LINE.` TO rt_code.
 
