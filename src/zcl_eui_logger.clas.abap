@@ -122,6 +122,7 @@ public section.
   methods HAS_MESSAGES
     importing
       !IV_MSG_TYPES type STRING
+      !IV_IN_LAST_BATCH type ABAP_BOOL optional
     returning
       value(RV_OK) type ABAP_BOOL .
   methods CLEAR .
@@ -144,6 +145,7 @@ private section.
   data MV_UNIQUE type ABAP_BOOL .
   data MT_UNIQUE_MSG type TT_UNIQUE_MSG .
   data MT_SKIP_MSG type TT_SKIP_MSG .
+  data MV_PREV_MSG_CNT type I .
 
   methods _ON_BUTTON_PRESSED
     for event FUNCTION_SELECTED of CL_GUI_TOOLBAR
@@ -223,6 +225,13 @@ ENDMETHOD.
 
 METHOD add_batch.
   ro_logger = me. " logger->add_batch( )->show( ).
+
+  " IF logger->add_batch( )->has_messages( iv_msg_types     = logger->mc_msg_types-error
+  "                                        IV_IN_LAST_BATCH = 'X' ) = abap_true.
+  " ENDIF.
+  DATA lt_msg TYPE sfb_t_bal_s_msg.
+  lt_msg = get_messages( ).
+  mv_prev_msg_cnt = lines( lt_msg ).
 
   FIELD-SYMBOLS <ls_msg> TYPE any.
   LOOP AT it_msg ASSIGNING <ls_msg>.
@@ -454,9 +463,20 @@ ENDMETHOD.
 
 
 METHOD has_messages.
+  DATA: lv_from TYPE i, lv_msg_types LIKE iv_msg_types.
+
+  " Only for ADD_BATCH( ) method
+  IF iv_in_last_batch = abap_true.
+    lv_from      = mv_prev_msg_cnt.
+    lv_msg_types = ''.            " All messages types
+  ELSE.
+    lv_msg_types = iv_msg_types.  " Search by certain types
+  ENDIF.
+  lv_from = lv_from + 1.
+
   DATA lt_msg TYPE sfb_t_bal_s_msg.
-  lt_msg = get_messages( iv_msg_types ).
-  LOOP AT lt_msg TRANSPORTING NO FIELDS WHERE msgty CA iv_msg_types.
+  lt_msg = get_messages( lv_msg_types ).
+  LOOP AT lt_msg FROM lv_from TRANSPORTING NO FIELDS WHERE msgty CA iv_msg_types.
     rv_ok = abap_true.
     RETURN.
   ENDLOOP.
