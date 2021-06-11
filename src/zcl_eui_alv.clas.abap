@@ -2,7 +2,9 @@ class ZCL_EUI_ALV definition
   public
   inheriting from ZCL_EUI_MANAGER
   final
-  create public .
+  create public
+
+  global friends ZCL_EUI_ALV_FILTER .
 
 public section.
   type-pools ABAP .
@@ -36,6 +38,11 @@ public section.
   methods SET_TOP_OF_PAGE_HEIGHT
     importing
       !IV_TOP_OF_PAGE_HEIGHT type I default 12 .
+  methods ADD_BUTTON
+    importing
+      !IS_BUTTON type STB_BUTTON
+      !IO_HANDLER type ref to OBJECT optional
+      !IV_HANDLERS_MAP type CSEQUENCE optional .
   class-methods UPDATE_COMPLEX_FIELDS
     importing
       !IR_TABLE type ref to DATA
@@ -63,6 +70,22 @@ ENDCLASS.
 
 
 CLASS ZCL_EUI_ALV IMPLEMENTATION.
+
+
+METHOD add_button.
+  APPEND is_button TO mt_toolbar.
+
+  CHECK io_handler IS NOT INITIAL.
+  DATA lo_error TYPE REF TO zcx_eui_exception.
+  TRY.
+      mo_event_caller->add_handler(
+          io_handler      = io_handler
+          iv_handlers_map = iv_handlers_map
+          iv_first        = abap_true ).
+    CATCH zcx_eui_exception INTO lo_error.
+      MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
+  ENDTRY.
+ENDMETHOD.
 
 
 METHOD constructor.

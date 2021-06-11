@@ -54,6 +54,8 @@ METHOD constructor.
   IF iv_editable <> abap_true.
     mv_read_only = abap_true.
   ENDIF.
+
+  CREATE OBJECT mo_event_caller.
 ENDMETHOD.
 
 
@@ -200,7 +202,6 @@ ENDMETHOD.
 METHOD zif_eui_manager~show.
   DATA lo_error   TYPE REF TO zcx_eui_exception.
 
-  CREATE OBJECT mo_event_caller.
   IF io_handler IS NOT INITIAL.
     TRY.
         mo_event_caller->add_handler(

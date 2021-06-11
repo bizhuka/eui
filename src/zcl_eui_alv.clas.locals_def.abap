@@ -96,6 +96,10 @@ CLASS lcl_helper DEFINITION FINAL.
           sender
           e_ucomm,
 
+      on_after_refresh FOR EVENT after_refresh OF cl_gui_alv_grid
+        IMPORTING
+          sender,
+
       on_f4 FOR EVENT onf4 OF cl_gui_alv_grid
         IMPORTING
           sender

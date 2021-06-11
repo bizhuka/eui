@@ -387,7 +387,8 @@ CLASS lcl_helper IMPLEMENTATION.
       on_hotspot_click FOR mo_eui_alv->mo_grid,
       on_double_click  FOR mo_eui_alv->mo_grid,
       on_data_changed  FOR mo_eui_alv->mo_grid,
-      on_f4            FOR mo_eui_alv->mo_grid.
+      on_f4            FOR mo_eui_alv->mo_grid,
+      on_after_refresh FOR mo_eui_alv->mo_grid.
 
 **********************************************************************
     " VARIANT
@@ -705,6 +706,13 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_for_event    = 'USER_COMMAND'
      iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
      iv_param_nam_01 = 'E_UCOMM'         iv_param_val_01 = e_ucomm  ).
+  ENDMETHOD.
+
+  METHOD on_after_refresh.
+    mo_eui_alv->mo_event_caller->call_handlers(
+     iv_of_class     = 'CL_GUI_ALV_GRID'
+     iv_for_event    = 'AFTER_REFRESH'
+     iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender ).
   ENDMETHOD.
 
   METHOD on_f4.
