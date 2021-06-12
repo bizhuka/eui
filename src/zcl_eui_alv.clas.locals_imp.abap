@@ -382,6 +382,7 @@ CLASS lcl_helper IMPLEMENTATION.
     " Catch all events
     SET HANDLER: " on_pbo_event FOR me, on_pai_event FOR me,
       on_toolbar       FOR mo_eui_alv->mo_grid,
+      on_menu_button   FOR mo_eui_alv->mo_grid,
       on_user_command  FOR mo_eui_alv->mo_grid,
       on_top_of_page   FOR mo_eui_alv->mo_grid,
       on_hotspot_click FOR mo_eui_alv->mo_grid,
@@ -689,6 +690,15 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
      iv_param_nam_01 = 'E_OBJECT'        iv_param_val_01 = e_object
      iv_param_nam_02 = 'E_INTERACTIVE'   iv_param_val_02 = e_interactive ).
+  ENDMETHOD.
+
+  METHOD on_menu_button.
+    mo_eui_alv->mo_event_caller->call_handlers(
+     iv_of_class     = 'CL_GUI_ALV_GRID'
+     iv_for_event    = 'MENU_BUTTON'
+     iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
+     iv_param_nam_01 = 'E_OBJECT'        iv_param_val_01 = e_object
+     iv_param_nam_02 = 'E_UCOMM'         iv_param_val_02 = e_ucomm ).
   ENDMETHOD.
 
   METHOD on_top_of_page.

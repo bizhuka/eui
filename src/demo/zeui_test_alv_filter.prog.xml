@@ -21,6 +21,12 @@
      <ENTRY>Max row count</ENTRY>
      <LENGTH>21</LENGTH>
     </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_MENU</KEY>
+     <ENTRY>As menu</ENTRY>
+     <LENGTH>15</LENGTH>
+    </item>
    </TPOOL>
    <I18N_TPOOL>
     <item>

@@ -85,6 +85,12 @@ CLASS lcl_helper DEFINITION FINAL.
           e_object
           e_interactive,
 
+      on_menu_button FOR EVENT menu_button OF cl_gui_alv_grid
+        IMPORTING
+          sender
+          e_object
+          e_ucomm,
+
       on_top_of_page FOR EVENT top_of_page OF cl_gui_alv_grid
         IMPORTING
           sender

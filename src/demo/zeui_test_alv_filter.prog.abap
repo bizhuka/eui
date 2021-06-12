@@ -9,7 +9,8 @@ TYPE-POOLS:
 
 SELECTION-SCREEN BEGIN OF BLOCK bl_grp WITH FRAME.
 PARAMETERS:
-  p_max TYPE i DEFAULT 255 OBLIGATORY.
+  p_max  TYPE i DEFAULT 255 OBLIGATORY,
+  p_menu AS CHECKBOX.
 SELECTION-SCREEN END OF BLOCK bl_grp.
 
 
@@ -42,7 +43,7 @@ CLASS lcl_report DEFINITION FINAL.
         IMPORTING
                   fieldname        TYPE lvc_s_filt-fieldname
                   option           TYPE lvc_s_filt-option OPTIONAL
-                  low              TYPE any
+                  low              TYPE lvc_s_filt-low
         RETURNING VALUE(rt_filter) TYPE lvc_t_filt.
 ENDCLASS.
 
@@ -89,11 +90,14 @@ CLASS lcl_report IMPLEMENTATION.
     ENDIF.
 
     DATA lt_alv LIKE mt_alv.
-    FIELD-SYMBOLS: <ls_alv>      LIKE LINE OF lt_alv,
-                   <ls_sel_rows> LIKE LINE OF lt_sel_rows.
+    FIELD-SYMBOLS <ls_sel_rows> LIKE LINE OF lt_sel_rows.
     LOOP AT lt_sel_rows ASSIGNING <ls_sel_rows>.
-      READ TABLE mt_alv INDEX <ls_sel_rows>-index ASSIGNING <ls_alv>.
-      APPEND <ls_alv> TO lt_alv.
+      DATA ls_alv LIKE LINE OF lt_alv.
+      READ TABLE mt_alv INDEX <ls_sel_rows>-index INTO ls_alv.
+
+      " Without any rules (colors)
+      CLEAR ls_alv-t_color[].
+      APPEND ls_alv TO lt_alv.
     ENDLOOP.
 
     " In the begining
@@ -118,34 +122,38 @@ CLASS lcl_report IMPLEMENTATION.
     " --1--
     lt_filter = _make_filter( fieldname = 'PRICE' " <--- color this field
                               option    = 'LE'
-                              low       = 500 ).
+                              low       = '500' ).
     ls_color-col = col_positive.
-    lo_filter->add( it_filter = lt_filter
-                    iv_desc   = 'Low price'
-                    is_color  = ls_color ).
+    lo_filter->add_rule( it_filter = lt_filter
+                         iv_desc   = 'Low price'
+                         is_color  = ls_color
+                         " iv_field  = '' " Use 'PRICE' field for column
+    ).
 
     " --2--
-    lt_filter = _make_filter( fieldname = 'SEATSOCC'
-                              low       = 0  ).
-    ls_color-col = col_negative.
-    lo_filter->add( it_filter = lt_filter
-                    iv_desc   = 'Occupied seats is equal to zero'
-                    is_color  = ls_color
-                    iv_field  = '*' " <--- all fields in row
+    lt_filter = _make_filter( fieldname = 'SEATSMAX'
+                              option    = 'GE'
+                              low       = '400'  ).
+    ls_color-col = col_heading.
+    lo_filter->add_rule( it_filter = lt_filter
+                         " iv_desc   = 'Very big planes'  " <--- Get description from filter
+                         is_color  = ls_color
+                         iv_field  = 'PLANETYPE,SEATSMAX' " <--- color 2 fields
     ).
 
     " --3--
-    lt_filter = _make_filter( fieldname = 'SEATSMAX'
-                              option    = 'GE'
-                              low       = 400  ).
-    ls_color-col = col_heading.
-    lo_filter->add( it_filter = lt_filter
-                    iv_desc   = 'Very big planes'
-                    is_color  = ls_color
-                    iv_field  = 'PLANETYPE,SEATSMAX' " <--- color 2 fields
+    lt_filter = _make_filter( fieldname = 'SEATSOCC'
+                              low       = '0'  ).
+    ls_color-col = col_negative.
+    lo_filter->add_rule( it_filter = lt_filter
+                         " iv_desc   = 'Occupied seats is equal to zero'  " <--- Get description from filter
+                         is_color  = ls_color
+                         iv_field  = '*' " <--- all fields in row
     ).
 
-    lo_filter->apply( io_alv = io_alv ).
+    lo_filter->add_button( io_alv  = io_alv
+                           " is_button = use own button style
+                           iv_menu = p_menu ).
   ENDMETHOD.
 
   METHOD _make_filter.
