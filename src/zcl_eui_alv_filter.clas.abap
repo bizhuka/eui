@@ -27,17 +27,17 @@ public section.
       !IS_BUTTON type STB_BUTTON optional
       !IV_MENU type ABAP_BOOL optional .
 protected section.
-PRIVATE SECTION.
+private section.
 
-  TYPES:
+  types:
     BEGIN OF ts_lvc_s_scol,
       fld_names TYPE string, " FNAME TYPE LVC_FNAME
       color	    TYPE lvc_s_colo,
       "NOKEYCOL TYPE LVC_NOKEYC
     END OF ts_lvc_s_scol .
-  TYPES:
+  types:
     tt_lvc_s_scol TYPE STANDARD TABLE OF ts_lvc_s_scol WITH DEFAULT KEY .
-  TYPES:
+  types:
     BEGIN OF ts_rule,
       selected  TYPE os_boolean,
       desc      TYPE string,
@@ -46,61 +46,66 @@ PRIVATE SECTION.
       count     TYPE i,
       own_color TYPE lvc_t_scol,
     END OF ts_rule .
-  TYPES:
+  types:
     tt_rule TYPE STANDARD TABLE OF ts_rule WITH DEFAULT KEY .
-  TYPES:
+  types:
     tt_color_filed   TYPE SORTED TABLE OF fieldname WITH UNIQUE KEY table_line .
-  TYPES:
-    tt_menu_selected TYPE SORTED TABLE OF numc3 WITH UNIQUE KEY table_line .
 
-  CONSTANTS:
+  constants:
     BEGIN OF mc_cmd,
       popup     TYPE syucomm VALUE '_AF_SHOW_POPUP_',
       menu      TYPE syucomm VALUE '_AF_MENU_',
       clear_all TYPE numc3 VALUE 001,
     END OF mc_cmd .
-  DATA mt_rule TYPE tt_rule .
-  DATA mo_alv TYPE REF TO zcl_eui_alv .
-  DATA mv_skip TYPE abap_bool .
-  DATA mt_menu_selected TYPE tt_menu_selected .
+  data MT_RULE type TT_RULE .
+  data MO_ALV type ref to ZCL_EUI_ALV .
+  data MV_SKIP type ABAP_BOOL .
 
-  METHODS _on_user_command
-      FOR EVENT user_command OF cl_gui_alv_grid
-    IMPORTING
-      !sender
-      !e_ucomm .
-  METHODS _on_after_refresh
-      FOR EVENT after_refresh OF cl_gui_alv_grid
-    IMPORTING
-      !sender .
-  METHODS _on_menu_button
-      FOR EVENT menu_button OF cl_gui_alv_grid
-    IMPORTING
-      !sender
-      !e_object
-      !e_ucomm .
-  METHODS _filter_by_popup
-    RETURNING
-      VALUE(rr_filter) TYPE REF TO lvc_t_filt .
-  METHODS _filter_by_menu
-    IMPORTING
-      !iv_command      TYPE syucomm
-    RETURNING
-      VALUE(rr_filter) TYPE REF TO lvc_t_filt .
-  METHODS _update_rule_table .
-  METHODS _get_rule_color_filed
-    IMPORTING
-      !is_rule    TYPE ts_rule
-      !it_catalog TYPE lvc_t_fcat
-    EXPORTING
-      !et_field   TYPE tt_color_filed
-      !es_color   TYPE lvc_s_scol .
-  METHODS _get_rule_description
-    IMPORTING
-      !is_rule       TYPE ts_rule
-      !it_catalog    TYPE lvc_t_fcat
-    RETURNING
-      VALUE(rv_desc) TYPE string .
+  methods _ON_USER_COMMAND
+    for event USER_COMMAND of CL_GUI_ALV_GRID
+    importing
+      !SENDER
+      !E_UCOMM .
+  methods _ON_AFTER_REFRESH
+    for event AFTER_REFRESH of CL_GUI_ALV_GRID
+    importing
+      !SENDER .
+  methods _ON_MENU_BUTTON
+    for event MENU_BUTTON of CL_GUI_ALV_GRID
+    importing
+      !E_OBJECT
+      !E_UCOMM .
+  methods _FILTER_BY_POPUP
+    returning
+      value(RV_OK) type ABAP_BOOL .
+  methods _FILTER_BY_MENU
+    importing
+      !IV_COMMAND type SYUCOMM
+    returning
+      value(RV_OK) type ABAP_BOOL .
+  methods _ON_POPUP_DATA_CHANGED
+    for event DATA_CHANGED of CL_GUI_ALV_GRID
+    importing
+      !SENDER
+      !ER_DATA_CHANGED .
+  methods _SET_SELECTED
+    importing
+      !IV_INDEX type I
+      !IV_VALUE type CSEQUENCE default ABAP_UNDEFINED .
+  methods _UPDATE_RULE_TABLE .
+  methods _GET_RULE_COLOR_FILED
+    importing
+      !IS_RULE type TS_RULE
+      !IT_CATALOG type LVC_T_FCAT
+    exporting
+      !ET_FIELD type TT_COLOR_FILED
+      !ES_COLOR type LVC_S_SCOL .
+  methods _GET_RULE_DESCRIPTION
+    importing
+      !IS_RULE type TS_RULE
+      !IT_CATALOG type LVC_T_FCAT
+    returning
+      value(RV_DESC) type STRING .
 ENDCLASS.
 
 
@@ -185,51 +190,41 @@ METHOD clear_rules.
 
   FIELD-SYMBOLS <ls_rule> LIKE LINE OF mt_rule.
   APPEND INITIAL LINE TO mt_rule ASSIGNING <ls_rule>.
-  <ls_rule>-desc = 'Clear all filters'(caf).
+  <ls_rule>-desc     = 'Clear all filters'(caf).
+  <ls_rule>-selected = abap_true.
 ENDMETHOD.
 
 
 METHOD constructor.
   clear_rules( ).
-  INSERT mc_cmd-clear_all INTO TABLE mt_menu_selected.
 ENDMETHOD.
 
 
 METHOD _filter_by_menu.
-  DATA lv_index TYPE numc3.
+  " Always ok
+  rv_ok = abap_true.
+
+  DATA: lv_index    TYPE i, lv_selected TYPE abap_bool VALUE abap_undefined.
   lv_index = iv_command+9.
 
   IF lv_index = mc_cmd-clear_all.
-    CLEAR mt_menu_selected.
-  ELSE.
-    DELETE mt_menu_selected WHERE table_line = mc_cmd-clear_all.
+    lv_selected = abap_true.
   ENDIF.
 
-  " Select
-  INSERT lv_index INTO TABLE mt_menu_selected.
-
-  " Already selected ? Deselect
-  IF sy-subrc <> 0.
-    DELETE mt_menu_selected WHERE table_line = lv_index.
-  ENDIF.
-
-  CREATE DATA rr_filter.
-  LOOP AT mt_menu_selected INTO lv_index.
-    DATA lr_rule TYPE REF TO ts_rule.
-    READ TABLE mt_rule INDEX lv_index REFERENCE INTO lr_rule.
-    CHECK sy-subrc = 0.
-
-    APPEND LINES OF lr_rule->t_filter[] TO rr_filter->*.
-  ENDLOOP.
+  _set_selected( iv_index = lv_index
+                 iv_value = lv_selected ).
 ENDMETHOD.
 
 
 METHOD _filter_by_popup.
   FIELD-SYMBOLS <ls_rule> LIKE LINE OF mt_rule.
+
+  DATA lt_prev_selected TYPE STANDARD TABLE OF abap_bool.
   LOOP AT mt_rule ASSIGNING <ls_rule>.
-    <ls_rule>-selected = abap_false.
+    APPEND <ls_rule>-selected TO lt_prev_selected.
   ENDLOOP.
 
+**********************************************************************
   DATA lt_catalog TYPE lvc_t_fcat.
   DATA lr_catalog TYPE REF TO lvc_s_fcat.
   APPEND INITIAL LINE TO lt_catalog REFERENCE INTO lr_catalog.
@@ -265,18 +260,24 @@ METHOD _filter_by_popup.
                    iv_col_end = 70
                    iv_row_beg = 3
                    iv_row_end = 10 ).
-  CHECK lo_popup->show( ) = 'OK'.
+  IF lo_popup->show( io_handler      = me
+                        iv_handlers_map = '_ON_POPUP_DATA_CHANGED' ) <> 'OK'.
+    " Restore values
+    DATA lv_selected TYPE abap_bool.
+    LOOP AT lt_prev_selected INTO lv_selected.
+      READ TABLE mt_rule ASSIGNING <ls_rule> INDEX sy-tabix.
+      <ls_rule>-selected = lv_selected.
+    ENDLOOP.
+    RETURN.
+  ENDIF.
 
-  CREATE DATA rr_filter.
-  LOOP AT mt_rule ASSIGNING <ls_rule> WHERE selected = 'X'.
-    APPEND LINES OF <ls_rule>-t_filter[] TO rr_filter->*.
-  ENDLOOP.
+  rv_ok = abap_true.
 ENDMETHOD.
 
 
 METHOD _get_rule_color_filed.
   CLEAR: et_field,
-         et_field.
+         es_color.
 
   FIELD-SYMBOLS <ls_color> LIKE LINE OF is_rule-t_color[].
   READ TABLE is_rule-t_color[] INDEX 1 ASSIGNING <ls_color>.
@@ -387,38 +388,90 @@ METHOD _on_menu_button.
     DATA lv_fcode TYPE syucomm.
     CONCATENATE mc_cmd-menu lv_index INTO lv_fcode.
 
-    " Selected?
-    DATA lv_selected TYPE abap_bool.
-    CLEAR lv_selected.
-    READ TABLE mt_menu_selected TRANSPORTING NO FIELDS
-     WITH TABLE KEY table_line = lv_index.
-    IF sy-subrc = 0.
-      lv_selected = abap_true.
-    ENDIF.
-
     e_object->add_function( fcode   = lv_fcode
                             text    = lv_text
-                            checked = lv_selected ).
+                            checked = lr_rule->selected ).
   ENDLOOP.
 ENDMETHOD.
 
 
-METHOD _on_user_command.
-  DATA lt_filter TYPE REF TO lvc_t_filt.
-  IF e_ucomm = mc_cmd-popup.
-    lt_filter = _filter_by_popup( ).
-  ELSEIF e_ucomm CS mc_cmd-menu.
-    lt_filter = _filter_by_menu( e_ucomm ).
-  ELSE.
-    RETURN.
-  ENDIF.
+METHOD _on_popup_data_changed.
+  " Only checkbox click
+  FIELD-SYMBOLS <ls_cell> LIKE LINE OF er_data_changed->mt_good_cells[].
+  LOOP AT er_data_changed->mt_good_cells[] ASSIGNING <ls_cell> WHERE fieldname = 'SELECTED'.
+    _set_selected( iv_index = <ls_cell>-row_id
+                   iv_value = <ls_cell>-value ).
+  ENDLOOP.
 
-  sender->set_filter_criteria( EXPORTING  it_filter = lt_filter->*
+  DATA ls_stable TYPE lvc_s_stbl.
+  ls_stable-col = ls_stable-row = 'X'.
+  sender->refresh_table_display( is_stable = ls_stable ).
+ENDMETHOD.
+
+
+METHOD _on_user_command.
+  DATA lv_ok TYPE abap_bool.
+  IF e_ucomm = mc_cmd-popup.
+    lv_ok = _filter_by_popup( ).
+  ELSEIF e_ucomm CS mc_cmd-menu.
+    lv_ok = _filter_by_menu( e_ucomm ).
+  ENDIF.
+  CHECK lv_ok = abap_true.
+
+  " What items is selecter
+  DATA lt_filter TYPE lvc_t_filt.
+  FIELD-SYMBOLS <ls_rule> LIKE LINE OF mt_rule.
+  LOOP AT mt_rule ASSIGNING <ls_rule> WHERE selected = 'X'.
+    APPEND LINES OF <ls_rule>-t_filter[] TO lt_filter.
+  ENDLOOP.
+
+  sender->set_filter_criteria( EXPORTING  it_filter = lt_filter
                                EXCEPTIONS OTHERS    = 0 ).
 
   DATA ls_stable TYPE lvc_s_stbl.
   ls_stable-col = ls_stable-row = 'X'.
   sender->refresh_table_display( is_stable = ls_stable ).
+ENDMETHOD.
+
+
+METHOD _set_selected.
+  FIELD-SYMBOLS <ls_rule> LIKE LINE OF mt_rule.
+  READ TABLE mt_rule ASSIGNING <ls_rule> INDEX iv_index.
+  " CHECK sy-subrc = 0. better dump
+
+  IF iv_value <> abap_undefined.
+    <ls_rule>-selected = iv_value.
+  ELSEIF <ls_rule>-selected = abap_true. " just invert
+    <ls_rule>-selected = abap_false.
+  ELSE.
+    <ls_rule>-selected = abap_true.
+  ENDIF.
+
+  " Change other selection ?
+  CHECK <ls_rule>-selected = abap_true.
+
+  DATA lv_sel_first TYPE abap_bool VALUE abap_undefined.
+  DATA lv_sel_other TYPE abap_bool VALUE abap_undefined.
+
+  IF iv_index = mc_cmd-clear_all.
+    lv_sel_other = abap_false.
+  ELSE.
+    lv_sel_first = abap_false.
+  ENDIF.
+
+  LOOP AT mt_rule ASSIGNING <ls_rule>.
+    IF sy-tabix = mc_cmd-clear_all.
+      IF lv_sel_first <> abap_undefined.
+        <ls_rule>-selected = lv_sel_first.
+      ENDIF.
+      CONTINUE.
+    ENDIF.
+
+    IF lv_sel_other = abap_undefined.
+      RETURN.
+    ENDIF.
+    <ls_rule>-selected = lv_sel_other.
+  ENDLOOP.
 ENDMETHOD.
 
 
@@ -456,7 +509,7 @@ METHOD _update_rule_table.
         t_filter              = <ls_rule>-t_filter[]
       IMPORTING
         t_filter_index_inside = lt_ind_inside.
-    IF lv_tabix = 1.
+    IF lv_tabix = mc_cmd-clear_all.
       <ls_rule>-count = lines( <lt_table> ).
     ELSE.
       <ls_rule>-count = lines( lt_ind_inside ).
