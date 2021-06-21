@@ -683,7 +683,7 @@ METHOD zif_eui_manager~show.
   " Oops!
   IF ms_ole_info-class IS INITIAL AND ms_ole_info-in_browser <> abap_true.
     MESSAGE s013(zeui_message) WITH mv_extension INTO sy-msgli.
-    zcx_eui_exception=>raise_dump( ).
+    zcx_eui_exception=>raise_dump( iv_message = sy-msgli ).
     RETURN.
   ENDIF.
 
