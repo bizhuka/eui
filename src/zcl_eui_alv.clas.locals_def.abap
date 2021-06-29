@@ -106,6 +106,11 @@ CLASS lcl_helper DEFINITION FINAL.
         IMPORTING
           sender,
 
+      on_context_menu_request FOR EVENT context_menu_request OF cl_gui_alv_grid
+        IMPORTING
+          sender
+          e_object,
+
       on_f4 FOR EVENT onf4 OF cl_gui_alv_grid
         IMPORTING
           sender

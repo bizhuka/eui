@@ -381,15 +381,16 @@ CLASS lcl_helper IMPLEMENTATION.
 **********************************************************************
     " Catch all events
     SET HANDLER: " on_pbo_event FOR me, on_pai_event FOR me,
-      on_toolbar       FOR mo_eui_alv->mo_grid,
-      on_menu_button   FOR mo_eui_alv->mo_grid,
-      on_user_command  FOR mo_eui_alv->mo_grid,
-      on_top_of_page   FOR mo_eui_alv->mo_grid,
-      on_hotspot_click FOR mo_eui_alv->mo_grid,
-      on_double_click  FOR mo_eui_alv->mo_grid,
-      on_data_changed  FOR mo_eui_alv->mo_grid,
-      on_f4            FOR mo_eui_alv->mo_grid,
-      on_after_refresh FOR mo_eui_alv->mo_grid.
+      on_toolbar              FOR mo_eui_alv->mo_grid,
+      on_menu_button          FOR mo_eui_alv->mo_grid,
+      on_user_command         FOR mo_eui_alv->mo_grid,
+      on_top_of_page          FOR mo_eui_alv->mo_grid,
+      on_hotspot_click        FOR mo_eui_alv->mo_grid,
+      on_double_click         FOR mo_eui_alv->mo_grid,
+      on_data_changed         FOR mo_eui_alv->mo_grid,
+      on_context_menu_request FOR mo_eui_alv->mo_grid,
+      on_f4                   FOR mo_eui_alv->mo_grid,
+      on_after_refresh        FOR mo_eui_alv->mo_grid.
 
 **********************************************************************
     " VARIANT
@@ -723,6 +724,14 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_of_class     = 'CL_GUI_ALV_GRID'
      iv_for_event    = 'AFTER_REFRESH'
      iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender ).
+  ENDMETHOD.
+
+  METHOD on_context_menu_request.
+    mo_eui_alv->mo_event_caller->call_handlers(
+     iv_of_class     = 'CL_GUI_ALV_GRID'
+     iv_for_event    = 'CONTEXT_MENU_REQUEST'
+     iv_param_nam_00 = 'SENDER'       iv_param_val_00 = sender
+     iv_param_nam_01 = 'E_OBJECT'     iv_param_val_01 = e_object ).
   ENDMETHOD.
 
   METHOD on_f4.
