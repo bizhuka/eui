@@ -51,7 +51,9 @@ ENDCLASS.
 **********************************************************************
 CLASS lcl_report IMPLEMENTATION.
   METHOD start_of_selection.
-    SELECT * INTO CORRESPONDING FIELDS OF TABLE mt_alv  "#EC CI_NOWHERE
+    SELECT carrid connid fldate price currency
+           planetype seatsmax seatsocc paymentsum seatsmax_b
+           seatsocc_b seatsmax_f seatsocc_f INTO CORRESPONDING FIELDS OF TABLE mt_alv "#EC CI_NOWHERE
     FROM sflight
     UP TO p_max ROWS.
 
