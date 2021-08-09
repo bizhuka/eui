@@ -102,6 +102,12 @@ CLASS lcl_helper DEFINITION FINAL.
           sender
           e_ucomm,
 
+      on_button_click FOR EVENT button_click OF cl_gui_alv_grid
+        IMPORTING
+            sender
+            es_col_id
+            es_row_no,
+
       on_after_refresh FOR EVENT after_refresh OF cl_gui_alv_grid
         IMPORTING
           sender,
