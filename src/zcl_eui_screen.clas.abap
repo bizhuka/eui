@@ -88,6 +88,9 @@ public section.
       !IV_READ type ABAP_BOOL default ABAP_TRUE
     returning
       value(RR_CONTEXT) type ref to DATA .
+  methods GET_DIMENSION
+    exporting
+      !EV_COL_END type I .
   class-methods EDIT_IN_POPUP
     importing
       !IV_TITLE type CSEQUENCE default 'Edit value'
@@ -116,6 +119,9 @@ public section.
     returning
       value(RV_UPDATE) type ABAP_BOOL .
   class-methods TOP_PBO .
+  class-methods TOP_PAI
+    importing
+      !IV_UCOMM type SYUCOMM .
 
   methods ZIF_EUI_MANAGER~PAI
     redefinition .
@@ -355,6 +361,36 @@ METHOD get_context.
 ENDMETHOD.
 
 
+METHOD get_dimension.
+  CONSTANTS c_max_col_end TYPE i VALUE 83.
+  " Minimum width for parameters only
+  ev_col_end = 37.
+
+  FIELD-SYMBOLS <ls_map> LIKE LINE OF mo_helper->mt_map.
+  LOOP AT mo_helper->mt_map ASSIGNING <ls_map>.
+    " Maximum width
+    IF <ls_map>-ui_type = zcl_eui_type=>mc_ui_type-range OR <ls_map>-is_list_box = abap_true.
+      ev_col_end = c_max_col_end.
+    ENDIF.
+
+    IF <ls_map>-ui_type = zcl_eui_type=>mc_ui_type-table AND ev_col_end < 73.
+      ev_col_end = 73.
+    ENDIF.
+
+    " Other PARAMETERS
+    DATA lv_calc_width TYPE i.
+    lv_calc_width = 37 + <ls_map>-length * '1.2'.
+    IF ev_col_end < lv_calc_width.
+      ev_col_end = lv_calc_width.
+    ENDIF.
+  ENDLOOP.
+
+  IF ev_col_end > c_max_col_end.
+    ev_col_end = c_max_col_end.
+  ENDIF.
+ENDMETHOD.
+
+
 METHOD SHOW_RANGE.
   DATA ls_tabfld            TYPE rstabfield.
   DATA lv_title             TYPE sytitle.
@@ -391,6 +427,13 @@ METHOD SHOW_RANGE.
 
   " ok
   rv_update = abap_true.
+ENDMETHOD.
+
+
+METHOD top_pai.
+  CALL FUNCTION 'ZFM_EUI_PAI'
+    EXPORTING
+      iv_ucomm = iv_ucomm.
 ENDMETHOD.
 
 

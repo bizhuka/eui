@@ -381,17 +381,19 @@ CLASS lcl_helper IMPLEMENTATION.
 **********************************************************************
     " Catch all events
     SET HANDLER: " on_pbo_event FOR me, on_pai_event FOR me,
-      on_toolbar              FOR mo_eui_alv->mo_grid,
-      on_menu_button          FOR mo_eui_alv->mo_grid,
-      on_user_command         FOR mo_eui_alv->mo_grid,
-      on_top_of_page          FOR mo_eui_alv->mo_grid,
-      on_hotspot_click        FOR mo_eui_alv->mo_grid,
-      on_double_click         FOR mo_eui_alv->mo_grid,
-      on_button_click         FOR mo_eui_alv->mo_grid,
-      on_data_changed         FOR mo_eui_alv->mo_grid,
-      on_context_menu_request FOR mo_eui_alv->mo_grid,
-      on_f4                   FOR mo_eui_alv->mo_grid,
-      on_after_refresh        FOR mo_eui_alv->mo_grid.
+      on_toolbar                   FOR mo_eui_alv->mo_grid,
+      on_menu_button               FOR mo_eui_alv->mo_grid,
+      on_user_command              FOR mo_eui_alv->mo_grid,
+      on_top_of_page               FOR mo_eui_alv->mo_grid,
+      on_hotspot_click             FOR mo_eui_alv->mo_grid,
+      on_double_click              FOR mo_eui_alv->mo_grid,
+      on_button_click              FOR mo_eui_alv->mo_grid,
+      on_data_changed              FOR mo_eui_alv->mo_grid,
+      on_data_changed_finished     FOR mo_eui_alv->mo_grid,
+      on_context_menu_request      FOR mo_eui_alv->mo_grid,
+      on_f4                        FOR mo_eui_alv->mo_grid,
+      on_after_refresh             FOR mo_eui_alv->mo_grid,
+      on_delayed_changed_selection FOR mo_eui_alv->mo_grid.
 
 **********************************************************************
     " VARIANT
@@ -436,6 +438,19 @@ CLASS lcl_helper IMPLEMENTATION.
 
       CHECK lt_f4[] IS NOT INITIAL.
       mo_eui_alv->mo_grid->register_f4_for_fields( it_f4 = lt_f4 ).
+    ENDDO.
+
+**********************************************************************
+    " Has event handler for ONF4
+    DATA lv_delayed_changed_selection TYPE abap_bool.
+    DO 1 TIMES.
+      lv_delayed_changed_selection = mo_eui_alv->mo_event_caller->has_handler(
+              iv_of_class  = 'CL_GUI_ALV_GRID'
+              iv_for_event = 'DELAYED_CHANGED_SEL_CALLBACK' ).
+      CHECK lv_delayed_changed_selection = abap_true.
+
+      mo_eui_alv->mo_grid->register_delayed_event(
+       i_event_id = cl_gui_alv_grid=>mc_evt_delayed_change_select ).
     ENDDO.
 
 **********************************************************************
@@ -557,6 +572,15 @@ CLASS lcl_helper IMPLEMENTATION.
      iv_param_nam_03 = 'E_ONF4_BEFORE'   iv_param_val_03 = e_onf4_before
      iv_param_nam_04 = 'E_ONF4_AFTER'    iv_param_val_04 = e_onf4_after
      iv_param_nam_05 = 'E_UCOMM'         iv_param_val_05 = e_ucomm ).
+  ENDMETHOD.
+
+  METHOD on_data_changed_finished.
+    mo_eui_alv->mo_event_caller->call_handlers(
+     iv_of_class     = 'CL_GUI_ALV_GRID'
+     iv_for_event    = 'DATA_CHANGED_FINISHED'
+     iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender
+     iv_param_nam_01 = 'E_MODIFIED'      iv_param_val_01 = e_modified
+     iv_param_nam_02 = 'ET_GOOD_CELLS'   iv_param_val_02 = et_good_cells ).
   ENDMETHOD.
 
   METHOD on_double_click.
@@ -817,6 +841,13 @@ CLASS lcl_helper IMPLEMENTATION.
     DATA ls_stable TYPE lvc_s_stbl.
     ls_stable-col = ls_stable-row = abap_true.
     io_grid->refresh_table_display( is_stable = ls_stable ).
+  ENDMETHOD.
+
+  METHOD on_delayed_changed_selection.
+    mo_eui_alv->mo_event_caller->call_handlers(
+     iv_of_class     = 'CL_GUI_ALV_GRID'
+     iv_for_event    = 'DELAYED_CHANGED_SEL_CALLBACK'
+     iv_param_nam_00 = 'SENDER'          iv_param_val_00 = sender ).
   ENDMETHOD.
 
   METHOD _get_std_table.

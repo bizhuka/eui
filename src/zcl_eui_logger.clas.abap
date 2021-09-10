@@ -19,6 +19,8 @@ public section.
         msgv4 TYPE sy-msgv4,
       END OF ts_msg .
   types:
+    tt_msg TYPE STANDARD TABLE OF ts_msg WITH DEFAULT KEY .
+  types:
     tt_unique_msg TYPE SORTED TABLE OF ts_msg WITH UNIQUE KEY table_line .
   types:
     tt_skip_msg TYPE SORTED TABLE OF ts_msg WITH UNIQUE KEY msgid msgno msgty .

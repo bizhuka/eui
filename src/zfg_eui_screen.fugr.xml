@@ -40,6 +40,25 @@
      </DOCUMENTATION>
     </item>
     <item>
+     <FUNCNAME>ZFM_EUI_PAI</FUNCNAME>
+     <SHORT_TEXT>Call PAI for subscreen</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>IV_UCOMM</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>SYUCOMM</TYP>
+      </RSIMP>
+     </IMPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>IV_UCOMM</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Function Code</STEXT>
+       <INDEX> 001</INDEX>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+    <item>
      <FUNCNAME>ZFM_EUI_PBO</FUNCNAME>
      <SHORT_TEXT>Call PBO for subscreen without error</SHORT_TEXT>
     </item>

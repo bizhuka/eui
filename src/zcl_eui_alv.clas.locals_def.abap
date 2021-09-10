@@ -65,6 +65,12 @@ CLASS lcl_helper DEFINITION FINAL.
           e_onf4_after
           e_ucomm,
 
+      on_data_changed_finished FOR EVENT data_changed_finished OF cl_gui_alv_grid
+        IMPORTING
+          sender
+          e_modified
+          et_good_cells,
+
       on_double_click FOR EVENT double_click OF cl_gui_alv_grid
         IMPORTING
           sender
@@ -104,9 +110,9 @@ CLASS lcl_helper DEFINITION FINAL.
 
       on_button_click FOR EVENT button_click OF cl_gui_alv_grid
         IMPORTING
-            sender
-            es_col_id
-            es_row_no,
+          sender
+          es_col_id
+          es_row_no,
 
       on_after_refresh FOR EVENT after_refresh OF cl_gui_alv_grid
         IMPORTING
@@ -126,6 +132,10 @@ CLASS lcl_helper DEFINITION FINAL.
           er_event_data
           et_bad_cells
           e_display,
+
+      on_delayed_changed_selection FOR EVENT delayed_changed_sel_callback OF cl_gui_alv_grid
+        IMPORTING
+          sender,
 
       _check_f4_table
         IMPORTING

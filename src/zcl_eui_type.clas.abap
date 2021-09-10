@@ -602,7 +602,7 @@ METHOD find_table_fieldname.
 
   SELECT d~tabname d~fieldname d~shlporigin INTO CORRESPONDING FIELDS OF TABLE lt_dd03l "#EC TOO_MANY_ITAB_FIELDS
   FROM dd03l AS d UP TO 100 ROWS
-  WHERE d~rollname = lv_rollname AND d~as4local = 'A' AND d~tabname NOT LIKE '/%' AND d~depth = 0.
+  WHERE d~rollname = lv_rollname AND d~as4local = 'A' AND d~depth = 0.
 
   " Find short table name
   LOOP AT lt_dd03l REFERENCE INTO ls_dd03l.
@@ -610,6 +610,10 @@ METHOD find_table_fieldname.
 
     " In the end
     IF ls_dd03l->shlporigin IS NOT INITIAL.
+      ls_dd03l->tab_len = ls_dd03l->tab_len - 1000.
+    ENDIF.
+
+    IF ls_dd03l->tabname CP '/*'.
       ls_dd03l->tab_len = ls_dd03l->tab_len - 1000.
     ENDIF.
   ENDLOOP.
