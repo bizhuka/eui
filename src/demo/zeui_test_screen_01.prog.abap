@@ -77,7 +77,9 @@ CLASS lcl_main IMPLEMENTATION.
     ENDIF.
 
     " As popup
-    mo_screen->popup( iv_col_end = 114 ).
+    DATA lv_col_end TYPE i.
+    mo_screen->get_dimension( IMPORTING ev_col_end = lv_col_end ).
+    mo_screen->popup( iv_col_end = lv_col_end ).
 
     " If pressed OK
     IF mo_screen->show( io_handler = me ) = 'OK'.

@@ -327,7 +327,9 @@ METHOD edit_in_popup.
    required = lv_required
    iv_label = iv_label ).
 
-  lo_manager->popup( iv_col_end = 114 ).
+  DATA lv_col_end TYPE i.
+  lo_screen->get_dimension( IMPORTING ev_col_end = lv_col_end ).
+  lo_manager->popup( iv_col_end = lv_col_end ).
 
   " Do not clear status & title
   lo_manager->ms_status-title    = iv_title.

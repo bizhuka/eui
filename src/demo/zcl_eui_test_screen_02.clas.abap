@@ -254,7 +254,9 @@ METHOD show_initial_screen.
     lo_screen->customize( name = 'P_BDC_M' iv_label = 'BDC mode' ).
 
     " As popup
-    lo_screen->popup( iv_col_end = 114 ).
+    DATA lv_col_end TYPE i.
+    lo_screen->get_dimension( IMPORTING ev_col_end = lv_col_end ).
+    lo_screen->popup( iv_col_end = lv_col_end ).
 
     " If pressed OK
     CHECK lo_screen->show( ) = 'OK'.
