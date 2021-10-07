@@ -365,9 +365,15 @@ ENDMETHOD.
 
 METHOD get_dimension.
   CONSTANTS c_max_col_end TYPE i VALUE 83.
-  " Minimum width for parameters only
-  ev_col_end = 37.
 
+  " No context?
+  IF mo_helper->mt_map[] IS INITIAL.
+    ev_col_end = c_max_col_end.
+    RETURN.
+  ENDIF.
+
+  " Minimum width for parameters only
+  ev_col_end = 42.
   FIELD-SYMBOLS <ls_map> LIKE LINE OF mo_helper->mt_map.
   LOOP AT mo_helper->mt_map ASSIGNING <ls_map>.
     " Maximum width
@@ -380,8 +386,8 @@ METHOD get_dimension.
     ENDIF.
 
     " Other PARAMETERS
-    DATA lv_calc_width TYPE i.
-    lv_calc_width = 37 + <ls_map>-length * '1.2'.
+    DATA lv_calc_width TYPE f.
+    lv_calc_width = 42 + <ls_map>-length * '1.4'.
     IF ev_col_end < lv_calc_width.
       ev_col_end = lv_calc_width.
     ENDIF.
