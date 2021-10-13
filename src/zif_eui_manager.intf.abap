@@ -74,4 +74,9 @@ interface ZIF_EUI_MANAGER
       !IV_HANDLERS_MAP type CSEQUENCE optional
     returning
       value(RV_CLOSE_CMD) type SYUCOMM .
+  methods SET_STATUS
+    importing
+      !IS_STATUS type TS_STATUS
+    returning
+      value(RO_MANAGER) type ref to ZIF_EUI_MANAGER .
 endinterface.

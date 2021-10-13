@@ -21,6 +21,8 @@ public section.
     for ZIF_EUI_MANAGER~PBO .
   aliases POPUP
     for ZIF_EUI_MANAGER~POPUP .
+  aliases SET_STATUS
+    for ZIF_EUI_MANAGER~SET_STATUS .
   aliases SHOW
     for ZIF_EUI_MANAGER~SHOW .
   aliases TS_STATUS
@@ -31,11 +33,6 @@ public section.
   methods CONSTRUCTOR
     importing
       !IV_EDITABLE type ABAP_BOOL .
-  methods SET_STATUS
-    importing
-      !IS_STATUS type TS_STATUS
-    returning
-      value(RO_MANAGER) type ref to ZIF_EUI_MANAGER .
 protected section.
 
   data MO_EVENT_CALLER type ref to ZCL_EUI_EVENT_CALLER .
@@ -56,16 +53,6 @@ METHOD constructor.
   ENDIF.
 
   CREATE OBJECT mo_event_caller.
-ENDMETHOD.
-
-
-METHOD set_status.
-  ms_status = is_status.
-  IF ms_status IS NOT INITIAL.
-    ms_status-is_fixed = abap_true.
-  ENDIF.
-
-  ro_manager = me.
 ENDMETHOD.
 
 
@@ -195,6 +182,16 @@ METHOD zif_eui_manager~popup.
   ms_popup = ls_popup.
 
   " For chains
+  ro_manager = me.
+ENDMETHOD.
+
+
+METHOD zif_eui_manager~set_status.
+  ms_status = is_status.
+  IF ms_status IS NOT INITIAL.
+    ms_status-is_fixed = abap_true.
+  ENDIF.
+
   ro_manager = me.
 ENDMETHOD.
 
