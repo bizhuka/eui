@@ -11,6 +11,9 @@ public section.
     importing
       !IR_TEXT type ref to STRING
       !IV_EDITABLE type ABAP_BOOL default ABAP_TRUE .
+  methods GET_TEXT
+    returning
+      value(RV_TEXT) type STRING .
 
   methods ZIF_EUI_MANAGER~PAI
     redefinition .
@@ -35,6 +38,14 @@ METHOD constructor.
 ENDMETHOD.
 
 
+METHOD get_text.
+  mo_textedit->get_textstream(
+   IMPORTING
+     text = rv_text ).
+  cl_gui_cfw=>flush( ).
+ENDMETHOD.
+
+
 METHOD zif_eui_manager~pai.
   FIELD-SYMBOLS <lv_text> TYPE string.
 
@@ -49,11 +60,7 @@ METHOD zif_eui_manager~pai.
     WHEN zif_eui_manager=>mc_cmd-ok.
       " Destination
       ASSIGN mr_text->* TO <lv_text>.
-
-      mo_textedit->get_textstream(
-       IMPORTING
-         text = <lv_text> ).
-      cl_gui_cfw=>flush( ).
+      <lv_text> = get_text( ).
 
       MESSAGE 'Text copied back' TYPE 'S'.
 
