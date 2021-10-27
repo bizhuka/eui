@@ -461,7 +461,8 @@ CLASS lcl_screen IMPLEMENTATION.
     " Yes is editor
     CHECK lo_manager IS NOT INITIAL.
 
-    lo_manager->popup( ).
+    lo_manager->popup( iv_row_end = 28
+                       iv_col_end = 140 ).
 
     lo_manager->show( ).
   ENDMETHOD.
@@ -1038,9 +1039,13 @@ ENDCLASS.
 CLASS lcl_scr_dync IMPLEMENTATION.
   METHOD show.
     CHECK iv_before = abap_true.
+    _create_program( ).
+  ENDMETHOD.
 
-    " Text of parameters
-    mv_pbo_set_labels = abap_true.
+  METHOD _create_program.
+    " Already created?
+    CHECK mo_eui_screen->ms_screen-dynnr = zcl_eui_screen=>mc_dynnr-dynamic.
+    mo_eui_screen->ms_screen-dynnr = '9999'.
 
     DATA lo_prog TYPE REF TO zcl_eui_prog.
     CREATE OBJECT lo_prog EXPORTING iv_cprog = mo_eui_screen->ms_screen-prog.
@@ -1048,14 +1053,12 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     DATA: lo_crc64 TYPE REF TO zcl_eui_crc64, lv_hash TYPE string.
     CREATE OBJECT lo_crc64 EXPORTING iv_dref = zcl_eui_crc64=>mc_dref-no_info.
     " Version of screen code
-    lo_crc64->add_to_hash( '003' ).
+    lo_crc64->add_to_hash( '004' ).
     lo_crc64->add_to_hash( mt_map ).
     lo_crc64->add_to_hash( mo_eui_screen->ms_status ).
     lo_crc64->add_to_hash( mo_eui_screen->ms_popup ).
     lv_hash = lo_crc64->get_hash( ).
 
-    " Already created?
-    mo_eui_screen->ms_screen-dynnr = '9999'.
     IF lv_hash = lo_prog->get_attribute( 'HASH').
       mo_eui_screen->ms_screen-prog = lo_prog->mv_cprog.
       RETURN.
@@ -1081,8 +1084,10 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     APPEND `SELECTION-SCREEN BEGIN OF SCREEN 9999 AS SUBSCREEN.`               TO rt_code.
 
     DATA lv_line TYPE string VALUE `SELECTION-SCREEN BEGIN OF BLOCK bl_main.`.
-    IF mo_eui_screen->ms_status-title IS NOT INITIAL AND mo_eui_screen->ms_popup-col_end >= 100.
+    DATA lv_button_offset TYPE num2 VALUE 35.
+    IF mo_eui_screen->ms_status-title IS NOT INITIAL AND ( mo_eui_screen->ms_popup IS INITIAL OR mo_eui_screen->ms_popup-col_end >= 100 ).
       REPLACE FIRST OCCURRENCE OF `.` IN lv_line WITH ` WITH FRAME TITLE s_title.`.
+      lv_button_offset = 33.
     ENDIF.
     APPEND lv_line TO rt_code.
 
@@ -1098,10 +1103,10 @@ CLASS lcl_scr_dync IMPLEMENTATION.
           APPEND `SELECTION-SCREEN BEGIN OF LINE.` TO rt_code.
 
           l_cmt_name+1 = l_par_name+1.
-          CONCATENATE `SELECTION-SCREEN COMMENT 1(33) `  l_cmt_name `.` INTO l_line.
+          CONCATENATE `SELECTION-SCREEN COMMENT 1(31) `  l_cmt_name `.` INTO l_line.
           APPEND l_line  TO rt_code.
 
-          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON 35(15) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
+          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON ` lv_button_offset `(15) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
           APPEND l_line TO rt_code.
           APPEND `SELECTION-SCREEN END OF LINE.` TO rt_code.
 
@@ -1133,8 +1138,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     APPEND `SELECTION-SCREEN END OF BLOCK bl_main.`  TO rt_code.
     APPEND `SELECTION-SCREEN END OF SCREEN 9999.`    TO rt_code.
     APPEND ``                                        TO rt_code.
-    APPEND `AT SELECTION-SCREEN OUTPUT.`             TO rt_code.
-    APPEND `zcl_eui_screen=>top_pbo( ).`             TO rt_code.
+    APPEND `INCLUDE zeui_dynamic_screen_events.`     TO rt_code.
   ENDMETHOD.
 
   METHOD get_parameter_name.
@@ -1158,6 +1162,10 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     FIELD-SYMBOLS <ls_current_screen> TYPE sydb0_screen.
     FIELD-SYMBOLS <lv_title>          TYPE csequence.
 
+    IF iv_before = abap_true.
+      _create_program( ).
+      RETURN.
+    ENDIF.
     CHECK iv_after = abap_true.
 
     ASSIGN ('(RSDBRUNT)CURRENT_SCREEN') TO <ls_current_screen> CASTING.
@@ -1204,6 +1212,9 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     IF <lv_title> IS ASSIGNED.
       <lv_title> = mo_eui_screen->ms_status-title.
     ENDIF.
+
+    " Text of parameters
+    mv_pbo_set_labels = abap_true.
 
     " And call parent method
     super->pbo( iv_after = iv_after ).

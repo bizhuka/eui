@@ -4,6 +4,8 @@ class ZCL_EUI_TYPE definition
   create public .
 
 public section.
+*"* public components of class ZCL_EUI_TYPE
+*"* do not include other source files here!!!
   type-pools ABAP .
 
   types:
@@ -30,22 +32,22 @@ public section.
     tt_unique_type TYPE SORTED TABLE OF string WITH UNIQUE KEY table_line .
 
   constants:
-    BEGIN OF MC_UI_TYPE,
+   BEGIN OF MC_UI_TYPE,
     " Simple UI types
-    CHAR type STRING value 'char',
-    NUMC type STRING value 'numc',
-    NUMERIC type STRING value 'numeric',
-    BOOLEAN type STRING value 'boolean',
-    DATE type STRING value 'date',
-    TIME type STRING value 'time',
-    DATETIME type STRING value 'datetime',
+    CHAR     type ZDEUI_UI_TYPE value 'char',
+    NUMC     type ZDEUI_UI_TYPE value 'numc',
+    NUMERIC  type ZDEUI_UI_TYPE value 'numeric',
+    BOOLEAN  type ZDEUI_UI_TYPE value 'boolean',
+    DATE     type ZDEUI_UI_TYPE value 'date',
+    TIME     type ZDEUI_UI_TYPE value 'time',
+    DATETIME type ZDEUI_UI_TYPE value 'datetime',
     " Complext UI types
-    STRING type STRING value 'string',
-    RANGE  type STRING value 'range',
-    TABLE  type STRING value 'table',
+    STRING   type ZDEUI_UI_TYPE value 'string',
+    RANGE    type ZDEUI_UI_TYPE value 'range',
+    TABLE    type ZDEUI_UI_TYPE value 'table',
     " For tech only
-    STRUCT type STRING value 'struct',
-    OBJECT type STRING value 'object',
+    STRUCT   type ZDEUI_UI_TYPE value 'struct',
+    OBJECT   type ZDEUI_UI_TYPE value 'object',
    END OF MC_UI_TYPE .
 
   class-methods GET_CATALOG
@@ -58,6 +60,12 @@ public section.
       !IV_TUNE_UP type ABAP_BOOL default ABAP_TRUE
     returning
       value(RT_FIELDCAT) type LVC_T_FCAT .
+  class-methods GET_MOD_CATALOG
+    importing
+      !IR_TABLE type ref to DATA
+      !IT_MOD_CATALOG type LVC_T_FCAT
+    returning
+      value(RT_CATALOG) type LVC_T_FCAT .
   class-methods IS_LIST_BOX
     importing
       !IV_TABNAME type DFIES-TABNAME
@@ -928,6 +936,52 @@ METHOD get_field_desc.
   IF rs_field_desc-label IS INITIAL.
     rs_field_desc-label = rs_field_desc-name.
   ENDIF.
+ENDMETHOD.
+
+
+METHOD get_mod_catalog.
+  DATA lt_catalog_fields         TYPE abap_compdescr_tab. " Filled 1 time with all LVC_S_FCAT fields
+  DATA ls_mod_catalog            LIKE LINE OF it_mod_catalog.
+  FIELD-SYMBOLS <ls_fieldcat>    LIKE LINE OF rt_catalog.
+  FIELD-SYMBOLS <ls_mod_catalog> LIKE LINE OF it_mod_catalog.
+
+  " Get field catalog
+  rt_catalog = zcl_eui_type=>get_catalog( ir_table = ir_table ).
+
+  " Change field catalog
+  CLEAR lt_catalog_fields.
+  LOOP AT rt_catalog ASSIGNING <ls_fieldcat>.
+
+    LOOP AT it_mod_catalog ASSIGNING <ls_mod_catalog>.
+      " Start of group (1 symbol)
+      IF <ls_mod_catalog>-fieldname = '+'.
+        ls_mod_catalog = <ls_mod_catalog>.
+        CONTINUE.
+      ELSEIF <ls_mod_catalog>-fieldname(1) = '+'.
+        " Group continue
+        ls_mod_catalog-fieldname = <ls_mod_catalog>-fieldname+1.
+      ELSE.
+        " No group
+        ls_mod_catalog = <ls_mod_catalog>.
+      ENDIF.
+
+      " By mask ?
+      IF ls_mod_catalog-fieldname CS '*'.
+        CHECK <ls_fieldcat>-fieldname CP ls_mod_catalog-fieldname.
+      ELSE.
+        CHECK <ls_fieldcat>-fieldname = ls_mod_catalog-fieldname.
+      ENDIF.
+
+      CLEAR ls_mod_catalog-fieldname. " Do not copy field name
+      zcl_eui_conv=>move_corresponding(
+       EXPORTING
+         is_source         = ls_mod_catalog
+         iv_except_initial = abap_true    " <--- Move-corresponding except initial
+       CHANGING
+         cs_destination    = <ls_fieldcat>
+         ct_component      = lt_catalog_fields ).
+    ENDLOOP.
+  ENDLOOP.
 ENDMETHOD.
 
 

@@ -3,6 +3,8 @@ class ZCL_EUI_MANAGER definition
   create public .
 
 public section.
+*"* public components of class ZCL_EUI_MANAGER
+*"* do not include other source files here!!!
   type-pools ABAP .
 
   interfaces ZIF_EUI_MANAGER .
@@ -28,8 +30,14 @@ public section.
   aliases TS_STATUS
     for ZIF_EUI_MANAGER~TS_STATUS .
 
-  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN' ##NO_TEXT.
+  constants MC_EUI_SCREEN_FUGR type SYCPROG value 'SAPLZFG_EUI_SCREEN'. "#EC NOTEXT
 
+  methods ADD_HANDLER
+    importing
+      !IO_HANDLER type ref to OBJECT
+      !IV_HANDLERS_MAP type CSEQUENCE optional
+    returning
+      value(RO_MANAGER) type ref to ZCL_EUI_MANAGER .
   methods CONSTRUCTOR
     importing
       !IV_EDITABLE type ABAP_BOOL .
@@ -39,11 +47,28 @@ protected section.
   data MV_READ_ONLY type ABAP_BOOL .
   data MV_CLOSE_CMD type SYUCOMM .
 private section.
+*"* private components of class ZCL_EUI_MANAGER
+*"* do not include other source files here!!!
 ENDCLASS.
 
 
 
 CLASS ZCL_EUI_MANAGER IMPLEMENTATION.
+
+
+METHOD add_handler.
+  ro_manager = me. " for chain calls
+  CHECK io_handler IS NOT INITIAL.
+
+  DATA lo_error TYPE REF TO zcx_eui_exception.
+  TRY.
+      mo_event_caller->add_handler(
+          io_handler      = io_handler
+          iv_handlers_map = iv_handlers_map ).
+    CATCH zcx_eui_exception INTO lo_error.
+      MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
+  ENDTRY.
+ENDMETHOD.
 
 
 METHOD constructor.
@@ -197,18 +222,8 @@ ENDMETHOD.
 
 
 METHOD zif_eui_manager~show.
-  DATA lo_error   TYPE REF TO zcx_eui_exception.
-
-  IF io_handler IS NOT INITIAL.
-    TRY.
-        mo_event_caller->add_handler(
-            io_handler      = io_handler
-            iv_handlers_map = iv_handlers_map ).
-      CATCH zcx_eui_exception INTO lo_error.
-        MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.
-        RETURN.
-    ENDTRY.
-  ENDIF.
+  add_handler( io_handler      = io_handler
+               iv_handlers_map = iv_handlers_map ).
 
   " Just call nect screen
   CALL FUNCTION 'ZFM_EUI_NEXT_SCREEN'

@@ -97,7 +97,7 @@ CLASS lcl_helper IMPLEMENTATION.
     mo_eui_alv->ms_status-is_fixed = abap_true.
     mo_eui_alv->ms_status-title    = ms_field_desc->label.
 
-    " 2 buttons
+                                                            " 2 buttons
     IF mo_eui_alv->mv_read_only = abap_true. " <> lcl_opt=>is_editable( ms_field_desc->is_editable )
       APPEND zif_eui_manager=>mc_cmd-ok TO mo_eui_alv->ms_status-exclude.
     ENDIF.
@@ -150,53 +150,17 @@ CLASS lcl_helper IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_field_catalog.
-    DATA lt_catalog_fields TYPE abap_compdescr_tab. " Filled 1 time with all LVC_S_FCAT fields
-    DATA ls_mod_catalog            LIKE LINE OF mo_eui_alv->mt_mod_catalog.
-    DATA ls_sub_field              TYPE REF TO zcl_eui_type=>ts_field_desc.
-    FIELD-SYMBOLS <ls_fieldcat>    LIKE LINE OF rt_fieldcat.
-    FIELD-SYMBOLS <ls_mod_catalog> LIKE LINE OF mo_eui_alv->mt_mod_catalog.
-
-    " Get field catalog
+    DATA lr_table TYPE REF TO data.
     IF me->mr_table IS NOT INITIAL. " AND me->ms_field_desc IS NOT INITIAL.
-      rt_fieldcat = zcl_eui_type=>get_catalog( ir_table = me->mr_table ).
+      lr_table = me->mr_table.
     ELSE.
-      rt_fieldcat = zcl_eui_type=>get_catalog( ir_table = mo_eui_alv->mr_table ).
+      lr_table = mo_eui_alv->mr_table.
     ENDIF.
-
+    rt_fieldcat = zcl_eui_type=>get_mod_catalog( ir_table       = lr_table
+                                                 it_mod_catalog = mo_eui_alv->mt_mod_catalog ).
     " Change field catalog
-    CLEAR lt_catalog_fields.
+    FIELD-SYMBOLS <ls_fieldcat> LIKE LINE OF rt_fieldcat.
     LOOP AT rt_fieldcat ASSIGNING <ls_fieldcat>.
-
-      LOOP AT mo_eui_alv->mt_mod_catalog ASSIGNING <ls_mod_catalog>.
-        " Start of group (1 symbol)
-        IF <ls_mod_catalog>-fieldname = '+'.
-          ls_mod_catalog = <ls_mod_catalog>.
-          CONTINUE.
-        ELSEIF <ls_mod_catalog>-fieldname(1) = '+'.
-          " Group continue
-          ls_mod_catalog-fieldname = <ls_mod_catalog>-fieldname+1.
-        ELSE.
-          " No group
-          ls_mod_catalog = <ls_mod_catalog>.
-        ENDIF.
-
-        " By mask ?
-        IF ls_mod_catalog-fieldname CS '*'.
-          CHECK <ls_fieldcat>-fieldname CP ls_mod_catalog-fieldname.
-        ELSE.
-          CHECK <ls_fieldcat>-fieldname = ls_mod_catalog-fieldname.
-        ENDIF.
-
-        CLEAR ls_mod_catalog-fieldname. " Do not copy field name
-        zcl_eui_conv=>move_corresponding(
-         EXPORTING
-           is_source         = ls_mod_catalog
-           iv_except_initial = abap_true    " <--- Move-corresponding except initial
-         CHANGING
-           cs_destination    = <ls_fieldcat>
-           ct_component      = lt_catalog_fields ).
-      ENDLOOP.
-
 ***    too short
 ***    " For F4
 ***    IF <ls_fieldcat>-rollname CP '*-*'.
@@ -205,7 +169,7 @@ CLASS lcl_helper IMPLEMENTATION.
 ***       <ls_fieldcat>-ref_field.
 ***    ENDIF.
 
-      " Change field catalog
+      DATA ls_sub_field TYPE REF TO zcl_eui_type=>ts_field_desc.
       READ TABLE mt_sub_field REFERENCE INTO ls_sub_field
        WITH KEY name = <ls_fieldcat>-fieldname.
       IF sy-subrc = 0.
@@ -221,7 +185,7 @@ CLASS lcl_helper IMPLEMENTATION.
           <ls_fieldcat>-hotspot = abap_true.
         ENDIF.
 
-        " For F4
+                                                            " For F4
         IF ls_sub_field->rollname CP '*-*'.
           SPLIT ls_sub_field->rollname AT '-' INTO
            <ls_fieldcat>-ref_table
@@ -274,7 +238,7 @@ CLASS lcl_helper IMPLEMENTATION.
             lv_key_fld = lv_txt_fld = lr_field->*.
           WHEN 2.
             lv_txt_fld = lr_field->*.
-          WHEN 3. " Or 4 ?
+          WHEN 3.                                           " Or 4 ?
             CLEAR lv_key_fld.
             EXIT.
         ENDCASE.
@@ -369,10 +333,10 @@ CLASS lcl_helper IMPLEMENTATION.
 
     CREATE OBJECT mo_eui_alv->mo_grid
       EXPORTING
-        i_parent = lo_container
+        i_parent      = lo_container
 *       i_appl_events = abap_true
       EXCEPTIONS
-        OTHERS   = 1.
+        others        = 1.
     IF sy-subrc <> 0.
       MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno DISPLAY LIKE 'E' WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
       RETURN.

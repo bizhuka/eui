@@ -113,6 +113,7 @@ ENDCLASS.
 CLASS lcl_scr_dync DEFINITION INHERITING FROM lcl_screen.
   PUBLIC SECTION.
     METHODS:
+      _create_program,
       _make_screen_code
         RETURNING VALUE(rt_code) TYPE stringtab,
 

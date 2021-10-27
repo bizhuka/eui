@@ -22,7 +22,7 @@ DATA:
   gv_screen_prog_07  TYPE syrepid,  gv_screen_dynnr_07 TYPE sydynnr.
 
 " Free selection dialog
-DATA go_free_manager TYPE REF TO zif_eui_manager.
+DATA go_top_manager TYPE REF TO zif_eui_manager.
 
 **********************************************************************
 **********************************************************************
@@ -47,18 +47,20 @@ CLASS lcl_stack DEFINITION FINAL.
       push_stack
         IMPORTING
           io_manager          TYPE REF TO zif_eui_manager
-          VALUE(iv_read_only) TYPE abap_bool,
+          value(iv_read_only) TYPE abap_bool,
 
       get_stack
         IMPORTING
                   iv_check        TYPE abap_bool DEFAULT abap_true
-        RETURNING VALUE(ro_stack) TYPE REF TO lcl_stack,
+        RETURNING value(ro_stack) TYPE REF TO lcl_stack,
 
       pop_stack,
 
       pbo_0700,
 
       pai_0700
+        IMPORTING
+                  iv_silent        TYPE abap_bool OPTIONAL
         CHANGING
           cv_cmd TYPE syucomm,
 
@@ -76,12 +78,6 @@ CLASS lcl_stack IMPLEMENTATION.
     DATA lv_col_end TYPE i.
     DATA lv_row_end TYPE i.
     DATA lv_shift   TYPE i.
-
-    " ### NO_CALL
-    IF io_manager->ms_screen-dynnr = zcl_eui_screen=>mc_dynnr-free_sel.
-      go_free_manager = io_manager.
-      RETURN.
-    ENDIF.
 
     " Next screen
     ADD 1 TO mv_dynnr_index.
@@ -150,7 +146,7 @@ CLASS lcl_stack IMPLEMENTATION.
     ENDIF.
 
     IF iv_check = abap_true AND ( mv_dynnr_index <> lv_dynnr OR mv_dynnr_index <> ro_stack->dynnr ).
-      zcx_eui_exception=>raise_dump( iv_message = 'Do not call LEAVE SCREEN 0 by code. Use CV_CLOSE in PAI!' ).
+      zcx_eui_no_check=>raise_sys_error( iv_message = 'Do not call LEAVE SCREEN 0 by code. Use CV_CLOSE in PAI!' ).
     ENDIF.
   ENDMETHOD.
 
@@ -250,13 +246,23 @@ CLASS lcl_stack IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD pai_0700.
+    DATA lo_error   TYPE REF TO zcx_eui_no_check.
     DATA lo_manager TYPE REF TO zif_eui_manager.
     DATA lo_stack   TYPE REF TO lcl_stack.
     DATA lv_ok_cmd  LIKE gv_ok_code.
     DATA lv_close   TYPE abap_bool.
 
     " Get manager
-    lo_stack   = get_stack( ).
+    TRY.
+      lo_stack = get_stack( ).
+    CATCH zcx_eui_no_check INTO lo_error.
+      " Wrong screen number? Close by OK or Cancel
+      IF iv_silent = abap_true.
+        RETURN.
+      ENDIF.
+      RAISE EXCEPTION lo_error.
+    ENDTRY.
+
     lo_manager = lo_stack->manager.
 
     lv_ok_cmd = cv_cmd.
@@ -286,7 +292,7 @@ ENDCLASS.
 *----------------------------------------------------------------------*
 FORM free_screen_pbo TABLES ct_seldyn STRUCTURE rsseldyn
                             ct_fldnum STRUCTURE rsdsfldnum. "#EC CALLED
-  go_free_manager->pbo( ).
+  go_top_manager->pbo( ).
 ENDFORM.
 
 *&---------------------------------------------------------------------*
@@ -301,7 +307,7 @@ FORM free_screen_pai TABLES ct_seldyn STRUCTURE rsseldyn
   ASSIGN ('(SAPLSSEL)SSCRFIELDS') TO <ls_sscrfields>.
   CHECK <ls_sscrfields> IS ASSIGNED.
 
-  go_free_manager->pai(
+  go_top_manager->pai(
    EXPORTING
      iv_command = <ls_sscrfields>-ucomm
    CHANGING

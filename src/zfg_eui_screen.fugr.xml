@@ -24,6 +24,12 @@
        <REFERENCE>X</REFERENCE>
        <TYP>ABAP_BOOL</TYP>
       </RSIMP>
+      <RSIMP>
+       <PARAMETER>IV_IS_TOP</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ABAP_BOOL</TYP>
+      </RSIMP>
      </IMPORT>
      <DOCUMENTATION>
       <RSFDO>
@@ -36,6 +42,11 @@
        <PARAMETER>IV_READ_ONLY</PARAMETER>
        <KIND>P</KIND>
        <INDEX> 002</INDEX>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IV_IS_TOP</PARAMETER>
+       <KIND>P</KIND>
+       <INDEX> 003</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
@@ -1533,7 +1544,7 @@
        <LINE>CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>INCLUDING gv_screen_prog_02 gv_screen_dynnr_02.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
@@ -1619,7 +1630,7 @@
        <LINE>CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>INCLUDING gv_screen_prog_03 gv_screen_dynnr_03.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
@@ -1705,7 +1716,7 @@
        <LINE>CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>INCLUDING gv_screen_prog_04 gv_screen_dynnr_04.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
@@ -1791,7 +1802,7 @@
        <LINE>CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>INCLUDING gv_screen_prog_05 gv_screen_dynnr_05.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
@@ -1877,7 +1888,7 @@
        <LINE>CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>INCLUDING gv_screen_prog_06 gv_screen_dynnr_06.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
@@ -1963,7 +1974,7 @@
        <LINE>CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>INCLUDING gv_screen_prog_07 gv_screen_dynnr_07.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
