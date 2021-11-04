@@ -93,7 +93,7 @@ public section.
       !EV_COL_END type I .
   class-methods EDIT_IN_POPUP
     importing
-      !IV_TITLE type CSEQUENCE default 'Edit value'
+      !IV_TITLE type CSEQUENCE default 'Edit value'(edt)
       !IV_LABEL type CSEQUENCE optional
       !IV_REQUIRED type ABAP_BOOL optional
     changing

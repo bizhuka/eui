@@ -461,8 +461,7 @@ CLASS lcl_screen IMPLEMENTATION.
     " Yes is editor
     CHECK lo_manager IS NOT INITIAL.
 
-    lo_manager->popup( iv_row_end = 28
-                       iv_col_end = 140 ).
+    lo_manager->popup( iv_row_end = 28 ).
 
     lo_manager->show( ).
   ENDMETHOD.
@@ -1053,7 +1052,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     DATA: lo_crc64 TYPE REF TO zcl_eui_crc64, lv_hash TYPE string.
     CREATE OBJECT lo_crc64 EXPORTING iv_dref = zcl_eui_crc64=>mc_dref-no_info.
     " Version of screen code
-    lo_crc64->add_to_hash( '004' ).
+    lo_crc64->add_to_hash( '005' ).
     lo_crc64->add_to_hash( mt_map ).
     lo_crc64->add_to_hash( mo_eui_screen->ms_status ).
     lo_crc64->add_to_hash( mo_eui_screen->ms_popup ).
@@ -1106,7 +1105,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
           CONCATENATE `SELECTION-SCREEN COMMENT 1(31) `  l_cmt_name `.` INTO l_line.
           APPEND l_line  TO rt_code.
 
-          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON ` lv_button_offset `(15) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
+          CONCATENATE `SELECTION-SCREEN  PUSHBUTTON ` lv_button_offset `(19) ` l_par_name ` USER-COMMAND ` l_par_name `.` INTO l_line.
           APPEND l_line TO rt_code.
           APPEND `SELECTION-SCREEN END OF LINE.` TO rt_code.
 
