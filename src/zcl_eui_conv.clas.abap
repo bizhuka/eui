@@ -66,6 +66,12 @@ public section.
       !IV_ENCODING type ABAP_ENCODING default MC_ENCODING-UTF_8
     returning
       value(RV_XSTRING) type XSTRING .
+  class-methods STRING_TO_TEXT_TABLE
+    importing
+      !IV_STRING type STRING
+    exporting
+      !ET_TEXT type TABLE
+      !EV_LENGTH type I .
   class-methods XML_TO_STR
     importing
       !IO_DOC type ref to IF_IXML_DOCUMENT
@@ -390,6 +396,18 @@ METHOD MOVE_CORRESPONDING.
 
     <lv_dest> = <lv_src>.
   ENDLOOP.
+ENDMETHOD.
+
+
+METHOD string_to_text_table.
+  " cl_bcs_convert=>string_to_soli( ).
+  CALL FUNCTION 'SCMS_STRING_TO_FTEXT'
+    EXPORTING
+      text      = iv_string
+    IMPORTING
+      length    = ev_length
+    TABLES
+      ftext_tab = et_text.
 ENDMETHOD.
 
 
