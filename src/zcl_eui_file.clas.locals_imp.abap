@@ -96,6 +96,10 @@ CLASS lcl_doi IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD web_dynpro_attach.
+    IF i_mime_type IS INITIAL.
+      i_mime_type = 'RAW'.
+    ENDIF.
+
     cl_wd_runtime_services=>attach_file_to_response(
       i_filename      = i_filename
       i_content       = i_content

@@ -10,8 +10,9 @@ public section.
   types:
     BEGIN OF TS_OLE_INFO,
       " Excel & Word
-      app      TYPE ole2_object,
-      class    TYPE text40,
+      app       TYPE ole2_object,
+      class     TYPE text40,
+      mime_type TYPE string,
 
       " Html & pdf
       in_browser   TYPE abap_bool,
@@ -186,7 +187,8 @@ METHOD download.
     lcl_doi=>web_dynpro_attach(
         i_filename      = iv_default_filename " lv_file_name " File name with extension
         i_content       = me->mv_xstring
-        i_inplace       = abap_false ). " <--- just download
+        i_inplace       = abap_false  " <--- just download
+        i_mime_type     = ms_ole_info-mime_type ).
     RETURN.
   ENDIF.
 
@@ -523,13 +525,33 @@ METHOD set_full_path.
 
   " detect by extension
   IF mv_extension CP `xls*` OR mv_extension = mc_extension-csv.
-    ms_ole_info-class     = `Excel.Application`.
-    ms_ole_info-proxy_app = `Excel.Sheet`.
+    ms_ole_info-class      = `Excel.Application`.
+    ms_ole_info-proxy_app  = `Excel.Sheet`.
+    CASE mv_extension.
+      WHEN `xls`.
+        ms_ole_info-mime_type  = `application/vnd.ms-excel`.
+      WHEN `xlsx`.
+        ms_ole_info-mime_type  = `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
+      WHEN `xlsm`.
+        ms_ole_info-mime_type  = `application/vnd.ms-excel.sheet.macroEnabled.12`.
+    ENDCASE.
   ELSEIF mv_extension CP `doc*`.
-    ms_ole_info-class     = `Word.Application`.
-    ms_ole_info-proxy_app = `Word.Document`.
-  ELSEIF mv_extension CP `htm*` OR mv_extension  = mc_extension-pdf.
+    ms_ole_info-class      = `Word.Application`.
+    ms_ole_info-proxy_app  = `Word.Document`.
+    CASE mv_extension.
+      WHEN `doc`.
+        ms_ole_info-mime_type  = `application/msword`.
+      WHEN `docx`.
+        ms_ole_info-mime_type  = `application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
+      WHEN `docm`.
+        ms_ole_info-mime_type  = `application/vnd.ms-word.document.macroEnabled.12`.
+    ENDCASE.
+  ELSEIF mv_extension CP `htm*`.
     ms_ole_info-in_browser = abap_true.
+    ms_ole_info-mime_type  = `text/html`.
+  ELSEIF mv_extension = mc_extension-pdf.
+    ms_ole_info-in_browser = abap_true.
+    ms_ole_info-mime_type  = `application/pdf`.
   ENDIF.
 ENDMETHOD.
 
@@ -676,7 +698,8 @@ METHOD zif_eui_manager~show.
     lcl_doi=>web_dynpro_attach(
         i_filename      = mv_file_name   " File name with extension
         i_content       = me->mv_xstring
-        i_inplace       = abap_true ).   " <--- Show inplace
+        i_inplace       = abap_true   " <--- Show inplace
+        i_mime_type     = ms_ole_info-mime_type ).
     RETURN.
   ENDIF.
 

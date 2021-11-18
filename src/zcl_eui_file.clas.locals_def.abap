@@ -23,11 +23,11 @@ CLASS lcl_doi DEFINITION FINAL.
 
       web_dynpro_attach
         IMPORTING
-          i_filename      TYPE string                          " File name with extension
-          i_content       TYPE xstring
-          i_inplace       TYPE abap_bool
-          i_in_new_window TYPE abap_bool DEFAULT abap_false
-          i_mime_type     TYPE string    DEFAULT 'RAW'.        " No need to specify
+          i_filename         TYPE string                          " File name with extension
+          i_content          TYPE xstring
+          i_inplace          TYPE abap_bool
+          i_in_new_window    TYPE abap_bool DEFAULT abap_false
+          VALUE(i_mime_type) TYPE string    OPTIONAL.
 ENDCLASS.
 
 
