@@ -27,7 +27,7 @@ CLASS lcl_doi DEFINITION FINAL.
           i_content          TYPE xstring
           i_inplace          TYPE abap_bool
           i_in_new_window    TYPE abap_bool DEFAULT abap_false
-          VALUE(i_mime_type) TYPE string    OPTIONAL.
+          i_mime_type        TYPE string    OPTIONAL.
 ENDCLASS.
 
 

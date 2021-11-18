@@ -96,8 +96,11 @@ CLASS lcl_doi IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD web_dynpro_attach.
-    IF i_mime_type IS INITIAL.
-      i_mime_type = 'RAW'.
+    DATA lv_mime_type TYPE STRING.
+    lv_mime_type = i_mime_type.
+    " Use as default
+    IF lv_mime_type IS INITIAL.
+      lv_mime_type = 'RAW'.
     ENDIF.
 
     cl_wd_runtime_services=>attach_file_to_response(
@@ -107,6 +110,6 @@ CLASS lcl_doi IMPLEMENTATION.
 
       " Use defaults
       i_in_new_window = i_in_new_window
-      i_mime_type     = i_mime_type ).
+      i_mime_type     = lv_mime_type ).
   ENDMETHOD.
 ENDCLASS.
