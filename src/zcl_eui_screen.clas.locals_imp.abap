@@ -301,7 +301,7 @@ CLASS lcl_screen IMPLEMENTATION.
 
   METHOD set_initial_values.
     " Set parameters from context ( 1 time only )
-    CHECK mv_pbo_init_params = abap_true.
+    CHECK mv_pbo_init_params = abap_true OR iv_force = abap_true.
     mv_pbo_init_params = abap_false.
 
     DATA ls_map TYPE REF TO zcl_eui_screen=>ts_map.

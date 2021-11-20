@@ -91,6 +91,7 @@ public section.
   methods GET_DIMENSION
     exporting
       !EV_COL_END type I .
+  methods SET_INIT_PARAMS .
   class-methods EDIT_IN_POPUP
     importing
       !IV_TITLE type CSEQUENCE default 'Edit value'(edt)
@@ -396,6 +397,11 @@ METHOD get_dimension.
   IF ev_col_end > c_max_col_end.
     ev_col_end = c_max_col_end.
   ENDIF.
+ENDMETHOD.
+
+
+METHOD set_init_params.
+  mo_helper->set_initial_values( iv_force = abap_true ).
 ENDMETHOD.
 
 

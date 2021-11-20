@@ -100,8 +100,19 @@ METHOD add_to_hash.
       ENDLOOP.
       RETURN.
 
+    WHEN lo_type->typekind_string.
+      DATA lv_input TYPE char40.
+      lv_input = zcl_eui_prog=>calc_string_hash( iv_string = <lv_input> ).
+
+    WHEN lo_type->typekind_xstring.
+      lv_input = zcl_eui_prog=>calc_xstring_hash( iv_xstring = <lv_input> ).
+
     WHEN OTHERS.
   ENDCASE.
+
+  IF lv_input IS NOT INITIAL.
+    ASSIGN lv_input TO <lv_input>.
+  ENDIF.
 
   DATA l_length TYPE i.
   DESCRIBE FIELD <lv_input> LENGTH l_length IN BYTE MODE.
