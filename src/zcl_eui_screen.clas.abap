@@ -97,6 +97,7 @@ public section.
       !IV_TITLE type CSEQUENCE default 'Edit value'(edt)
       !IV_LABEL type CSEQUENCE optional
       !IV_REQUIRED type ABAP_BOOL optional
+      !IV_EDITABLE type ABAP_BOOL default ABAP_TRUE
     changing
       !CV_OK type ABAP_BOOL optional
       !CV_VALUE type ANY .
@@ -309,8 +310,9 @@ METHOD edit_in_popup.
       " Pass params
       CREATE OBJECT lo_screen
         EXPORTING
-          iv_dynnr   = zcl_eui_screen=>mc_dynnr-free_sel
-          ir_context = lr_data. " <--- Set initial values
+          iv_dynnr    = zcl_eui_screen=>mc_dynnr-free_sel
+          ir_context  = lr_data " <--- Set initial values
+          iv_editable = iv_editable.
       lo_manager = lo_screen.
     CATCH zcx_eui_exception INTO lo_error.
       MESSAGE lo_error TYPE 'S' DISPLAY LIKE 'E'.

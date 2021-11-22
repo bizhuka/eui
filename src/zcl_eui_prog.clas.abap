@@ -151,13 +151,26 @@ METHOD generate.
     RETURN.
   ENDIF.
 
-  " Permanently in in SE38!
-  IF iv_cprog IS NOT INITIAL.
+  IF iv_cprog IS INITIAL.
+    ls_hash-prog = _generate_subroutine( it_code ).
+  ELSE.
+    " Permanently in in SE38!
     ls_hash-prog = iv_cprog.
+
+    " Is already generated ?
+    IF ls_hash-prog+1(1) = '%'.
+      DO 39 TIMES.
+        ls_hash-prog+sy-index(1) = '%'.
+        READ TABLE mt_hash TRANSPORTING NO FIELDS
+         WITH KEY prog = ls_hash-prog.
+        IF sy-subrc <> 0.
+          EXIT.
+        ENDIF.
+      ENDDO.
+    ENDIF.
+
     _save_prog( it_code  = it_code
                 iv_cprog = ls_hash-prog ).
-  ELSE.
-    ls_hash-prog = _generate_subroutine( it_code ).
   ENDIF.
 
   rv_prog = ls_hash-prog.
@@ -206,7 +219,10 @@ METHOD _save_prog.
   APPEND `    MESSAGE lv_message`                   TO lt_saver.
   APPEND `    LINE    lv_pos`                       TO lt_saver.
   APPEND `    WORD    lv_word.`                     TO lt_saver.
-  APPEND `  CHECK sy-subrc <> 0.`                   TO lt_saver.
+  APPEND `  IF sy-subrc = 0.`                       TO lt_saver.
+  APPEND `   COMMIT WORK AND WAIT.`                 TO lt_saver.
+  APPEND `   RETURN.`                               TO lt_saver.
+  APPEND `  ENDIF.`                                 TO lt_saver.
   APPEND `  ZCX_EUI_NO_CHECK=>RAISE_SYS_ERROR( iv_message = lv_message ).`  TO lt_saver.
   APPEND `ENDFORM.`                                 TO lt_saver.
 
