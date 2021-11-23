@@ -161,7 +161,7 @@ METHOD generate.
     IF ls_hash-prog+1(1) = '%'.
       DO 39 TIMES.
         ls_hash-prog+sy-index(1) = '%'.
-        READ TABLE mt_hash TRANSPORTING NO FIELDS
+        READ TABLE mt_hash TRANSPORTING NO FIELDS  "#EC CI_SORTSEQ
          WITH KEY prog = ls_hash-prog.
         IF sy-subrc <> 0.
           EXIT.
