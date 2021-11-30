@@ -57,6 +57,11 @@ CLASS lcl_screen DEFINITION.
         IMPORTING
           iv_force TYPE abap_bool OPTIONAL,
 
+      _get_hash
+        IMPORTING
+                  iv_value       TYPE any
+        RETURNING VALUE(rv_hash) TYPE char16,
+
       show
         IMPORTING
                   iv_before    TYPE abap_bool OPTIONAL

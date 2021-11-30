@@ -345,8 +345,10 @@ CLASS lcl_screen IMPLEMENTATION.
       ENDIF.
 
       " Initialize 1 time only
-      DATA lt_listbox TYPE vrm_values.
-      CLEAR lt_listbox.
+      DATA: lv_set_vrm TYPE abap_bool,
+            lt_listbox TYPE vrm_values.
+      CLEAR: lv_set_vrm,
+             lt_listbox.
       CALL FUNCTION 'VRM_GET_VALUES'
         EXPORTING
           id     = lv_id
@@ -354,9 +356,21 @@ CLASS lcl_screen IMPLEMENTATION.
           values = lt_listbox
         EXCEPTIONS
           OTHERS = 1.
-      CHECK sy-subrc <> 0 OR lt_listbox IS INITIAL.
+      IF sy-subrc <> 0 OR lt_listbox IS INITIAL.
+        lv_set_vrm = abap_true.
+      ELSE.
+        " Are values changed?
+        DATA: lv_hash1 TYPE char16,
+              lv_hash2 TYPE char16.
+        lv_hash1 = _get_hash( lt_listbox ).
+        lv_hash2 = _get_hash( <ls_screen_src>-t_listbox[] ).
+        IF lv_hash1 <> lv_hash2.
+          lv_set_vrm = abap_true.
+        ENDIF.
+      ENDIF.
 
       " And set
+      CHECK lv_set_vrm = abap_true.
       CALL FUNCTION 'VRM_SET_VALUES'
         EXPORTING
           id     = lv_id
@@ -364,6 +378,13 @@ CLASS lcl_screen IMPLEMENTATION.
         EXCEPTIONS
           OTHERS = 0.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD _get_hash.
+    DATA lo_crc64 TYPE REF TO zcl_eui_crc64.
+    CREATE OBJECT lo_crc64.
+    lo_crc64->add_to_hash( iv_value ).
+    rv_hash = lo_crc64->get_hash( ).
   ENDMETHOD.
 
   METHOD read_from_screen.
