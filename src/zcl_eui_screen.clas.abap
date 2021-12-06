@@ -47,6 +47,7 @@ public section.
         " For map
         label      TYPE zcl_eui_type=>ts_field_desc-label,
         sub_fdesc  TYPE zcl_eui_type=>ts_field_desc-sub_fdesc,
+        rollname   TYPE zcl_eui_type=>ts_field_desc-rollname,
       END OF ts_customize .
   types:
     tt_customize TYPE STANDARD TABLE OF ts_customize WITH DEFAULT KEY .
@@ -81,6 +82,7 @@ public section.
       !IT_LISTBOX type VRM_VALUES optional
       !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
       !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional
+      !IV_ROLLNAME type ZCL_EUI_TYPE=>TS_FIELD_DESC-ROLLNAME optional
     returning
       value(RO_SCREEN) type ref to ZCL_EUI_SCREEN .
   methods GET_CONTEXT
@@ -94,7 +96,7 @@ public section.
   methods SET_INIT_PARAMS .
   class-methods EDIT_IN_POPUP
     importing
-      !IV_TITLE type CSEQUENCE default 'Edit value'(edt)
+      !IV_TITLE type CSEQUENCE default 'Edit value'(EDT)
       !IV_LABEL type CSEQUENCE optional
       !IV_REQUIRED type ABAP_BOOL optional
       !IV_EDITABLE type ABAP_BOOL default ABAP_TRUE
@@ -264,6 +266,7 @@ METHOD customize.
     " For map
     ls_param-label     = iv_label.
     ls_param-sub_fdesc = iv_sub_fdesc.
+    ls_param-rollname  = iv_rollname.
 
     " And add
     APPEND ls_param TO lt_all.
@@ -282,7 +285,6 @@ METHOD edit_in_popup.
   DATA lo_screen           TYPE REF TO zcl_eui_screen.
   DATA lo_manager          TYPE REF TO zif_eui_manager.
   DATA lo_error            TYPE REF TO cx_root.
-  DATA lv_list_box         TYPE abap_bool.
   FIELD-SYMBOLS <ls_struc> TYPE any.
   FIELD-SYMBOLS <lv_value> TYPE any.
 

@@ -10,6 +10,7 @@ CLASS lcl_screen DEFINITION.
 
       " Screen context & map of fields
       mr_context         TYPE REF TO data,
+      mv_unq_rollname    TYPE abap_bool,
       mt_map             TYPE zcl_eui_screen=>tt_map,
 
       " For pbo
@@ -17,19 +18,21 @@ CLASS lcl_screen DEFINITION.
 
       " Initilize with values & Set lables
       mv_pbo_init_params TYPE abap_bool VALUE abap_true,
-      mv_pbo_set_labels  TYPE abap_bool,
-
-      " zcl_eui_screen=>mc_dynnr-auto_gen
-      mt_unq_table       TYPE zcl_eui_type=>tt_unique_type.
+      mv_pbo_set_labels  TYPE abap_bool.
 
     METHODS:
       constructor
         IMPORTING
-          io_eui_screen TYPE REF TO zcl_eui_screen
-          ir_context    TYPE REF TO data,
+          io_eui_screen   TYPE REF TO zcl_eui_screen
+          ir_context      TYPE REF TO data
+          iv_unq_rollname TYPE abap_bool,
 
       fill_from_context FINAL
         RAISING zcx_eui_exception,
+
+      _check_is_list_box
+        CHANGING
+          cs_map TYPE zcl_eui_screen=>ts_map,
 
       get_parameter_name
         IMPORTING
@@ -94,9 +97,14 @@ CLASS lcl_screen DEFINITION.
           io_alv        TYPE REF TO zcl_eui_alv.
 ENDCLASS.
 
-CLASS lcl_scr_free DEFINITION INHERITING FROM lcl_screen.
+CLASS lcl_scr_free DEFINITION INHERITING FROM lcl_screen FINAL.
   PUBLIC SECTION.
     METHODS:
+      constructor
+        IMPORTING
+          io_eui_screen TYPE REF TO zcl_eui_screen
+          ir_context    TYPE REF TO data,
+
       get_text_value
         IMPORTING
           is_data        TYPE any
@@ -118,9 +126,14 @@ CLASS lcl_scr_free DEFINITION INHERITING FROM lcl_screen.
       read_from_screen   REDEFINITION.
 ENDCLASS.
 
-CLASS lcl_scr_dync DEFINITION INHERITING FROM lcl_screen.
+CLASS lcl_scr_dync DEFINITION INHERITING FROM lcl_screen FINAL.
   PUBLIC SECTION.
     METHODS:
+      constructor
+        IMPORTING
+          io_eui_screen TYPE REF TO zcl_eui_screen
+          ir_context    TYPE REF TO data,
+
       _create_program,
       _make_screen_code
         RETURNING VALUE(rt_code) TYPE stringtab,

@@ -4,8 +4,9 @@
 
 CLASS lcl_screen IMPLEMENTATION.
   METHOD constructor.
-    mo_eui_screen = io_eui_screen.
-    mr_context = ir_context.
+    mo_eui_screen   = io_eui_screen.
+    mr_context      = ir_context.
+    mv_unq_rollname = iv_unq_rollname.
   ENDMETHOD.
 
   " Fill mapping
@@ -15,9 +16,7 @@ CLASS lcl_screen IMPLEMENTATION.
     DATA lo_struc              TYPE REF TO cl_abap_structdescr.
     DATA ls_comp               TYPE REF TO abap_compdescr.
     DATA lv_index              TYPE num2.
-    DATA ls_fieldcat           TYPE lvc_s_fcat.
     DATA lt_unq_rollname       TYPE SORTED TABLE OF zcl_eui_type=>ts_field_desc-rollname WITH UNIQUE KEY table_line.
-    DATA lv_text               TYPE string.
     FIELD-SYMBOLS <ls_context> TYPE any.
     FIELD-SYMBOLS <lv_field>   TYPE any.
 
@@ -60,43 +59,32 @@ CLASS lcl_screen IMPLEMENTATION.
             cv_rollname    = ls_map-rollname ).
 
         WHEN OTHERS.
-          " № 0
-          zcl_eui_type=>split_type(
-           EXPORTING iv_datatype = ls_map-rollname
-           IMPORTING ev_table    = ls_fieldcat-ref_table
-                     ev_field    = ls_fieldcat-ref_field ).
-
-          zcl_eui_type=>is_list_box(
-           EXPORTING
-             iv_tabname   = ls_fieldcat-ref_table
-             iv_fieldname = ls_fieldcat-ref_field
-           IMPORTING
-             ev_list_box  = ls_map-is_list_box ).
+          _check_is_list_box( CHANGING cs_map = ls_map ).
       ENDCASE.
 
-      INSERT ls_map-rollname INTO TABLE lt_unq_rollname.
-      " Check
-      IF sy-subrc <> 0 OR ls_map-rollname NP '*-*'.
+      DO 1 TIMES.
+        CHECK mv_unq_rollname = abap_true.
+        INSERT ls_map-rollname INTO TABLE lt_unq_rollname.
+
+        CHECK  sy-subrc <> 0 OR ls_map-rollname NP '*-*'.
         zcx_eui_exception=>raise_sys_error( iv_message = 'Cannot create a unique pair TABLE-FIELD_NAME' ).
-      ENDIF.
-
-      " № 1
-      IF  ls_map-ui_type = zcl_eui_type=>mc_ui_type-table
-       OR ls_map-ui_type = zcl_eui_type=>mc_ui_type-string
-       OR ls_map-ui_type = zcl_eui_type=>mc_ui_type-range.
-
-        zcl_eui_type=>split_type(
-         EXPORTING iv_datatype = ls_map-rollname
-         IMPORTING ev_table    = ls_fieldcat-ref_table
-                   ev_field    = ls_fieldcat-ref_field ).
-
-        " And add
-        lv_text = ls_fieldcat-ref_table.
-        INSERT lv_text INTO TABLE me->mt_unq_table.
-      ENDIF.
+      ENDDO.
 
       APPEND ls_map TO me->mt_map.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD _check_is_list_box.
+    DATA ls_fieldcat           TYPE lvc_s_fcat.
+    zcl_eui_type=>split_type(
+     EXPORTING iv_datatype = cs_map-rollname
+     IMPORTING ev_table    = ls_fieldcat-ref_table
+               ev_field    = ls_fieldcat-ref_field ).
+
+    zcl_eui_type=>is_list_box(
+     EXPORTING iv_tabname   = ls_fieldcat-ref_table
+               iv_fieldname = ls_fieldcat-ref_field
+     IMPORTING ev_list_box  = cs_map-is_list_box ).
   ENDMETHOD.
 
   METHOD get_parameter_name.
@@ -109,14 +97,17 @@ CLASS lcl_screen IMPLEMENTATION.
     DATA ls_map       TYPE zcl_eui_screen=>ts_map.
     DATA lr_map       TYPE REF TO zcl_eui_screen=>ts_map.
     DATA lv_message   TYPE string.
+    DATA lv_skip      TYPE string.
 
     LOOP AT it_customize REFERENCE INTO lr_customize.
       " All by name
       MOVE-CORRESPONDING lr_customize->* TO ls_screen.
 
       " For map
+      CLEAR ls_map.
       ls_map-label      = lr_customize->label.
       ls_map-sub_fdesc  = lr_customize->sub_fdesc.
+      ls_map-rollname   = lr_customize->rollname.
 
       "№ 1
       IF   ls_screen-name IS NOT INITIAL
@@ -136,11 +127,18 @@ CLASS lcl_screen IMPLEMENTATION.
         zcx_eui_exception=>raise_dump( iv_message = lv_message ).
       ENDIF.
 
+      lv_skip = 'ROLLNAME'.
+      IF ls_map-rollname IS NOT INITIAL AND lr_map->ui_type <> zcl_eui_type=>mc_ui_type-table AND lr_map->ui_type <> zcl_eui_type=>mc_ui_type-string.
+        _check_is_list_box( CHANGING cs_map = ls_map ).
+        CLEAR lv_skip.
+      ENDIF.
+
       " Label or sub_fdesc
       zcl_eui_conv=>move_corresponding(
        EXPORTING
          is_source         = ls_map
          iv_except_initial = abap_true
+         iv_except         = lv_skip
        CHANGING
          cs_destination    = lr_map->* ).
     ENDLOOP.
@@ -150,8 +148,6 @@ CLASS lcl_screen IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD get_screen_by_map.
-    DATA lr_screen TYPE REF TO zcl_eui_screen=>ts_screen.
-
     " Just return INPUT & REQUIRED
     READ TABLE mt_screen INTO rs_screen
      WITH KEY name = iv_name.
@@ -516,6 +512,13 @@ ENDCLASS.
 **********************************************************************
 **********************************************************************
 CLASS lcl_scr_free IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor(
+     io_eui_screen   = io_eui_screen
+     ir_context      = ir_context
+     iv_unq_rollname = abap_true ).
+  ENDMETHOD.
+
   METHOD get_parameter_name.
     CONCATENATE `%%DYN0` iv_index INTO rv_name.
   ENDMETHOD.
@@ -980,7 +983,6 @@ CLASS lcl_scr_free IMPLEMENTATION.
     DATA lv_name               TYPE string.
     DATA lv_ok                 TYPE abap_bool.
     FIELD-SYMBOLS <lv_param>   TYPE any.
-    FIELD-SYMBOLS <lv_dest>    TYPE any.
 
     " Get name of paramater or range
     lv_param = ir_map->par_name.
@@ -1057,6 +1059,13 @@ ENDCLASS.
 **********************************************************************
 **********************************************************************
 CLASS lcl_scr_dync IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor(
+     io_eui_screen   = io_eui_screen
+     ir_context      = ir_context
+     iv_unq_rollname = abap_false ).
+  ENDMETHOD.
+
   METHOD show.
     CHECK iv_before = abap_true.
     _create_program( ).
