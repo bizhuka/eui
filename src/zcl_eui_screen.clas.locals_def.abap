@@ -25,7 +25,7 @@ CLASS lcl_screen DEFINITION.
         IMPORTING
           io_eui_screen   TYPE REF TO zcl_eui_screen
           ir_context      TYPE REF TO data
-          iv_unq_rollname TYPE abap_bool,
+          iv_unq_rollname TYPE abap_bool DEFAULT abap_false,
 
       fill_from_context FINAL
         RAISING zcx_eui_exception,
@@ -129,11 +129,6 @@ ENDCLASS.
 CLASS lcl_scr_dync DEFINITION INHERITING FROM lcl_screen FINAL.
   PUBLIC SECTION.
     METHODS:
-      constructor
-        IMPORTING
-          io_eui_screen TYPE REF TO zcl_eui_screen
-          ir_context    TYPE REF TO data,
-
       _create_program,
       _make_screen_code
         RETURNING VALUE(rt_code) TYPE stringtab,

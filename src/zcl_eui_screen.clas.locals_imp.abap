@@ -1059,13 +1059,6 @@ ENDCLASS.
 **********************************************************************
 **********************************************************************
 CLASS lcl_scr_dync IMPLEMENTATION.
-  METHOD constructor.
-    super->constructor(
-     io_eui_screen   = io_eui_screen
-     ir_context      = ir_context
-     iv_unq_rollname = abap_false ).
-  ENDMETHOD.
-
   METHOD show.
     CHECK iv_before = abap_true.
     _create_program( ).
