@@ -29,6 +29,7 @@ public section.
         cur_value   TYPE REF TO data,
         par_name    TYPE string,
         is_list_box TYPE abap_bool,
+        command     TYPE syucomm,
       END OF ts_map .
   types:
     tt_map TYPE STANDARD TABLE OF ts_map WITH DEFAULT KEY .
@@ -48,6 +49,7 @@ public section.
         label      TYPE zcl_eui_type=>ts_field_desc-label,
         sub_fdesc  TYPE zcl_eui_type=>ts_field_desc-sub_fdesc,
         rollname   TYPE zcl_eui_type=>ts_field_desc-rollname,
+        command    TYPE syucomm,
       END OF ts_customize .
   types:
     tt_customize TYPE STANDARD TABLE OF ts_customize WITH DEFAULT KEY .
@@ -83,6 +85,7 @@ public section.
       !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
       !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional
       !IV_ROLLNAME type ZCL_EUI_TYPE=>TS_FIELD_DESC-ROLLNAME optional
+      !IV_COMMAND type SYUCOMM optional
     returning
       value(RO_SCREEN) type ref to ZCL_EUI_SCREEN .
   methods GET_CONTEXT
@@ -267,6 +270,7 @@ METHOD customize.
     ls_param-label     = iv_label.
     ls_param-sub_fdesc = iv_sub_fdesc.
     ls_param-rollname  = iv_rollname.
+    ls_param-command   = iv_command.
 
     " And add
     APPEND ls_param TO lt_all.

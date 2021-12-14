@@ -108,6 +108,7 @@ CLASS lcl_screen IMPLEMENTATION.
       ls_map-label      = lr_customize->label.
       ls_map-sub_fdesc  = lr_customize->sub_fdesc.
       ls_map-rollname   = lr_customize->rollname.
+      ls_map-command    = lr_customize->command.
 
       "№ 1
       IF   ls_screen-name IS NOT INITIAL
@@ -1116,6 +1117,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     DATA lr_map        TYPE REF TO zcl_eui_screen=>ts_map.
     DATA: l_par_name TYPE sychar08 VALUE 'X', l_for_name TYPE sychar08 VALUE 'F', l_cmt_name TYPE sychar08 VALUE 'T'.
     DATA l_line        TYPE string.
+    DATA lv_command    TYPE string.
 
     LOOP AT mt_map REFERENCE INTO lr_map.
       UNPACK sy-tabix TO l_par_name+1(*).
@@ -1142,14 +1144,19 @@ CLASS lcl_scr_dync IMPLEMENTATION.
         WHEN OTHERS. " Parameter
           CONCATENATE `PARAMETERS ` l_par_name ` TYPE ` lr_map->rollname INTO l_line.
 
+          CLEAR lv_command.
+          IF lr_map->command IS NOT INITIAL.
+            CONCATENATE ` USER-COMMAND ` lr_map->command INTO lv_command.
+          ENDIF.
+
           " Get by screen option
           DATA ls_screen TYPE zcl_eui_screen=>ts_screen.
           ls_screen = get_screen_by_map( lr_map->name ).
 
           IF lr_map->ui_type = zcl_eui_type=>mc_ui_type-boolean.
-            CONCATENATE l_line ` AS CHECKBOX` INTO l_line.
+            CONCATENATE l_line ` AS CHECKBOX` lv_command INTO l_line.
           ELSEIF lr_map->is_list_box = abap_true OR ls_screen-t_listbox[] IS NOT INITIAL.
-            CONCATENATE l_line ` AS LISTBOX VISIBLE LENGTH 50` INTO l_line.
+            CONCATENATE l_line ` AS LISTBOX VISIBLE LENGTH 50` lv_command INTO l_line.
           ENDIF.
           CONCATENATE l_line `.` INTO l_line.
 
