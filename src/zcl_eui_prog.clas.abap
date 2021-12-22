@@ -22,17 +22,6 @@ public section.
       !IV_KEY type CSEQUENCE
     returning
       value(RV_VALUE) type STRING .
-  class-methods CALC_STRING_HASH
-    importing
-      !IV_STRING type STRING optional
-      !IT_TABLE type STRINGTAB optional
-    returning
-      value(RV_HASH) type HASH160 .
-  class-methods CALC_XSTRING_HASH
-    importing
-      !IV_XSTRING type XSTRING
-    returning
-      value(RV_HASH) type HASH160 .
 protected section.
 private section.
 
@@ -70,44 +59,6 @@ ENDCLASS.
 CLASS ZCL_EUI_PROG IMPLEMENTATION.
 
 
-METHOD calc_string_hash.
-  DATA lv_line TYPE string.
-
-  IF iv_string IS SUPPLIED.
-    lv_line = iv_string.
-  ELSEIF it_table IS SUPPLIED.
-    CONCATENATE LINES OF it_table INTO lv_line.
-  ELSE.
-    zcx_eui_no_check=>raise_sys_error( iv_message = 'Wrong parameters of CALC_STRING_HASH' ).
-  ENDIF.
-
-  CALL FUNCTION 'CALCULATE_HASH_FOR_CHAR'
-    EXPORTING
-      data   = lv_line
-    IMPORTING
-      hash   = rv_hash
-    EXCEPTIONS
-      OTHERS = 1.
-
-  CHECK sy-subrc <> 0.
-  zcx_eui_no_check=>raise_sys_error( ).
-ENDMETHOD.
-
-
-METHOD calc_xstring_hash.
-  CALL FUNCTION 'CALCULATE_HASH_FOR_RAW'
-    EXPORTING
-      data   = iv_xstring
-    IMPORTING
-      hash   = rv_hash
-    EXCEPTIONS
-      OTHERS = 1.
-
-  CHECK sy-subrc <> 0.
-  zcx_eui_no_check=>raise_sys_error( ).
-ENDMETHOD.
-
-
 METHOD constructor.
   CHECK iv_cprog IS NOT INITIAL.
 
@@ -142,7 +93,7 @@ ENDMETHOD.
 METHOD generate.
   " Already created ?
   DATA ls_hash TYPE ts_hash.
-  ls_hash-hash = calc_string_hash( it_table = it_code ).
+  ls_hash-hash = zcl_eui_crc64=>calc_string_hash( it_table = it_code ).
 
   READ TABLE mt_hash INTO ls_hash
    WITH TABLE KEY hash = ls_hash-hash.
