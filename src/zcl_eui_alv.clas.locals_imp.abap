@@ -202,6 +202,17 @@ CLASS lcl_helper IMPLEMENTATION.
           cs_fieldcat  = <ls_fieldcat>
           cv_drdn_hndl = mv_drdn_hndl ).
       ENDIF.
+
+      " Default SH for date & time
+      CHECK <ls_fieldcat>-ref_table IS INITIAL AND <ls_fieldcat>-ref_field IS INITIAL.
+      CASE <ls_fieldcat>-inttype.
+        WHEN cl_abap_typedescr=>typekind_date.
+          <ls_fieldcat>-ref_table = 'SYST'.
+          <ls_fieldcat>-ref_field = 'DATUM'.
+        WHEN cl_abap_typedescr=>typekind_time.
+          <ls_fieldcat>-ref_table = 'SYST'.
+          <ls_fieldcat>-ref_field = 'UZEIT'.
+      ENDCASE.
     ENDLOOP.
   ENDMETHOD.
 
