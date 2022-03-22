@@ -170,7 +170,7 @@ ENDCLASS.
 **********************************************************************
 
 DATA:
-  go_report     TYPE REF TO lcl_report.
+  go_report     TYPE REF TO lcl_report.                     "#EC NEEDED
 
 INITIALIZATION.
   CREATE OBJECT go_report.

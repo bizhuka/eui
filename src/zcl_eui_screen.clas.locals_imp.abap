@@ -479,7 +479,7 @@ CLASS lcl_screen IMPLEMENTATION.
     " Yes is editor
     CHECK lo_manager IS NOT INITIAL.
 
-    lo_manager->popup( iv_row_end = 28 ).
+    lo_manager->popup( iv_row_end = 28 ).                "#EC NUMBER_OK
 
     lo_manager->show( ).
   ENDMETHOD.
@@ -550,7 +550,7 @@ CLASS lcl_scr_free IMPLEMENTATION.
         LOOP AT mt_map TRANSPORTING NO FIELDS
            WHERE ui_type = zcl_eui_type=>mc_ui_type-table
               OR ui_type = zcl_eui_type=>mc_ui_type-string.
-          sy-tabix = 1105 * 1000 + sy-tabix * 2 + 2.  "TODO
+          sy-tabix = 1105 * 1000 + sy-tabix * 2 + 2.     "#EC NUMBER_OK
           DELETE <lt_sscr> WHERE numb = sy-tabix.
         ENDLOOP.
 
@@ -799,26 +799,26 @@ CLASS lcl_scr_free IMPLEMENTATION.
         events                   = lt_event
         event_fields             = lt_scr_fld_evt
       EXCEPTIONS
-        fields_incomplete        = 1
-        fields_no_join           = 2
-        field_not_found          = 3
-        no_tables                = 4
-        table_not_found          = 5
-        expression_not_supported = 6
-        incorrect_expression     = 7
-        illegal_kind             = 8
-        area_not_found           = 9
-        inconsistent_area        = 10
-        kind_f_no_fields_left    = 11
-        kind_f_no_fields         = 12
-        too_many_fields          = 13
-        dup_field                = 14
-        field_no_type            = 15
-        field_ill_type           = 16
-        dup_event_field          = 17
-        node_not_in_ldb          = 18
-        area_no_field            = 19
-        OTHERS                   = 20.
+        fields_incomplete        = 1   "#EC NUMBER_OK
+        fields_no_join           = 2   "#EC NUMBER_OK
+        field_not_found          = 3   "#EC NUMBER_OK
+        no_tables                = 4   "#EC NUMBER_OK
+        table_not_found          = 5   "#EC NUMBER_OK
+        expression_not_supported = 6   "#EC NUMBER_OK
+        incorrect_expression     = 7   "#EC NUMBER_OK
+        illegal_kind             = 8   "#EC NUMBER_OK
+        area_not_found           = 9   "#EC NUMBER_OK
+        inconsistent_area        = 10  "#EC NUMBER_OK
+        kind_f_no_fields_left    = 11  "#EC NUMBER_OK
+        kind_f_no_fields         = 12  "#EC NUMBER_OK
+        too_many_fields          = 13  "#EC NUMBER_OK
+        dup_field                = 14  "#EC NUMBER_OK
+        field_no_type            = 15  "#EC NUMBER_OK
+        field_ill_type           = 16  "#EC NUMBER_OK
+        dup_event_field          = 17  "#EC NUMBER_OK
+        node_not_in_ldb          = 18  "#EC NUMBER_OK
+        area_no_field            = 19  "#EC NUMBER_OK
+        OTHERS                   = 20. "#EC NUMBER_OK
     IF sy-subrc <> 0.
       MESSAGE s021(zeui_message) DISPLAY LIKE 'E' WITH 'FREE_SELECTIONS_INIT' sy-subrc.
       RETURN.
@@ -920,15 +920,15 @@ CLASS lcl_scr_free IMPLEMENTATION.
     " Number types only
     CASE lv_kind.
       WHEN 'b'. " TYPEKIND_INT1
-        lv_len = 3.
+        lv_len = 3.                                      "#EC NUMBER_OK
       WHEN 's'. " TYPEKIND_INT2
-        lv_len = 5.
+        lv_len = 5.                                      "#EC NUMBER_OK
       WHEN 'a'. " TYPEKIND_DECFLOAT16
-        lv_len = 24.
+        lv_len = 24.                                     "#EC NUMBER_OK
       WHEN 'e'. " TYPEKIND_DECFLOAT34
-        lv_len = 46.
+        lv_len = 46.                                     "#EC NUMBER_OK
       WHEN '8'. " TYPEKIND_INT8
-        lv_len = 20.
+        lv_len = 20.                                     "#EC NUMBER_OK
       WHEN 'F'. " TYPEKIND_FLOAT
         DESCRIBE FIELD <lv_val> LENGTH lv_len IN BYTE MODE.
       WHEN 'I' OR " TYPEKIND_INT
@@ -938,11 +938,13 @@ CLASS lcl_scr_free IMPLEMENTATION.
           CHECK sy-subrc = 0.
 
           " Get tech info from domain
-          SELECT SINGLE dd01l~leng dd01l~signflag dd01l~decimals INTO (lv_len_n, lv_sign, lv_decimals)
+          SELECT SINGLE dd01l~leng dd01l~signflag dd01l~decimals INTO (lv_len_n, lv_sign, lv_decimals) "#EC CI_NOORDER
           FROM dd03l
             INNER JOIN dd01l ON dd01l~domname = dd03l~domname AND dd01l~as4local = 'A' AND dd01l~as4vers = '0000'
-          WHERE tabname   = lv_tabname
-            AND fieldname = lv_fieldname.
+          WHERE dd03l~tabname   = lv_tabname
+            AND dd03l~fieldname = lv_fieldname
+            AND dd03l~as4local  = 'A'
+            AND dd03l~as4vers   = '0000'.
           CHECK sy-subrc = 0.
           lv_len = lv_len_n.
 
@@ -961,9 +963,9 @@ CLASS lcl_scr_free IMPLEMENTATION.
         IF lv_len <= 1.
           CASE lv_kind.
             WHEN 'I'.
-              lv_len = 11.
+              lv_len = 11.                               "#EC NUMBER_OK
             WHEN 'P'.
-              lv_len = 17.
+              lv_len = 17.                               "#EC NUMBER_OK
           ENDCASE.
         ENDIF.
     ENDCASE.
@@ -1110,7 +1112,7 @@ CLASS lcl_scr_dync IMPLEMENTATION.
     DATA lv_button_offset TYPE num2 VALUE 35.
     IF mo_eui_screen->ms_status-title IS NOT INITIAL AND ( mo_eui_screen->ms_popup IS INITIAL OR mo_eui_screen->ms_popup-col_end >= 100 ).
       REPLACE FIRST OCCURRENCE OF `.` IN lv_line WITH ` WITH FRAME TITLE s_title.`.
-      lv_button_offset = 33.
+      lv_button_offset = 33.                             "#EC NUMBER_OK
     ENDIF.
     APPEND lv_line TO rt_code.
 

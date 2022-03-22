@@ -15,16 +15,16 @@ CLASS lcl_data DEFINITION FINAL
 
   PUBLIC SECTION.
     METHODS:
-     constructor.
+      constructor.
 
     DATA mv_a TYPE string.
 
   PRIVATE SECTION.
     TYPES:
-     BEGIN OF ts_row,
-       fld1 TYPE char1,
-       fld2 TYPE char1,
-     END OF ts_row.
+      BEGIN OF ts_row,
+        fld1 TYPE char1,
+        fld2 TYPE char1,
+      END OF ts_row.
     DATA lt_table TYPE STANDARD TABLE OF ts_row WITH DEFAULT KEY.
 ENDCLASS.
 
@@ -44,7 +44,7 @@ ENDCLASS.
 CLASS lcl_report DEFINITION FINAL.
   PUBLIC SECTION.
     METHODS:
-     start_of_selection.
+      start_of_selection.
 ENDCLASS.
 
 CLASS lcl_report IMPLEMENTATION.
@@ -82,7 +82,7 @@ ENDCLASS.
 **********************************************************************
 **********************************************************************
 INITIALIZATION.
-  DATA go_report TYPE REF TO lcl_report.
+  DATA go_report TYPE REF TO lcl_report.                    "#EC NEEDED
   CREATE OBJECT go_report.
 
 START-OF-SELECTION.

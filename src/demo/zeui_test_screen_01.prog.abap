@@ -6,16 +6,16 @@ TYPE-POOLS:
  abap.
 
 " Screen 1000
+SELECTION-SCREEN BEGIN OF BLOCK bl_1010 WITH FRAME TITLE TEXT-tit.
 PARAMETERS:
   p_01_gry AS CHECKBOX DEFAULT ' ',
   p_02_obl AS CHECKBOX DEFAULT 'X'.
+SELECTION-SCREEN END OF BLOCK bl_1010.
 
 " Screen 1010
 SELECTION-SCREEN BEGIN OF SCREEN 1010 AS SUBSCREEN.
-SELECTION-SCREEN BEGIN OF BLOCK bl_1010. "WITH FRAME TITLE TEXT-tit.
 PARAMETERS : p_fld_01 TYPE sytabix,
              p_fld_02 TYPE sytabix.
-SELECTION-SCREEN END OF BLOCK bl_1010.
 SELECTION-SCREEN END OF SCREEN 1010.
 
 **********************************************************************
@@ -40,11 +40,6 @@ ENDCLASS.
 
 **********************************************************************
 **********************************************************************
-DATA:
-  go_main  TYPE REF TO lcl_main.
-
-**********************************************************************
-**********************************************************************
 CLASS lcl_main IMPLEMENTATION.
   METHOD start_of_selection.
     DATA ls_context TYPE REF TO ts_context.
@@ -54,7 +49,7 @@ CLASS lcl_main IMPLEMENTATION.
     " Fill context
     " p_fld_01 = 777 is of course easy, but if you fill another program screen
     CREATE DATA ls_context.
-    ls_context->p_fld_01 = 777.
+    ls_context->p_fld_01 = 777.                          "#EC NUMBER_OK
 
     TRY.
         " Pass params
@@ -83,17 +78,17 @@ CLASS lcl_main IMPLEMENTATION.
 
     " If pressed OK
     IF mo_screen->show( io_handler = me ) = 'OK'.
-      MESSAGE 'OK is pressed' TYPE 'I'.
+      MESSAGE 'OK is pressed'(yes) TYPE 'I'.
     ELSE.
-      MESSAGE 'The action is cancelled' TYPE 'S' DISPLAY LIKE 'W'.
+      MESSAGE 'The action is cancelled'(can) TYPE 'S' DISPLAY LIKE 'W'.
     ENDIF.
   ENDMETHOD.
 
   METHOD pbo.
+    CHECK sy-dynnr = '1010'.
+
     " LOOP AT SCREEN
-    IF sy-dynnr = '1010'.
-      mo_screen->pbo( ).
-    ENDIF.
+    mo_screen->pbo( ).
   ENDMETHOD.
 
 ENDCLASS.
@@ -101,6 +96,9 @@ ENDCLASS.
 
 **********************************************************************
 **********************************************************************
+
+DATA:
+  go_main  TYPE REF TO lcl_main.                            "#EC NEEDED
 
 INITIALIZATION.
   CREATE OBJECT go_main.

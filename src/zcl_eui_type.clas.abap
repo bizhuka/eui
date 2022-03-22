@@ -1016,6 +1016,10 @@ ENDMETHOD.
 
 
 METHOD split_type.
+  CLEAR:
+   ev_table,
+   ev_field.
+
   " Check is table and field name
   CHECK iv_datatype CP '*-*'.
 

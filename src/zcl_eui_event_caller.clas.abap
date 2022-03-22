@@ -164,7 +164,7 @@ METHOD call_handlers.
   FIELD-SYMBOLS <lv_name>  TYPE csequence.
   FIELD-SYMBOLS <lv_value> TYPE any.
 
-  DO 15 TIMES.
+  DO 15 TIMES.                                           "#EC NUMBER_OK
     " get next parameter
     lv_index = sy-index - 1.
     CONCATENATE 'IV_PARAM_NAM_' lv_index INTO lv_name.

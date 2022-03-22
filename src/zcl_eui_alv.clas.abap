@@ -37,7 +37,7 @@ public section.
       !IT_F4_TABLE type TT_F4_TABLE .
   methods SET_TOP_OF_PAGE_HEIGHT
     importing
-      !IV_TOP_OF_PAGE_HEIGHT type I default 12 .
+      !IV_TOP_OF_PAGE_HEIGHT type I default 12 . "#EC NUMBER_OK
   methods ADD_BUTTON
     importing
       !IS_BUTTON type STB_BUTTON

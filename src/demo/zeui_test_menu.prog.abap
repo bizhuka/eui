@@ -37,15 +37,10 @@ CLASS lcl_report DEFINITION FINAL.
 
       on_function_selected FOR EVENT function_selected OF cl_gui_toolbar
         IMPORTING
-            sender
-            fcode.
+          sender
+          fcode.
 ENDCLASS.
 
-
-**********************************************************************
-**********************************************************************
-DATA:
-  go_report     TYPE REF TO lcl_report.
 
 **********************************************************************
 **********************************************************************
@@ -143,6 +138,9 @@ ENDCLASS.
 
 **********************************************************************
 **********************************************************************
+DATA:
+  go_report     TYPE REF TO lcl_report.                     "#EC NEEDED
+
 INITIALIZATION.
   CREATE OBJECT go_report.
 

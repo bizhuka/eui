@@ -92,12 +92,6 @@ CLASS lcl_txt_editor DEFINITION INHERITING FROM zcl_eui_manager FINAL.
           iv_command.
 ENDCLASS.
 
-
-**********************************************************************
-**********************************************************************
-DATA:
-  go_report     TYPE REF TO lcl_report.
-
 **********************************************************************
 **********************************************************************
 CLASS lcl_report IMPLEMENTATION.
@@ -425,6 +419,9 @@ ENDCLASS.
 
 **********************************************************************
 **********************************************************************
+DATA:
+  go_report     TYPE REF TO lcl_report.                     "#EC NEEDED
+
 INITIALIZATION.
   CREATE OBJECT go_report.
 

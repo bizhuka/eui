@@ -189,7 +189,7 @@ METHOD show_initial_screen.
     CASE lv_cmd.
       WHEN 'CMD_01'.
         " Just use declaration in another app
-        lv_dynnr = 1020.
+        lv_dynnr = 1020.                                 "#EC NUMBER_OK
         lv_prog  = c_cprog.
 
       WHEN 'CMD_02'.

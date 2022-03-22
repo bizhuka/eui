@@ -268,12 +268,13 @@ METHOD from_json.
                                    RESULT data = ex_data.
             " Ok
             ev_ok = abap_true.
-          CATCH cx_transformation_error.
+          CATCH cx_root.
             ev_ok = abap_false.
         ENDTRY.
 
       " For version ABAP 7.02 patch level 006
       WHEN '2'.
+        CLEAR ex_data.
         TRY.
             _json_2_abap(
              EXPORTING
@@ -302,8 +303,9 @@ METHOD from_json.
 
     " For debug
     DATA lo_file TYPE REF TO zcl_eui_file.
-    lo_file->import_from_string( iv_json ).
     TRY.
+        CREATE OBJECT lo_file.
+        lo_file->import_from_string( iv_json ).
         lo_file->download( iv_full_path   = 'dump_json.txt'
                            iv_save_dialog = abap_true ).
         lo_file->open( ).
@@ -340,9 +342,9 @@ METHOD guid_create.
   ENDTRY.
   CHECK rv_guid IS INITIAL.
 
-  " № 2
+  " № 2 - for 7.00 only
   TRY.
-      CALL FUNCTION 'GUID_CREATE'
+      CALL FUNCTION 'GUID_CREATE' "#EC FB_OLDED
         IMPORTING
           ev_guid_32 = rv_guid.
     CATCH cx_root.                                       "#EC CATCH_ALL
@@ -466,11 +468,11 @@ METHOD to_json.
     lv_end = strlen( rv_json ).
 
     IF rv_json(9) CP `{"DATA":"`.
-      lv_beg = 9.
-      lv_end = lv_end - 11.
+      lv_beg = 9.                                        "#EC NUMBER_OK
+      lv_end = lv_end - 11.                              "#EC NUMBER_OK
     ELSE.
-      lv_beg = 8.
-      lv_end = lv_end - 9.
+      lv_beg = 8.                                        "#EC NUMBER_OK
+      lv_end = lv_end - 9.                               "#EC NUMBER_OK
     ENDIF.
 
     rv_json = rv_json+lv_beg(lv_end).
@@ -514,13 +516,16 @@ METHOD XML_FROM_ZIP.
 ENDMETHOD.
 
 
-METHOD XML_TO_STR.
+METHOD xml_to_str.
   DATA:
     lo_xml     TYPE REF TO if_ixml,
     lo_encode  TYPE REF TO if_ixml_encoding,
     lo_factory TYPE REF TO if_ixml_stream_factory,
     lo_stream  TYPE REF TO if_ixml_ostream,
     lo_rendr   TYPE REF TO if_ixml_renderer.
+
+  CLEAR ev_xstr.
+  CLEAR ev_str.
 
   lo_xml    = cl_ixml=>create( ).
 
@@ -535,10 +540,8 @@ METHOD XML_TO_STR.
 
   " Return a xtring
   IF ev_xstr IS REQUESTED.
-    CLEAR ev_xstr.
     lo_stream = lo_factory->create_ostream_xstring( string = ev_xstr ).
   ELSEIF ev_str IS REQUESTED. " Return a string
-    CLEAR ev_str.
     lo_stream = lo_factory->create_ostream_cstring( string = ev_str ).
   ELSE.
     RETURN.
@@ -554,7 +557,7 @@ METHOD XML_TO_STR.
 ENDMETHOD.
 
 
-METHOD XML_TO_ZIP.
+METHOD xml_to_zip.
   DATA:
    lv_value TYPE xstring.
 
@@ -575,8 +578,9 @@ METHOD XML_TO_ZIP.
     RETURN.
   ENDIF.
 
-  " Delete from ZIP
-  io_zip->delete( EXPORTING name = iv_name EXCEPTIONS OTHERS = 1 ).
+  " Delete from ZIP (if the file is exists)
+  io_zip->delete( EXPORTING name    = iv_name
+                  EXCEPTIONS OTHERS = 0 ).
 
   " Add to ZIP
   io_zip->add( name = iv_name content = lv_value ).
@@ -593,9 +597,9 @@ METHOD xstring_to_base64.
     CATCH cx_sy_dyn_call_error.
       " 7.00 doesn't have cl_http_utility=>encode_x_base64( ).
       DATA lv_error TYPE i.
-      SYSTEM-CALL ict  "#EC CI_SYSTEMCALL
+      SYSTEM-CALL ict                                "#EC CI_SYSTEMCALL
         DID
-          86 " ihttp_scid_base64_escape_x
+          86  "#EC NUMBER_OK  " ihttp_scid_base64_escape_x
         PARAMETERS
           iv_xstring
           rv_base64
@@ -783,7 +787,7 @@ METHOD _abap_2_json.
     IF sy-subrc <> 0 OR lo_type IS INITIAL.
       APPEND '{}' TO json_fragments.
       CONCATENATE LINES OF json_fragments INTO rv_json.
-      EXIT.
+      RETURN.
     ENDIF.
   ELSE.
     ASSIGN im_data TO <abap_data>.
@@ -861,7 +865,7 @@ METHOD _abap_2_json.
           IF lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_oref OR lo_subtype->type_kind EQ cl_abap_typedescr=>typekind_iref.
             rec_rv_json = '"REF UNSUPPORTED"'.
           ELSE.
-            get_scalar_value rec_rv_json <comp> lo_subtype.
+            get_scalar_value rec_rv_json <comp> lo_subtype. "#EC NUMBER_OK
           ENDIF.
           CONCATENATE c_quote l_name c_quote c_colon rec_rv_json INTO rec_rv_json.
         ENDIF.
@@ -878,7 +882,7 @@ METHOD _abap_2_json.
 *                  - Scalars -                     *
 ****************************************************
     ELSE.
-      get_scalar_value l_value <abap_data> lo_type.
+      get_scalar_value l_value <abap_data> lo_type.      "#EC NUMBER_OK
       APPEND l_value TO json_fragments.
 
     ENDIF.
@@ -982,12 +986,14 @@ METHOD _json_2_abap.
 
 
   IF js_object IS NOT BOUND.
-
-    IF json_string IS INITIAL. EXIT. ENDIF. " exit method if there is nothing to parse
+    " exit method if there is nothing to parse
+    IF json_string IS INITIAL.
+      RETURN.
+    ENDIF.
 
     l_json_string = json_string.
     " js_object = cl_java_script=>create( STACKSIZE = 16384 ).
-    js_object = cl_java_script=>create( stacksize = 16384 heapsize = 960000 ).
+    js_object = cl_java_script=>create( stacksize = 16384 heapsize = 960000 ). "#EC NUMBER_OK
 
 ***************************************************
 *  Parse JSON using JavaScript                    *
@@ -1058,7 +1064,7 @@ METHOD _json_2_abap.
 * Exit if abap_data is not supplied, normally when called
 * from json_deserialize to get top level properties
   IF abap_data IS NOT SUPPLIED.
-    EXIT.
+    RETURN.
   ENDIF. "***
 
 *

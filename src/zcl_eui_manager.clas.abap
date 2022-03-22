@@ -192,7 +192,7 @@ METHOD zif_eui_manager~popup.
   ENDIF.
 
   IF ls_popup-col_end IS INITIAL.
-    ls_popup-col_end = 150.
+    ls_popup-col_end = 150.                              "#EC NUMBER_OK
   ENDIF.
 
   IF ls_popup-row_beg IS INITIAL.
@@ -200,7 +200,7 @@ METHOD zif_eui_manager~popup.
   ENDIF.
 
   IF ls_popup-row_end IS INITIAL.
-    ls_popup-row_end = 30.
+    ls_popup-row_end = 30.                               "#EC NUMBER_OK
   ENDIF.
 
   " And set

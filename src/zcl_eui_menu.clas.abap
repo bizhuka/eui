@@ -160,13 +160,13 @@ METHOD create_toolbar.
                                           AND par_function IS INITIAL.
       CASE <ls_menu>-butn_type.
         WHEN cntb_btype_menu.
-          ADD 51 TO lv_width.
+          ADD 51 TO lv_width.                            "#EC NUMBER_OK
 
         WHEN cntb_btype_sep.
-          ADD 6 TO lv_width.
+          ADD 6 TO lv_width.                             "#EC NUMBER_OK
 
         WHEN OTHERS.
-          ADD 41 TO lv_width.
+          ADD 41 TO lv_width.                            "#EC NUMBER_OK
       ENDCASE.
     ENDLOOP.
   ENDIF.

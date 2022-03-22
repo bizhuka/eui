@@ -70,12 +70,6 @@ CLASS lcl_report DEFINITION FINAL.
           io_container.
 ENDCLASS.
 
-
-**********************************************************************
-**********************************************************************
-DATA:
-  go_report     TYPE REF TO lcl_report.
-
 **********************************************************************
 **********************************************************************
 CLASS lcl_report IMPLEMENTATION.
@@ -313,7 +307,7 @@ CLASS lcl_report IMPLEMENTATION.
     IF is_excel_map-field = 'DISTANCE'.
       ASSIGN cv_value->* TO <lv_distance>.
       " Could analyze IV_SOURCE from excel
-      <lv_distance> = 77777.
+      <lv_distance> = 77777.                             "#EC NUMBER_OK
     ENDIF.
 
     " alternative for cf_reca_message_list=>create( )
@@ -343,6 +337,8 @@ ENDCLASS.
 
 **********************************************************************
 **********************************************************************
+DATA:
+  go_report     TYPE REF TO lcl_report.                     "#EC NEEDED
 
 INITIALIZATION.
   CREATE OBJECT go_report.

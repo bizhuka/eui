@@ -12,9 +12,21 @@
    <TPOOL>
     <item>
      <ID>I</ID>
+     <KEY>CAN</KEY>
+     <ENTRY>The action is cancelled</ENTRY>
+     <LENGTH>46</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
      <KEY>TIT</KEY>
      <ENTRY>Next screen options</ENTRY>
      <LENGTH>29</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>YES</KEY>
+     <ENTRY>OK is pressed</ENTRY>
+     <LENGTH>23</LENGTH>
     </item>
     <item>
      <ID>R</ID>
@@ -46,6 +58,60 @@
      <LENGTH>22</LENGTH>
     </item>
    </TPOOL>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>R</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>I</ID>
+       <KEY>CAN</KEY>
+       <ENTRY>Действие отменено</ENTRY>
+       <LENGTH>46</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>TIT</KEY>
+       <ENTRY>Параметры следующего экрана</ENTRY>
+       <LENGTH>29</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>YES</KEY>
+       <ENTRY>OK был нажат</ENTRY>
+       <LENGTH>23</LENGTH>
+      </item>
+      <item>
+       <ID>R</ID>
+       <ENTRY>Пример экрана 01</ENTRY>
+       <LENGTH>70</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_01_GRY</KEY>
+       <ENTRY>Сделать P_FLD_01 серым</ENTRY>
+       <LENGTH>38</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_02_OBL</KEY>
+       <ENTRY>Сделать P_FLD_02 обязательным</ENTRY>
+       <LENGTH>38</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_FLD_01</KEY>
+       <ENTRY>Поле P_FLD_01</ENTRY>
+       <LENGTH>38</LENGTH>
+      </item>
+      <item>
+       <ID>S</ID>
+       <KEY>P_FLD_02</KEY>
+       <ENTRY>Поле P_FLD_02</ENTRY>
+       <LENGTH>38</LENGTH>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
   </asx:values>
  </asx:abap>
 </abapGit>

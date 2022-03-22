@@ -353,7 +353,8 @@ METHOD constructor.
   set_default ms_header-alprog  sy-cprog.
   " Calculated default
   DATA lv_delete_date TYPE d.
-  lv_delete_date = ms_header-aldate + 30. " delete after 30 days
+  " delete after 30 days
+  lv_delete_date = ms_header-aldate + 30.                "#EC NUMBER_OK
   set_default ms_header-aldate_del lv_delete_date.
 
   CALL FUNCTION 'BAL_LOG_CREATE'

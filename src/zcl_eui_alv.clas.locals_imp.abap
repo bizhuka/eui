@@ -97,7 +97,7 @@ CLASS lcl_helper IMPLEMENTATION.
     mo_eui_alv->ms_status-is_fixed = abap_true.
     mo_eui_alv->ms_status-title    = ms_field_desc->label.
 
-                                                            " 2 buttons
+    " 2 buttons
     IF mo_eui_alv->mv_read_only = abap_true. " <> lcl_opt=>is_editable( ms_field_desc->is_editable )
       APPEND zif_eui_manager=>mc_cmd-ok TO mo_eui_alv->ms_status-exclude.
     ENDIF.
@@ -125,7 +125,7 @@ CLASS lcl_helper IMPLEMENTATION.
       lv_ind = sy-index - 1.
       lv_sum = lv_sum + cl_abap_conv_out_ce=>uccpi( ms_field_desc->name+lv_ind(1) ).
     ENDDO.
-    lv_sum = 9999 - lv_sum.
+    lv_sum = 9999 - lv_sum.                              "#EC NUMBER_OK
     cs_variant-handle  = lv_sum.
   ENDMETHOD.
 
@@ -185,7 +185,7 @@ CLASS lcl_helper IMPLEMENTATION.
           <ls_fieldcat>-hotspot = abap_true.
         ENDIF.
 
-                                                            " For F4
+        " For F4
         IF ls_sub_field->rollname CP '*-*'.
           SPLIT ls_sub_field->rollname AT '-' INTO
            <ls_fieldcat>-ref_table
@@ -344,10 +344,10 @@ CLASS lcl_helper IMPLEMENTATION.
 
     CREATE OBJECT mo_eui_alv->mo_grid
       EXPORTING
-        i_parent      = lo_container
+        i_parent = lo_container
 *       i_appl_events = abap_true
       EXCEPTIONS
-        others        = 1.
+        OTHERS   = 1.
     IF sy-subrc <> 0.
       MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno DISPLAY LIKE 'E' WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
       RETURN.

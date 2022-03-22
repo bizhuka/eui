@@ -345,7 +345,7 @@ METHOD _show_log.
       ir_table       = lr_table
       it_mod_catalog = lt_catalog.
 
-  lo_alv->popup( iv_row_end = 25 ).
+  lo_alv->popup( iv_row_end = 25 ).                      "#EC NUMBER_OK
   lo_alv->show( ).
 ENDMETHOD.
 ENDCLASS.

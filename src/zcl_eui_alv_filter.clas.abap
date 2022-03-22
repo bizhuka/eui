@@ -256,12 +256,13 @@ METHOD _filter_by_popup.
       it_mod_catalog = lt_catalog
       is_layout      = ls_layout.
 
-  lo_popup->popup( iv_col_beg = 25
-                   iv_col_end = 70
-                   iv_row_beg = 3
-                   iv_row_end = 10 ).
+  lo_popup->popup( iv_col_beg = 25                       "#EC NUMBER_OK
+                   iv_col_end = 70                       "#EC NUMBER_OK
+                   iv_row_beg = 3                        "#EC NUMBER_OK
+                   iv_row_end = 10                       "#EC NUMBER_OK
+                 ).
   IF lo_popup->show( io_handler      = me
-                        iv_handlers_map = '_ON_POPUP_DATA_CHANGED' ) <> 'OK'.
+                     iv_handlers_map = '_ON_POPUP_DATA_CHANGED' ) <> 'OK'.
     " Restore values
     DATA lv_selected TYPE abap_bool.
     LOOP AT lt_prev_selected INTO lv_selected.

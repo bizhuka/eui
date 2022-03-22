@@ -166,8 +166,8 @@ METHOD column_2_int.
       CONTINUE.
     ENDIF.
     lv_uccpi   = cl_abap_conv_out_ce=>uccpi( lv_char ).
-    lv_factor  = 26 ** ( 3 - sy-index ).
-    rv_column  = rv_column + ( lv_uccpi MOD 64 ) * lv_factor.
+    lv_factor  = 26 ** ( 3 - sy-index ).                      "#EC NUMBER_OK
+    rv_column  = rv_column + ( lv_uccpi MOD 64 ) * lv_factor. "#EC NUMBER_OK
   ENDDO.
 
   " Add to both tables
@@ -668,17 +668,17 @@ METHOD int_2_column.
     RETURN.
   ENDIF.
 
-  IF iv_column > 16384 OR iv_column < 1.
+  IF iv_column > 16384 OR iv_column < 1.                 "#EC NUMBER_OK
     MESSAGE s004(zeui_message) WITH iv_column INTO sy-msgli.
     zcx_eui_exception=>raise_sys_error( ).
   ENDIF.
 
   ls_col_ind-ind = iv_column.
   WHILE iv_column GT 0.
-    lv_module = ( iv_column - 1 ) MOD 26.
-    lv_uccpi  = 65 + lv_module.
+    lv_module = ( iv_column - 1 ) MOD 26.                "#EC NUMBER_OK
+    lv_uccpi  = 65 + lv_module.                          "#EC NUMBER_OK
 
-    iv_column = ( iv_column - lv_module ) / 26.
+    iv_column = ( iv_column - lv_module ) / 26.          "#EC NUMBER_OK
 
     lv_text   = cl_abap_conv_in_ce=>uccpi( lv_uccpi ).
     CONCATENATE lv_text rv_column INTO rv_column.

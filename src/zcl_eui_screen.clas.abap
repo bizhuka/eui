@@ -82,7 +82,7 @@ public section.
       !INVISIBLE type SCREEN-INVISIBLE optional
       !ACTIVE type SCREEN-ACTIVE optional
       !IT_LISTBOX type VRM_VALUES optional
-      !IV_LABEL type ZCL_EUI_TYPE=>TS_FIELD_DESC-LABEL optional
+      !IV_LABEL type CSEQUENCE optional
       !IV_SUB_FDESC type ZCL_EUI_TYPE=>TS_FIELD_DESC-SUB_FDESC optional
       !IV_ROLLNAME type ZCL_EUI_TYPE=>TS_FIELD_DESC-ROLLNAME optional
       !IV_COMMAND type SYUCOMM optional
@@ -373,37 +373,42 @@ ENDMETHOD.
 
 
 METHOD get_dimension.
-  CONSTANTS c_max_col_end TYPE i VALUE 83.
+  CONSTANTS:
+    BEGIN OF c_width,
+      min              TYPE i VALUE 42,
+      max              TYPE i VALUE 83,
+      table_button_end TYPE i VALUE 73,
+    END OF c_width.
 
   " No context?
   IF mo_helper->mt_map[] IS INITIAL.
-    ev_col_end = c_max_col_end.
+    ev_col_end = c_width-max.
     RETURN.
   ENDIF.
 
   " Minimum width for parameters only
-  ev_col_end = 42.
+  ev_col_end = c_width-min.
   FIELD-SYMBOLS <ls_map> LIKE LINE OF mo_helper->mt_map.
   LOOP AT mo_helper->mt_map ASSIGNING <ls_map>.
     " Maximum width
     IF <ls_map>-ui_type = zcl_eui_type=>mc_ui_type-range OR <ls_map>-is_list_box = abap_true.
-      ev_col_end = c_max_col_end.
+      ev_col_end = c_width-max.
     ENDIF.
 
-    IF <ls_map>-ui_type = zcl_eui_type=>mc_ui_type-table AND ev_col_end < 73.
-      ev_col_end = 73.
+    IF <ls_map>-ui_type = zcl_eui_type=>mc_ui_type-table AND ev_col_end < c_width-table_button_end.
+      ev_col_end = c_width-table_button_end.
     ENDIF.
 
     " Other PARAMETERS
     DATA lv_calc_width TYPE f.
-    lv_calc_width = 42 + <ls_map>-length * '1.4'.
+    lv_calc_width = c_width-min + <ls_map>-length * '1.4'. "#EC NUMBER_OK
     IF ev_col_end < lv_calc_width.
       ev_col_end = lv_calc_width.
     ENDIF.
   ENDLOOP.
 
-  IF ev_col_end > c_max_col_end.
-    ev_col_end = c_max_col_end.
+  IF ev_col_end > c_width-max.
+    ev_col_end = c_width-max.
   ENDIF.
 ENDMETHOD.
 

@@ -22,7 +22,7 @@ DATA:
   gv_screen_prog_07  TYPE syrepid,  gv_screen_dynnr_07 TYPE sydynnr.
 
 " Free selection dialog
-DATA go_top_manager TYPE REF TO zif_eui_manager.
+DATA go_top_manager TYPE REF TO zif_eui_manager.            "#EC NEEDED
 
 **********************************************************************
 **********************************************************************
@@ -47,12 +47,12 @@ CLASS lcl_stack DEFINITION FINAL.
       push_stack
         IMPORTING
           io_manager          TYPE REF TO zif_eui_manager
-          value(iv_read_only) TYPE abap_bool,
+          VALUE(iv_read_only) TYPE abap_bool,
 
       get_stack
         IMPORTING
                   iv_check        TYPE abap_bool DEFAULT abap_true
-        RETURNING value(ro_stack) TYPE REF TO lcl_stack,
+        RETURNING VALUE(ro_stack) TYPE REF TO lcl_stack,
 
       pop_stack,
 
@@ -60,9 +60,9 @@ CLASS lcl_stack DEFINITION FINAL.
 
       pai_0700
         IMPORTING
-                  iv_silent        TYPE abap_bool OPTIONAL
+          iv_silent TYPE abap_bool OPTIONAL
         CHANGING
-          cv_cmd TYPE syucomm,
+          cv_cmd    TYPE syucomm,
 
       pbo_0100
         IMPORTING
@@ -99,9 +99,9 @@ CLASS lcl_stack IMPLEMENTATION.
     IF io_manager->ms_status-name IS INITIAL AND io_manager->ms_status-prog IS INITIAL AND
        iv_read_only = abap_true AND
        io_manager->ms_popup-col_beg IS INITIAL.
-      lv_dynnr = lo_stack->dynnr + 700.
+      lv_dynnr = lo_stack->dynnr + 700.                  "#EC NUMBER_OK
     ELSE.
-      lv_dynnr = lo_stack->dynnr + 600.
+      lv_dynnr = lo_stack->dynnr + 600.                  "#EC NUMBER_OK
     ENDIF.
 **********************************************************************
 
@@ -115,8 +115,8 @@ CLASS lcl_stack IMPLEMENTATION.
       lv_row_end = io_manager->ms_popup-row_end.
 
       " Just to see better next screen
-      IF io_manager->ms_popup-no_shift <> abap_true AND mv_dynnr_index > 100.
-        lv_shift = mv_dynnr_index  - 100.
+      IF io_manager->ms_popup-no_shift <> abap_true AND mv_dynnr_index > 100. "#EC NUMBER_OK
+        lv_shift = mv_dynnr_index  - 100.                "#EC NUMBER_OK
         ADD lv_shift TO:
           lv_col_beg, lv_row_beg,
           lv_col_end, lv_row_end.
@@ -139,10 +139,10 @@ CLASS lcl_stack IMPLEMENTATION.
 
     " Check screen index
     lv_dynnr = sy-dynnr.
-    IF lv_dynnr >= 800.
-      lv_dynnr = lv_dynnr  - 700.
-    ELSEIF lv_dynnr >= 700.
-      lv_dynnr = lv_dynnr  - 600.
+    IF lv_dynnr >= 800.                                  "#EC NUMBER_OK
+      lv_dynnr = lv_dynnr  - 700.                        "#EC NUMBER_OK
+    ELSEIF lv_dynnr >= 700.                              "#EC NUMBER_OK
+      lv_dynnr = lv_dynnr  - 600.                        "#EC NUMBER_OK
     ENDIF.
 
     IF iv_check = abap_true AND ( mv_dynnr_index <> lv_dynnr OR mv_dynnr_index <> ro_stack->dynnr ).
@@ -254,13 +254,13 @@ CLASS lcl_stack IMPLEMENTATION.
 
     " Get manager
     TRY.
-      lo_stack = get_stack( ).
-    CATCH zcx_eui_no_check INTO lo_error.
-      " Wrong screen number? Close by OK or Cancel
-      IF iv_silent = abap_true.
-        RETURN.
-      ENDIF.
-      RAISE EXCEPTION lo_error.
+        lo_stack = get_stack( ).
+      CATCH zcx_eui_no_check INTO lo_error.
+        " Wrong screen number? Close by OK or Cancel
+        IF iv_silent = abap_true.
+          RETURN.
+        ENDIF.
+        RAISE EXCEPTION lo_error.
     ENDTRY.
 
     lo_manager = lo_stack->manager.

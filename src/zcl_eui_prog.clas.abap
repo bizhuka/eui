@@ -110,7 +110,7 @@ METHOD generate.
 
     " Is already generated ?
     IF ls_hash-prog+1(1) = '%'.
-      DO 39 TIMES.
+      DO 39 TIMES.                                       "#EC NUMBER_OK
         ls_hash-prog+sy-index(1) = '%'.
         READ TABLE mt_hash TRANSPORTING NO FIELDS  "#EC CI_SORTSEQ
          WITH KEY prog = ls_hash-prog.
@@ -141,8 +141,8 @@ ENDMETHOD.
 
 METHOD _generate_subroutine.
   DATA lv_message TYPE string.
-  DATA lv_pos     TYPE i.
-  DATA lv_word    TYPE string.
+  DATA lv_pos     TYPE i.                    "#EC NEEDED  <-- dump info
+  DATA lv_word    TYPE string.               "#EC NEEDED  <-- dump info
   GENERATE SUBROUTINE POOL it_code NAME rv_prog
     MESSAGE lv_message
     LINE    lv_pos
@@ -150,7 +150,7 @@ METHOD _generate_subroutine.
   CHECK sy-subrc <> 0.
 
   " Ooops! wrong syntax in MT_ABAP_CODE!
-  zcx_eui_no_check=>raise_sys_error( iv_message = lv_message ).
+  zcx_eui_no_check=>raise_sys_error( iv_message = lv_message ). "<-- dump info
 ENDMETHOD.
 
 

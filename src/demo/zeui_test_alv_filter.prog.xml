@@ -11,6 +11,12 @@
    </PROGDIR>
    <TPOOL>
     <item>
+     <ID>I</ID>
+     <KEY>ADD</KEY>
+     <ENTRY>Add selected rows</ENTRY>
+     <LENGTH>27</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
      <ENTRY>Test ALV color filter</ENTRY>
      <LENGTH>21</LENGTH>
@@ -33,20 +39,26 @@
      <LANGUAGE>R</LANGUAGE>
      <TEXTPOOL>
       <item>
+       <ID>I</ID>
+       <KEY>ADD</KEY>
+       <ENTRY>Добавить выбранные строки</ENTRY>
+       <LENGTH>27</LENGTH>
+      </item>
+      <item>
        <ID>R</ID>
        <ENTRY>Тестирование ALV</ENTRY>
        <LENGTH>70</LENGTH>
       </item>
       <item>
        <ID>S</ID>
-       <KEY>P_EDIT</KEY>
-       <ENTRY>Редактируемый</ENTRY>
+       <KEY>P_MAX</KEY>
+       <ENTRY>Максимальное количество строк</ENTRY>
        <LENGTH>38</LENGTH>
       </item>
       <item>
        <ID>S</ID>
-       <KEY>P_POPUP</KEY>
-       <ENTRY>ALV во всплывающем окне</ENTRY>
+       <KEY>P_MENU</KEY>
+       <ENTRY>В виде меню</ENTRY>
        <LENGTH>38</LENGTH>
       </item>
      </TEXTPOOL>
