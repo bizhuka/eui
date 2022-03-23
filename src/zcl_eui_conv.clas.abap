@@ -263,6 +263,7 @@ METHOD from_json.
     CASE lv_mode.
       " in most cases it works fine regardless the fact that in system there is no if_sxml=>co_xt_json declared
       WHEN '1'.
+        CLEAR ex_data.
         TRY.
             CALL TRANSFORMATION id SOURCE XML iv_json
                                    RESULT data = ex_data.

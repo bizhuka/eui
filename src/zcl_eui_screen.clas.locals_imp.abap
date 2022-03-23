@@ -458,6 +458,14 @@ CLASS lcl_screen IMPLEMENTATION.
             is_layout = ls_layout.
         lo_manager = lo_alv.
 
+        " delegate to alv
+        FIELD-SYMBOLS <ls_item> LIKE LINE OF mo_eui_screen->mt_skip_msg[].
+        LOOP AT mo_eui_screen->mt_skip_msg[] ASSIGNING <ls_item>.
+          lo_alv->skip_message( iv_msgid = <ls_item>-msgid
+                                iv_msgno = <ls_item>-msgno
+                                iv_msgty = <ls_item>-msgty ).
+        ENDLOOP.
+
         " As refernce
         GET REFERENCE OF ls_map->field_desc INTO lr_field_desc.
         lo_alv->set_field_desc( lr_field_desc ).

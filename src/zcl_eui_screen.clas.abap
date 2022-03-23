@@ -1,6 +1,6 @@
 class ZCL_EUI_SCREEN definition
   public
-  inheriting from ZCL_EUI_MANAGER
+  inheriting from ZCL_EUI_MSG_MANAGER
   final
   create public .
 

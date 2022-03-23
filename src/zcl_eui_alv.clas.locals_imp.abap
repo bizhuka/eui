@@ -538,6 +538,20 @@ CLASS lcl_helper IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD on_data_changed.
+    IF mo_eui_alv->mt_skip_msg[] IS NOT INITIAL AND er_data_changed IS NOT INITIAL.
+      DATA: lr_item  TYPE REF TO lvc_s_msg1,
+            lv_tabix TYPE sytabix.
+      LOOP AT er_data_changed->mt_protocol[] REFERENCE INTO lr_item.
+        lv_tabix = sy-tabix.
+        CHECK mo_eui_alv->is_skipped(
+                iv_msgid = lr_item->msgid
+                iv_msgno = lr_item->msgno
+                iv_msgty = lr_item->msgty ) = abap_true.
+
+        DELETE er_data_changed->mt_protocol[] INDEX lv_tabix.
+      ENDLOOP.
+    ENDIF.
+
     mo_eui_alv->mo_event_caller->call_handlers(
      iv_of_class     = 'CL_GUI_ALV_GRID'
      iv_for_event    = 'DATA_CHANGED'
