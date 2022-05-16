@@ -111,9 +111,13 @@ CLASS lcl_screen IMPLEMENTATION.
       ls_map-command    = lr_customize->command.
 
       "№ 1
-      IF   ls_screen-name IS NOT INITIAL
+      IF   ls_screen-name   IS NOT INITIAL
         OR ls_screen-group1 IS NOT INITIAL
         OR ls_screen-group2 IS NOT INITIAL.
+        " Previous SCREEN option
+        DELETE mt_screen WHERE name   = ls_screen-name
+                           AND group1 = ls_screen-group1
+                           AND group2 = ls_screen-group2.
         APPEND ls_screen TO mt_screen.
       ENDIF.
 
@@ -121,27 +125,26 @@ CLASS lcl_screen IMPLEMENTATION.
       CHECK ls_map IS NOT INITIAL
         AND ls_screen-name IS NOT INITIAL.
 
-      READ TABLE mt_map REFERENCE INTO lr_map
-       WITH KEY name = ls_screen-name.
+      LOOP AT mt_map REFERENCE INTO lr_map WHERE name CP ls_screen-name. " was 'EQ'
+        lv_skip = 'ROLLNAME'.
+        IF ls_map-rollname IS NOT INITIAL AND lr_map->ui_type <> zcl_eui_type=>mc_ui_type-table AND lr_map->ui_type <> zcl_eui_type=>mc_ui_type-string.
+          _check_is_list_box( CHANGING cs_map = ls_map ).
+          CLEAR lv_skip.
+        ENDIF.
+
+        " Label or sub_fdesc
+        zcl_eui_conv=>move_corresponding(
+         EXPORTING
+           is_source         = ls_map
+           iv_except_initial = abap_true
+           iv_except         = lv_skip
+         CHANGING
+           cs_destination    = lr_map->* ).
+      ENDLOOP.
       IF sy-subrc <> 0.
-        CONCATENATE `Unknown field name ` ls_map-name INTO lv_message.
+        CONCATENATE `Unknown field name ` ls_screen-name INTO lv_message.
         zcx_eui_exception=>raise_dump( iv_message = lv_message ).
       ENDIF.
-
-      lv_skip = 'ROLLNAME'.
-      IF ls_map-rollname IS NOT INITIAL AND lr_map->ui_type <> zcl_eui_type=>mc_ui_type-table AND lr_map->ui_type <> zcl_eui_type=>mc_ui_type-string.
-        _check_is_list_box( CHANGING cs_map = ls_map ).
-        CLEAR lv_skip.
-      ENDIF.
-
-      " Label or sub_fdesc
-      zcl_eui_conv=>move_corresponding(
-       EXPORTING
-         is_source         = ls_map
-         iv_except_initial = abap_true
-         iv_except         = lv_skip
-       CHANGING
-         cs_destination    = lr_map->* ).
     ENDLOOP.
   ENDMETHOD.
 
@@ -210,44 +213,46 @@ CLASS lcl_screen IMPLEMENTATION.
         CHECK sy-subrc = 0.
 
         " Get by screen option
-        ls_screen = get_screen_by_map( ls_map->name ).
+        LOOP AT mt_screen INTO ls_screen.       " ls_screen = get_screen_by_map( ls_map->name ).
+          CHECK ls_map->name CP ls_screen-name. " was 'EQ'
 
-        " Set required for parameter or select-option
-        IF ls_screen-required IS NOT INITIAL AND ( ls_screen_dst-group3 = 'PAR' OR ls_screen_dst-group3 = 'LOW' ).
-          ls_screen_dst-required = ls_screen-required.
-        ENDIF.
-
-        lv_input = ''.
-        IF ls_screen-input = '0' OR mo_eui_screen->mv_read_only = 'X'. " AND ls_screen_dst-group3 <> 'VPU' 'PBU'. " But not for tables
-          lv_input = '0'.
-        ENDIF.
-
-        IF ls_map->ui_type = zcl_eui_type=>mc_ui_type-table OR
-           ls_map->ui_type = zcl_eui_type=>mc_ui_type-string.
-
-          IF ls_screen_dst-group3 = 'LOW' OR ls_screen_dst-group3 = 'TOT' OR ls_screen_dst-group3 = 'HGH'.
-            ls_screen_dst-active    = '0'.
-            ls_screen_dst-invisible = '1'.
-            lv_input                = '0'.
+          " Set required for parameter or select-option
+          IF ls_screen-required IS NOT INITIAL AND ( ls_screen_dst-group3 = 'PAR' OR ls_screen_dst-group3 = 'LOW' ).
+            ls_screen_dst-required = ls_screen-required.
           ENDIF.
-        ENDIF.
 
-        " Do not edit
-        IF lv_input = '0'.
-          ls_screen_dst-input = '0'.
-        ENDIF.
+          lv_input = ''.
+          IF ls_screen-input = '0' OR mo_eui_screen->mv_read_only = 'X'. " AND ls_screen_dst-group3 <> 'VPU' 'PBU'. " But not for tables
+            lv_input = '0'.
+          ENDIF.
 
-        " TODO change SCREEN-NAME instead ?
-        CHECK ls_screen_dst-name = ls_map->par_name
-          AND ls_map->ui_type <> zcl_eui_type=>mc_ui_type-table
-          AND ls_map->ui_type <> zcl_eui_type=>mc_ui_type-string.
-        CLEAR: ls_screen-name,
-               ls_screen-input,
-               ls_screen-required.
-        zcl_eui_conv=>move_corresponding( EXPORTING is_source         = ls_screen
-                                                    iv_except_initial = abap_true    " <--- Move-corresponding except initial
-                                          CHANGING  cs_destination    = ls_screen_dst
-                                                    ct_component      = lt_scr_fields ).
+          IF ls_map->ui_type = zcl_eui_type=>mc_ui_type-table OR
+             ls_map->ui_type = zcl_eui_type=>mc_ui_type-string.
+
+            IF ls_screen_dst-group3 = 'LOW' OR ls_screen_dst-group3 = 'TOT' OR ls_screen_dst-group3 = 'HGH'.
+              ls_screen_dst-active    = '0'.
+              ls_screen_dst-invisible = '1'.
+              lv_input                = '0'.
+            ENDIF.
+          ENDIF.
+
+          " Do not edit
+          IF lv_input = '0'.
+            ls_screen_dst-input = '0'.
+          ENDIF.
+
+          " TODO change SCREEN-NAME instead ?
+          CHECK ls_screen_dst-name = ls_map->par_name
+            AND ls_map->ui_type <> zcl_eui_type=>mc_ui_type-table
+            AND ls_map->ui_type <> zcl_eui_type=>mc_ui_type-string.
+          CLEAR: ls_screen-name,
+                 ls_screen-input,
+                 ls_screen-required.
+          zcl_eui_conv=>move_corresponding( EXPORTING is_source         = ls_screen
+                                                      iv_except_initial = abap_true    " <--- Move-corresponding except initial
+                                            CHANGING  cs_destination    = ls_screen_dst
+                                                      ct_component      = lt_scr_fields ).
+        ENDLOOP.
       ENDDO.
 
       FIELD-SYMBOLS <ls_screen_src> LIKE LINE OF mt_screen.
