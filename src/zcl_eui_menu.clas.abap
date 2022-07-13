@@ -45,6 +45,9 @@ public section.
   methods CHANGE_HANDLER
     importing
       !IO_HANDLER type ref to OBJECT .
+  class-methods CAN_SHOW
+    returning
+      value(RV_OK) type ABAP_BOOL .
 protected section.
 private section.
 
@@ -82,6 +85,34 @@ METHOD add_handler.
 ENDMETHOD.
 
 
+METHOD can_show.
+  DATA:
+    lp_dialog_status TYPE char1,
+    lp_gui           TYPE char1,
+    lp_cat           TYPE char1.
+
+  " if we are called by RFC in a dialogless BAPI or in update task or in batch suppress the starter
+  GET PARAMETER ID 'FLAG_DIALOG_STATUS' FIELD lp_dialog_status.
+
+  CALL FUNCTION 'CAT_IS_ACTIVE'
+    IMPORTING
+      active = lp_cat.
+
+  CALL FUNCTION 'RFC_IS_GUI_ON'
+    IMPORTING
+      on = lp_gui.
+
+  CHECK  " TODO sy-binpt IS INITIAL
+         sy-batch IS INITIAL
+     AND sy-oncom <> 'V'
+     AND lp_dialog_status IS INITIAL
+     AND lp_cat = space
+     AND lp_gui = 'Y'.
+
+  rv_ok = abap_true.
+ENDMETHOD.
+
+
 METHOD change_handler.
   DATA lo_error TYPE REF TO zcx_eui_exception.
 
@@ -110,15 +141,12 @@ ENDMETHOD.
 
 METHOD create_toolbar.
   DATA:
-    lp_dialog_status TYPE char1,
-    lp_gui           TYPE char1,
-    lp_cat           TYPE char1,
-    lt_stb_menu      TYPE SORTED TABLE OF stb_btnmnu WITH UNIQUE KEY function,
-    ls_stb_menu      TYPE stb_btnmnu,
-    lv_icon          TYPE icon-id,
-    lv_width         TYPE i,
-    ls_event         TYPE REF TO cntl_simple_event,
-    lt_event         TYPE cntl_simple_events.
+    lt_stb_menu TYPE SORTED TABLE OF stb_btnmnu WITH UNIQUE KEY function,
+    ls_stb_menu TYPE stb_btnmnu,
+    lv_icon     TYPE icon-id,
+    lv_width    TYPE i,
+    ls_event    TYPE REF TO cntl_simple_event,
+    lt_event    TYPE cntl_simple_events.
   FIELD-SYMBOLS:
     <ls_menu>     LIKE LINE OF it_menu,
     <ls_stb_menu> TYPE stb_btnmnu.
@@ -133,23 +161,7 @@ METHOD create_toolbar.
        OR sy-tcode CP 'SE*'.
   ENDIF.
 
-  " if we are called by RFC in a dialogless BAPI or in update task or in batch suppress the starter
-  GET PARAMETER ID 'FLAG_DIALOG_STATUS' FIELD lp_dialog_status.
-
-  CALL FUNCTION 'CAT_IS_ACTIVE'
-    IMPORTING
-      active = lp_cat.
-
-  CALL FUNCTION 'RFC_IS_GUI_ON'
-    IMPORTING
-      on = lp_gui.
-
-  CHECK  " TODO sy-binpt IS INITIAL
-         sy-batch IS INITIAL
-     AND sy-oncom <> 'V'
-     AND lp_dialog_status IS INITIAL
-     AND lp_cat = space
-     AND lp_gui = 'Y'.
+  CHECK can_show( ) = abap_true.
 
 **********************************************************************
   " Calc new width
