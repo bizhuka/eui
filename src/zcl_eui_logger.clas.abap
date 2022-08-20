@@ -405,13 +405,13 @@ METHOD corresponding_msg.
   ENDIF.
 
   " Last case
-  rs_msg-msgty = ls_minority-type.
-  rs_msg-msgid = ls_minority-id.
-  rs_msg-msgno = ls_minority-number.
-  rs_msg-msgv1 = ls_minority-message_v1.
-  rs_msg-msgv2 = ls_minority-message_v2.
-  rs_msg-msgv3 = ls_minority-message_v3.
-  rs_msg-msgv4 = ls_minority-message_v4.
+  set_default rs_msg-msgty ls_minority-type.
+  set_default rs_msg-msgid ls_minority-id.
+  set_default rs_msg-msgno ls_minority-number.
+  set_default rs_msg-msgv1 ls_minority-message_v1.
+  set_default rs_msg-msgv2 ls_minority-message_v2.
+  set_default rs_msg-msgv3 ls_minority-message_v3.
+  set_default rs_msg-msgv4 ls_minority-message_v4.
 ENDMETHOD.
 
 
