@@ -212,6 +212,10 @@ CLASS lcl_screen IMPLEMENTATION.
          WITH KEY par_name = lv_name.
         CHECK sy-subrc = 0.
 
+        IF mo_eui_screen->mv_read_only = 'X'.
+          ls_screen_dst-input = '0'.
+        ENDIF.
+
         " Get by screen option
         LOOP AT mt_screen INTO ls_screen.       " ls_screen = get_screen_by_map( ls_map->name ).
           CHECK ls_map->name CP ls_screen-name. " was 'EQ'
@@ -222,7 +226,7 @@ CLASS lcl_screen IMPLEMENTATION.
           ENDIF.
 
           lv_input = ''.
-          IF ls_screen-input = '0' OR mo_eui_screen->mv_read_only = 'X'. " AND ls_screen_dst-group3 <> 'VPU' 'PBU'. " But not for tables
+          IF ls_screen-input = '0'. " AND ls_screen_dst-group3 <> 'VPU' 'PBU'. " But not for tables
             lv_input = '0'.
           ENDIF.
 
