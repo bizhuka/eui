@@ -95,6 +95,14 @@ CLASS lcl_screen DEFINITION.
         IMPORTING
           is_field_desc TYPE zcl_eui_type=>ts_field_desc
           io_alv        TYPE REF TO zcl_eui_alv.
+
+    CLASS-METHODS:
+      is_fixed_values_list
+        IMPORTING is_catalog   TYPE lvc_s_fcat
+                  iv_read_only TYPE abap_bool
+        EXPORTING ev_update    TYPE abap_bool
+                  ev_is_fixed  TYPE abap_bool
+        CHANGING  ct_range     TYPE STANDARD TABLE.
 ENDCLASS.
 
 CLASS lcl_scr_free DEFINITION INHERITING FROM lcl_screen FINAL.

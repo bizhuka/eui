@@ -24,8 +24,9 @@ public section.
 
   methods CONSTRUCTOR
     importing
+      !IO_HANDLER type ref to OBJECT optional
       !IO_CONTAINER type ref to CL_GUI_CONTAINER optional
-      !IO_HANDLER type ref to OBJECT optional .
+    preferred parameter IO_HANDLER .
   methods CREATE_TOOLBAR
     importing
       !IT_MENU type TT_MENU

@@ -42,6 +42,7 @@ CLASS lcl_helper DEFINITION FINAL.
 
       get_field_catalog
         RETURNING VALUE(rt_fieldcat) TYPE lvc_t_fcat,
+      _set_dropdown_4_domain_values  CHANGING cs_fieldcat TYPE lvc_s_fcat,
 
       is_editable
         RETURNING VALUE(rv_editable) TYPE abap_bool,

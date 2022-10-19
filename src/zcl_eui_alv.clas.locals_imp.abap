@@ -99,7 +99,8 @@ CLASS lcl_helper IMPLEMENTATION.
 
     " 2 buttons
     IF mo_eui_alv->mv_read_only = abap_true. " <> lcl_opt=>is_editable( ms_field_desc->is_editable )
-      APPEND zif_eui_manager=>mc_cmd-ok TO mo_eui_alv->ms_status-exclude.
+      APPEND: zif_eui_manager=>mc_cmd-ok   TO mo_eui_alv->ms_status-exclude,
+              zif_eui_manager=>mc_cmd-save TO mo_eui_alv->ms_status-exclude.
     ENDIF.
   ENDMETHOD.
 
@@ -193,15 +194,7 @@ CLASS lcl_helper IMPLEMENTATION.
         ENDIF.
       ENDIF.
 
-      " for domain values
-      IF <ls_fieldcat>-ref_table IS NOT INITIAL AND <ls_fieldcat>-ref_field IS NOT INITIAL.
-        zcl_eui_type=>find_dropdown(
-         EXPORTING
-          io_grid      = mo_eui_alv->mo_grid
-         CHANGING
-          cs_fieldcat  = <ls_fieldcat>
-          cv_drdn_hndl = mv_drdn_hndl ).
-      ENDIF.
+      _set_dropdown_4_domain_values( CHANGING cs_fieldcat = <ls_fieldcat> ).
 
       " Default SH for date & time
       CHECK <ls_fieldcat>-ref_table IS INITIAL AND <ls_fieldcat>-ref_field IS INITIAL.
@@ -214,6 +207,35 @@ CLASS lcl_helper IMPLEMENTATION.
           <ls_fieldcat>-ref_field = 'UZEIT'.
       ENDCASE.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD _set_dropdown_4_domain_values.
+    " No need
+    IF cs_fieldcat-ref_table = abap_undefined AND cs_fieldcat-ref_field = abap_undefined.
+      CLEAR cs_fieldcat-ref_table.
+      CLEAR cs_fieldcat-ref_field.
+      EXIT.
+    ENDIF.
+    CHECK cs_fieldcat-ref_table IS NOT INITIAL AND cs_fieldcat-ref_field IS NOT INITIAL.
+
+    cs_fieldcat-drdn_hndl = mv_drdn_hndl + 1.
+
+    DATA lt_dropdown TYPE lvc_t_dral.
+    lt_dropdown = zcl_eui_type=>find_dropdown( is_fieldcat = cs_fieldcat
+                                               iv_show_key = abap_true ).
+    IF lt_dropdown[] IS INITIAL.
+      CLEAR cs_fieldcat-drdn_hndl.
+      RETURN.
+    ENDIF.
+
+    " Yes use next handle
+    mv_drdn_hndl = cs_fieldcat-drdn_hndl.
+
+    " Prepare field catalog
+    cs_fieldcat-drdn_hndl  = mv_drdn_hndl.
+    cs_fieldcat-drdn_alias = abap_true.
+
+    mo_eui_alv->mo_grid->set_drop_down_table( it_drop_down_alias = lt_dropdown ).
   ENDMETHOD.
 
   METHOD _check_f4_table.
@@ -501,6 +523,10 @@ CLASS lcl_helper IMPLEMENTATION.
 
         " Destination
         ASSIGN mo_eui_alv->mr_table->* TO <lt_table_dest>.
+        IF sy-subrc <> 0.
+          MESSAGE 'The ALV table memory was already freed' TYPE 'S' DISPLAY LIKE 'E'.
+          RETURN.
+        ENDIF.
 
         " Create new table for safety
         lo_tab_desc ?= cl_abap_typedescr=>describe_by_data( <lt_table_dest> ).

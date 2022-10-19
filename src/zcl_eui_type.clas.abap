@@ -32,7 +32,7 @@ public section.
     tt_unique_type TYPE SORTED TABLE OF string WITH UNIQUE KEY table_line .
 
   constants:
-   BEGIN OF MC_UI_TYPE,
+    BEGIN OF MC_UI_TYPE,
     " Simple UI types
     CHAR     type ZDEUI_UI_TYPE value 'char',
     NUMC     type ZDEUI_UI_TYPE value 'numc',
@@ -81,10 +81,10 @@ public section.
       !EV_FIELD type CSEQUENCE .
   class-methods FIND_DROPDOWN
     importing
-      !IO_GRID type ref to CL_GUI_ALV_GRID
-    changing
-      !CS_FIELDCAT type LVC_S_FCAT
-      !CV_DRDN_HNDL type I .
+      !IS_FIELDCAT type LVC_S_FCAT
+      !IV_SHOW_KEY type ABAP_BOOL
+    returning
+      value(RT_DROPDOWN) type LVC_T_DRAL .
   class-methods GET_FIELD_DESC
     importing
       !IV_FIELD_NAME type CSEQUENCE optional
@@ -398,7 +398,6 @@ METHOD find_dropdown.
     ls_fld_prop       TYPE REF TO ddshfprop,
     lt_shlp_descr_tab TYPE shlp_desct,
     lt_shlp_record    TYPE STANDARD TABLE OF seahlpres,
-    lt_dropdown       TYPE lvc_t_dral,
     ls_dropdown       TYPE lvc_s_dral.
   FIELD-SYMBOLS:
     <lt_table> TYPE STANDARD TABLE,
@@ -408,25 +407,18 @@ METHOD find_dropdown.
     <lv_txt>   TYPE csequence.
 
   " No need
-  IF cs_fieldcat-ref_table = abap_undefined AND cs_fieldcat-ref_field = abap_undefined.
-    CLEAR cs_fieldcat-ref_table.
-    CLEAR cs_fieldcat-ref_field.
-    RETURN.
-  ENDIF.
-
-  " No need
-  CHECK cs_fieldcat-checkbox <> abap_true
-    AND cs_fieldcat-hotspot  <> abap_true
-    AND cs_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int
-    AND cs_fieldcat-inttype  <> 'b' "cl_abap_typedescr=>typekind_int1
-    AND cs_fieldcat-inttype  <> 's' "cl_abap_typedescr=>typekind_int2
-    AND cs_fieldcat-inttype  <> '8'."cl_abap_typedescr=>typekind_int8.
+  CHECK is_fieldcat-checkbox <> abap_true
+    AND is_fieldcat-hotspot  <> abap_true
+    AND is_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int
+    AND is_fieldcat-inttype  <> 'b' "cl_abap_typedescr=>typekind_int1
+    AND is_fieldcat-inttype  <> 's' "cl_abap_typedescr=>typekind_int2
+    AND is_fieldcat-inttype  <> '8'."cl_abap_typedescr=>typekind_int8.
 
   " Get top SH
   is_list_box(
    EXPORTING
-    iv_tabname   = cs_fieldcat-ref_table
-    iv_fieldname = cs_fieldcat-ref_field
+    iv_tabname   = is_fieldcat-ref_table
+    iv_fieldname = is_fieldcat-ref_field
    IMPORTING
     ev_list_box  = lv_list_box
     es_sh_desc   = ls_sh_desc ).
@@ -558,29 +550,23 @@ METHOD find_dropdown.
 **********************************************************************
 **********************************************************************
 
-  " Next handle
-  ADD 1 TO cv_drdn_hndl.
-
-  " Prepare field catalog
-  cs_fieldcat-drdn_hndl  = cv_drdn_hndl.
-  cs_fieldcat-drdn_alias = abap_true.
-
   LOOP AT <lt_table> ASSIGNING <ls_row>.
     ASSIGN COMPONENT:
      '_LOW'  OF STRUCTURE <ls_row> TO <lv_low>,
      '_TEXT' OF STRUCTURE <ls_row> TO <lv_txt>.
 
-    ls_dropdown-handle    = cs_fieldcat-drdn_hndl.
+    ls_dropdown-handle    = is_fieldcat-drdn_hndl.
     ls_dropdown-int_value = <lv_low>.
-    ls_dropdown-value     = <lv_low>.
-    CONCATENATE ls_dropdown-value ` - ` <lv_txt> INTO ls_dropdown-value.
+
+    IF iv_show_key = abap_true.
+      CONCATENATE ls_dropdown-int_value ` - ` <lv_txt> INTO ls_dropdown-value.
+    ELSE.
+      ls_dropdown-value     = <lv_txt>.
+    ENDIF.
 
     " Add new item to dropdown
-    APPEND ls_dropdown TO lt_dropdown.
+    APPEND ls_dropdown TO rt_dropdown.
   ENDLOOP.
-
-  io_grid->set_drop_down_table(
-   it_drop_down_alias = lt_dropdown ).
 ENDMETHOD.
 
 

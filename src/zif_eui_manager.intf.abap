@@ -35,6 +35,7 @@ interface ZIF_EUI_MANAGER
   constants:
     BEGIN OF MC_CMD,
      OK     TYPE SYUCOMM VALUE 'OK',
+     SAVE   TYPE SYUCOMM VALUE 'SAVE',
      CANCEL TYPE SYUCOMM VALUE 'DCAN',
      RETURN TYPE SYUCOMM VALUE 'CRET',
    END OF MC_CMD .
@@ -72,6 +73,7 @@ interface ZIF_EUI_MANAGER
     importing
       !IO_HANDLER type ref to OBJECT optional
       !IV_HANDLERS_MAP type CSEQUENCE optional
+    preferred parameter IO_HANDLER
     returning
       value(RV_CLOSE_CMD) type SYUCOMM .
   methods SET_STATUS

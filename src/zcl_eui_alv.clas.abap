@@ -192,25 +192,47 @@ METHOD update_complex_fields.
           LOOP AT <lt_sub_table> ASSIGNING <ls_sub_src>.
             MOVE-CORRESPONDING <ls_sub_src> TO ls_range.
 
-            " Do not show SIGN
-            IF ls_range-sign = 'I'.
-              CLEAR lv_beg_txt.
-            ELSE.
-              CONCATENATE ls_range-sign `:` INTO lv_beg_txt.
-            ENDIF.
+            DATA: lv_option TYPE string,
+                  lv_beg    TYPE string,
+                  lv_end    TYPE string.
+            lv_beg = lv_end = ``.
 
             " Do not show HIGH
             ASSIGN COMPONENT 'HIGH' OF STRUCTURE <ls_sub_src> TO <lv_high>.
             IF <lv_high> IS INITIAL.
               CLEAR lv_end_txt.
             ELSE.
-              CONCATENATE `:` ls_range-high INTO lv_end_txt.
+              CONCATENATE `-` ls_range-high INTO lv_end_txt.
+              lv_beg = `{`.
+              lv_end = `}`.
             ENDIF.
 
-            CONCATENATE <lv_ui_ext> ` ` lv_beg_txt ls_range-option `:` ls_range-low lv_end_txt INTO <lv_ui_ext>.
+            IF ls_range-sign <> 'I'.
+              lv_beg = `}`.
+              lv_end = `{`.
+            ENDIF.
+
+            CASE ls_range-option.
+              WHEN 'EQ'. lv_option = `=`.
+              WHEN 'NE'. lv_option = `≠`.
+              WHEN 'GT'. lv_option = `>`.
+              WHEN 'LT'. lv_option = `<`.
+              WHEN 'GE'. lv_option = `≥`.
+              WHEN 'LE'. lv_option = `≤`.
+              WHEN 'CP'. lv_option = ``.
+              WHEN 'NP'. lv_option = `≠`.
+              WHEN 'BT'. lv_option = ``.
+              WHEN OTHERS.
+                ASSERT 1 = 2.
+            ENDCASE.
+
+            CONCATENATE <lv_ui_ext> `,` lv_beg
+                                        lv_option
+                                        ls_range-low
+                                        lv_end_txt lv_end INTO <lv_ui_ext>.
           ENDLOOP.
 
-          " Delete first ` `
+          " Delete first `,`
           IF sy-subrc = 0.
             <lv_ui_ext> = <lv_ui_ext>+1.
           ENDIF.

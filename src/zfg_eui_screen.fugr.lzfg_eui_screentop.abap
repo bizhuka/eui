@@ -47,7 +47,8 @@ CLASS lcl_stack DEFINITION FINAL.
       push_stack
         IMPORTING
           io_manager          TYPE REF TO zif_eui_manager
-          VALUE(iv_read_only) TYPE abap_bool,
+*          VALUE(iv_read_only) TYPE abap_bool
+          ,
 
       get_stack
         IMPORTING
@@ -89,15 +90,15 @@ CLASS lcl_stack IMPLEMENTATION.
 
 **********************************************************************
     " Detect screen number
-    READ TABLE io_manager->ms_status-exclude TRANSPORTING NO FIELDS
-     WITH KEY table_line = zif_eui_manager=>mc_cmd-ok.
-    IF sy-subrc = 0.
-      iv_read_only = abap_true.
-    ENDIF.
+*    LOOP AT io_manager->ms_status-exclude TRANSPORTING NO FIELDS WHERE table_line = zif_eui_manager=>mc_cmd-ok
+*                                                                    OR table_line = zif_eui_manager=>mc_cmd-save.
+*      iv_read_only = abap_true.
+*      EXIT.
+*    ENDLOOP.
 
     " If default PF-STATUS & READ_ONLY & FULL SCREEN
     IF io_manager->ms_status-name IS INITIAL AND io_manager->ms_status-prog IS INITIAL AND
-       iv_read_only = abap_true AND
+*       iv_read_only = abap_true AND
        io_manager->ms_popup-col_beg IS INITIAL.
       lv_dynnr = lo_stack->dynnr + 700.                  "#EC NUMBER_OK
     ELSE.

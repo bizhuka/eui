@@ -19,12 +19,6 @@
        <REF_CLASS>X</REF_CLASS>
       </RSIMP>
       <RSIMP>
-       <PARAMETER>IV_READ_ONLY</PARAMETER>
-       <OPTIONAL>X</OPTIONAL>
-       <REFERENCE>X</REFERENCE>
-       <TYP>ABAP_BOOL</TYP>
-      </RSIMP>
-      <RSIMP>
        <PARAMETER>IV_IS_TOP</PARAMETER>
        <OPTIONAL>X</OPTIONAL>
        <REFERENCE>X</REFERENCE>
@@ -39,14 +33,9 @@
        <INDEX> 001</INDEX>
       </RSFDO>
       <RSFDO>
-       <PARAMETER>IV_READ_ONLY</PARAMETER>
-       <KIND>P</KIND>
-       <INDEX> 002</INDEX>
-      </RSFDO>
-      <RSFDO>
        <PARAMETER>IV_IS_TOP</PARAMETER>
        <KIND>P</KIND>
-       <INDEX> 003</INDEX>
+       <INDEX> 002</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
@@ -2054,14 +2043,16 @@
       <FUN_TEXT>Ok</FUN_TEXT>
       <ICON_TEXT>Ok</ICON_TEXT>
      </RSMPE_FUNT>
+     <RSMPE_FUNT>
+      <CODE>SAVE</CODE>
+      <TEXTNO>001</TEXTNO>
+      <TEXT_TYPE>S</TEXT_TYPE>
+      <TEXT_NAME>ICON_SYSTEM_SAVE</TEXT_NAME>
+      <ICON_ID>@2L@</ICON_ID>
+      <FUN_TEXT>Save</FUN_TEXT>
+     </RSMPE_FUNT>
     </FUN>
     <BUT>
-     <RSMPE_BUT>
-      <PFK_CODE>000006</PFK_CODE>
-      <CODE>0001</CODE>
-      <NO>01</NO>
-      <PFNO>02</PFNO>
-     </RSMPE_BUT>
      <RSMPE_BUT>
       <PFK_CODE>000007</PFK_CODE>
       <CODE>0001</CODE>
@@ -2078,15 +2069,15 @@
     <PFK>
      <RSMPE_PFK>
       <CODE>000006</CODE>
-      <PFNO>02</PFNO>
-      <FUNCODE>OK</FUNCODE>
-      <FUNNO>001</FUNNO>
-     </RSMPE_PFK>
-     <RSMPE_PFK>
-      <CODE>000006</CODE>
       <PFNO>03</PFNO>
       <FUNCODE>CRET</FUNCODE>
       <FUNNO>002</FUNNO>
+     </RSMPE_PFK>
+     <RSMPE_PFK>
+      <CODE>000006</CODE>
+      <PFNO>11</PFNO>
+      <FUNCODE>SAVE</FUNCODE>
+      <FUNNO>001</FUNNO>
      </RSMPE_PFK>
      <RSMPE_PFK>
       <CODE>000006</CODE>
@@ -2124,7 +2115,7 @@
      </RSMPE_STAF>
      <RSMPE_STAF>
       <STATUS>OK_CANCEL_FULL_SCR</STATUS>
-      <FUNCTION>OK</FUNCTION>
+      <FUNCTION>SAVE</FUNCTION>
      </RSMPE_STAF>
      <RSMPE_STAF>
       <STATUS>OK_CANCEL_POPUP</STATUS>

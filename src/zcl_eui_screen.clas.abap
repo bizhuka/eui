@@ -418,29 +418,40 @@ METHOD set_init_params.
 ENDMETHOD.
 
 
-METHOD SHOW_RANGE.
-  DATA ls_tabfld            TYPE rstabfield.
-  DATA lv_title             TYPE sytitle.
-  FIELD-SYMBOLS <lt_range>  TYPE STANDARD TABLE.
-
+METHOD show_range.
   " Table name and field
+  DATA ls_tabfld TYPE rstabfield.
   zcl_eui_type=>split_type(
-   EXPORTING
-     iv_datatype = is_field_desc-rollname
-   IMPORTING
-     ev_table    = ls_tabfld-tablename
-     ev_field    = ls_tabfld-fieldname ).
+   EXPORTING iv_datatype = is_field_desc-rollname
+   IMPORTING ev_table    = ls_tabfld-tablename
+             ev_field    = ls_tabfld-fieldname ).
   CHECK ls_tabfld-fieldname IS NOT INITIAL.
 
   " Range table
+  FIELD-SYMBOLS <lt_range>  TYPE STANDARD TABLE.
   ASSIGN ir_cur_value->* TO <lt_range>.
 
-  " Show ranges
-  lv_title = is_field_desc-label.
-*    IF lcl_opt=>is_editable( is_fld_value-is_editable ) <> abap_true.
-*      lv_display = abap_true.
-*    ENDIF.
+**********************************************************************
+  DATA ls_catalog TYPE lvc_s_fcat.
+  ls_catalog-inttype   = is_field_desc-sys_type.
+  ls_catalog-ref_table = ls_tabfld-tablename.
+  ls_catalog-ref_field = ls_tabfld-fieldname.
+  ls_catalog-coltext   = is_field_desc-label.
 
+  DATA lv_is_fixed TYPE abap_bool.
+  lcl_screen=>is_fixed_values_list(
+   EXPORTING is_catalog   = ls_catalog
+             iv_read_only = iv_read_only
+   IMPORTING ev_update    = rv_update
+             ev_is_fixed  = lv_is_fixed
+   CHANGING  ct_range     = <lt_range> ).
+
+  CHECK lv_is_fixed <> abap_true.
+**********************************************************************
+
+  " Show ranges
+  DATA lv_title TYPE sytitle.
+  lv_title = is_field_desc-label.
   CALL FUNCTION 'COMPLEX_SELECTIONS_DIALOG'
     EXPORTING
       title         = lv_title

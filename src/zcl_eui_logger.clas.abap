@@ -67,7 +67,8 @@ public section.
     importing
       !IS_HEADER type BAL_S_LOG optional
       !IV_MSG_TYPES type STRING default MC_MSG_TYPES-ALL
-      !IV_UNIQUE type ABAP_BOOL optional .
+      !IV_UNIQUE type ABAP_BOOL optional
+    preferred parameter IS_HEADER .
   methods ADD
     importing
       !IS_MSG type ANY optional
@@ -110,7 +111,8 @@ public section.
   methods SHOW
     importing
       !IV_PROFILE type FUNCNAME default MC_PROFILE-DEFAULT
-      !IS_PROFILE type BAL_S_PROF optional .
+      !IS_PROFILE type BAL_S_PROF optional
+    preferred parameter IV_PROFILE .
   methods SHOW_AS_BUTTON
     importing
       !IV_WRITE_MESSAGE type CSEQUENCE optional
@@ -646,6 +648,7 @@ METHOD _on_button_pressed.
   ENDDO.
 
   ls_profile-start_col = ls_profile-start_row = 1.
+  ls_profile-use_grid  = abap_true.
   show( iv_profile = mc_profile-popup
         " Set additional values
         is_profile = ls_profile ).
