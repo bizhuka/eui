@@ -30,6 +30,12 @@
      <ENTRY>Rows</ENTRY>
      <LENGTH>14</LENGTH>
     </item>
+    <item>
+     <ID>I</ID>
+     <KEY>SHR</KEY>
+     <ENTRY>Show range</ENTRY>
+     <LENGTH>20</LENGTH>
+    </item>
    </TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>

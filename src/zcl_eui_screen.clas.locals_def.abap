@@ -150,3 +150,43 @@ ENDCLASS.
 CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_screen.
 CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_scr_free.
 CLASS zcl_eui_screen DEFINITION LOCAL FRIENDS lcl_scr_dync.
+
+
+CLASS lcl_fv_dialog DEFINITION.
+  PUBLIC SECTION.
+    CONSTANTS:
+      BEGIN OF mc_cmd,
+        show_range   TYPE syucomm VALUE '_SHOW_RANGE',
+        select_all   TYPE syucomm VALUE '_SELECT_ALL',
+        deselect_all TYPE syucomm VALUE '_DESELECT_ALL',
+      END OF mc_cmd.
+
+    TYPES: BEGIN OF ts_f4,
+             mark TYPE abap_bool,
+             key  TYPE char30,
+             text TYPE string,
+           END OF ts_f4,
+           tt_f4 TYPE STANDARD TABLE OF ts_f4 WITH DEFAULT KEY.
+
+    DATA:
+           _mr_alv TYPE REF TO tt_f4.
+
+    METHODS: show IMPORTING it_range     TYPE STANDARD TABLE
+                            iv_read_only TYPE abap_bool
+                            iv_title     TYPE csequence
+                  EXPORTING ev_cmd       TYPE syucomm
+                            et_f4        TYPE tt_f4
+                  CHANGING  ct_dropdown  TYPE lvc_t_dral,
+
+      _on_toolbar FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING e_object,
+
+      _on_user_command FOR EVENT user_command OF cl_gui_alv_grid
+        IMPORTING sender e_ucomm,
+
+      _on_pai_event FOR EVENT pai_event OF zif_eui_manager
+        IMPORTING
+          sender
+          iv_command
+          cv_close.
+ENDCLASS.

@@ -552,40 +552,79 @@ CLASS lcl_screen IMPLEMENTATION.
     ev_is_fixed = abap_true.
 
 **********************************************************************
-    TYPES: BEGIN OF ts_f4,
-             mark TYPE abap_bool,
-             key  TYPE char30,
-             text TYPE string,
-           END OF ts_f4.
-    DATA lt_f4   TYPE STANDARD TABLE OF ts_f4.
-    DATA lr_f4   TYPE REF TO ts_f4.
+    DATA: lo_fv_dialog TYPE REF TO lcl_fv_dialog,
+          lt_f4        TYPE lcl_fv_dialog=>tt_f4,
+          lv_cmd       TYPE syucomm.
+    CREATE OBJECT lo_fv_dialog.
+    lo_fv_dialog->show( EXPORTING it_range     = ct_range
+                                  iv_read_only = iv_read_only
+                                  iv_title     = is_catalog-coltext
+                        IMPORTING et_f4        = lt_f4
+                                  ev_cmd       = lv_cmd
+                        CHANGING  ct_dropdown  = lt_dropdown ).
 
-    SORT lt_dropdown BY int_value.
-    LOOP AT ct_range ASSIGNING <ls_range>.
+    CASE lv_cmd.
+      WHEN zif_eui_manager=>mc_cmd-cancel.
+        RETURN.
+
+      WHEN lcl_fv_dialog=>mc_cmd-show_range.
+        ev_is_fixed = abap_false.
+        RETURN.
+
+      WHEN zif_eui_manager=>mc_cmd-ok.
+        ev_update = abap_true.
+
+        CLEAR ct_range.
+        FIELD-SYMBOLS: <ls_f4>  LIKE LINE OF lt_f4,
+                       <lv_val> TYPE any.
+        LOOP AT lt_f4 ASSIGNING <ls_f4> WHERE mark = abap_true.
+          APPEND INITIAL LINE TO ct_range ASSIGNING <ls_range>.
+          ASSIGN COMPONENT: 'SIGN'   OF STRUCTURE <ls_range> TO <lv_sign>,
+                            'OPTION' OF STRUCTURE <ls_range> TO <lv_option>,
+                            'LOW'    OF STRUCTURE <ls_range> TO <lv_val>.
+          <lv_sign>   = 'I'.
+          <lv_option> = 'EQ'.
+          <lv_val>    = <ls_f4>-key.
+        ENDLOOP.
+    ENDCASE.
+  ENDMETHOD.
+ENDCLASS.
+**********************************************************************
+**********************************************************************
+CLASS lcl_fv_dialog IMPLEMENTATION.
+  METHOD show.
+    CLEAR: et_f4,
+           ev_cmd.
+    FIELD-SYMBOLS <ls_range> TYPE any.
+
+    SORT ct_dropdown BY int_value.
+    LOOP AT it_range ASSIGNING <ls_range>.
       FIELD-SYMBOLS <lv_val> TYPE any.
       ASSIGN COMPONENT 'LOW' OF STRUCTURE <ls_range> TO <lv_val>.
 
-      DATA ls_dropdown LIKE LINE OF lt_dropdown.
-      READ TABLE lt_dropdown INTO ls_dropdown BINARY SEARCH
+      DATA ls_dropdown LIKE LINE OF ct_dropdown.
+      READ TABLE ct_dropdown INTO ls_dropdown BINARY SEARCH
        WITH KEY int_value = <lv_val>.
       CHECK sy-subrc  = 0.
-      DELETE lt_dropdown INDEX sy-tabix.
+      DELETE ct_dropdown INDEX sy-tabix.
 
-      APPEND INITIAL LINE TO lt_f4 REFERENCE INTO lr_f4.
+      DATA lr_f4   TYPE REF TO ts_f4.
+      APPEND INITIAL LINE TO et_f4 REFERENCE INTO lr_f4.
       lr_f4->key  = ls_dropdown-int_value.
       lr_f4->text = ls_dropdown-value.
       lr_f4->mark = abap_true.
     ENDLOOP.
 
-    LOOP AT lt_dropdown INTO ls_dropdown.
-      APPEND INITIAL LINE TO lt_f4 REFERENCE INTO lr_f4.
+    " What remains
+    LOOP AT ct_dropdown INTO ls_dropdown.
+      APPEND INITIAL LINE TO et_f4 REFERENCE INTO lr_f4.
       lr_f4->key  = ls_dropdown-int_value.
       lr_f4->text = ls_dropdown-value.
     ENDLOOP.
+**********************************************************************
+    GET REFERENCE OF et_f4 INTO _mr_alv.
 
-    DATA lr_table TYPE REF TO data.
-    GET REFERENCE OF lt_f4 INTO lr_table.
-
+**********************************************************************
     DATA lt_catalog TYPE lvc_t_fcat.
     DATA lr_catalog TYPE REF TO lvc_s_fcat.
 
@@ -604,34 +643,74 @@ CLASS lcl_screen IMPLEMENTATION.
     APPEND INITIAL LINE TO lt_catalog REFERENCE INTO lr_catalog.
     lr_catalog->fieldname = 'TEXT'.
     lr_catalog->coltext   = 'Text'(txt).
-
+**********************************************************************
     DATA ls_layout TYPE lvc_s_layo.
-    ls_layout-smalltitle = ls_layout-no_rowmark = ls_layout-no_toolbar = abap_true.
-    ls_layout-grid_title = is_catalog-coltext.
+    ls_layout-smalltitle = ls_layout-no_rowmark = abap_true. " ls_layout-no_toolbar
+    ls_layout-grid_title = iv_title.
+
+**********************************************************************
+    DATA lt_toolbar TYPE ttb_button.
+    DATA ls_toolbar TYPE stb_button.
+
+    ls_toolbar-disabled = iv_read_only.
+    ls_toolbar-function = mc_cmd-select_all.
+    ls_toolbar-icon     = icon_select_all.
+    APPEND ls_toolbar TO lt_toolbar.
+    ls_toolbar-function = mc_cmd-deselect_all.
+    ls_toolbar-icon     = icon_deselect_all.
+    APPEND ls_toolbar TO lt_toolbar.
+
+    ls_toolbar-disabled = abap_false.
+    ls_toolbar-function = mc_cmd-show_range.
+    ls_toolbar-icon     = icon_enter_more.
+    ls_toolbar-text     = 'Show range'(shr).
+    APPEND ls_toolbar TO lt_toolbar.
+**********************************************************************
 
     DATA lo_alv TYPE REF TO zcl_eui_alv.
     CREATE OBJECT lo_alv
       EXPORTING
-        ir_table       = lr_table
+        ir_table       = _mr_alv
         it_mod_catalog = lt_catalog
-        is_layout      = ls_layout.
+        is_layout      = ls_layout
+        it_toolbar     = lt_toolbar.
+
     lo_alv->popup( iv_col_beg = 25
                    iv_col_end = 97
                    iv_row_beg = 3
                    iv_row_end = 13 ).
-    CHECK lo_alv->show( ) = 'OK'.
-    ev_update = abap_true.
+    ev_cmd = lo_alv->show( me ).
+  ENDMETHOD.
 
-    CLEAR ct_range.
-    LOOP AT lt_f4 REFERENCE INTO lr_f4 WHERE mark = abap_true.
-      APPEND INITIAL LINE TO ct_range ASSIGNING <ls_range>.
-      ASSIGN COMPONENT: 'SIGN'   OF STRUCTURE <ls_range> TO <lv_sign>,
-                        'OPTION' OF STRUCTURE <ls_range> TO <lv_option>,
-                        'LOW'    OF STRUCTURE <ls_range> TO <lv_val>.
-      <lv_sign>   = 'I'.
-      <lv_option> = 'EQ'.
-      <lv_val>    = lr_f4->key.
-    ENDLOOP.
+  METHOD _on_toolbar.
+    DELETE e_object->mt_toolbar WHERE function NP '_*'.
+  ENDMETHOD.
+
+  METHOD _on_user_command.
+    FIELD-SYMBOLS <lt_f4> TYPE tt_f4.
+    ASSIGN _mr_alv->* TO <lt_f4>.
+
+    CASE e_ucomm.
+      WHEN mc_cmd-show_range.
+        zcl_eui_screen=>top_pai( mc_cmd-show_range ).
+
+      WHEN mc_cmd-select_all OR mc_cmd-deselect_all.
+        DATA lv_mark TYPE abap_bool.
+        IF e_ucomm = mc_cmd-select_all.
+          lv_mark = abap_true.
+        ENDIF.
+
+        FIELD-SYMBOLS <ls_f4> LIKE LINE OF <lt_f4>.
+        LOOP AT <lt_f4> ASSIGNING <ls_f4>.
+          <ls_f4>-mark = lv_mark.
+        ENDLOOP.
+        sender->refresh_table_display( EXCEPTIONS OTHERS = 0 ).
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD _on_pai_event.
+    CHECK iv_command = mc_cmd-show_range.
+    cv_close->* = abap_true.
   ENDMETHOD.
 ENDCLASS.
 

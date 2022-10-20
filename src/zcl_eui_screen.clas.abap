@@ -5,6 +5,7 @@ class ZCL_EUI_SCREEN definition
   create public .
 
 public section.
+  type-pools ICON .
   type-pools SSCR .
   type-pools SYDB0 .
   type-pools VRM .
