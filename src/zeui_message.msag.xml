@@ -60,7 +60,7 @@
      <SPRSL>E</SPRSL>
      <ARBGB>ZEUI_MESSAGE</ARBGB>
      <MSGNR>008</MSGNR>
-     <TEXT>Please make method &amp;1 of IO_HANDLER public</TEXT>
+     <TEXT>Please make &apos;&amp;1&apos; method public or add to freinds ZCL_EUI_EVENT_CALLER</TEXT>
     </T100>
     <T100>
      <SPRSL>E</SPRSL>

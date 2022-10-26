@@ -36,15 +36,16 @@ public section.
     tt_map TYPE STANDARD TABLE OF ts_map WITH DEFAULT KEY .
   types:
     BEGIN OF ts_customize,
-        name       TYPE screen-name,
-        group1     TYPE screen-group1,
-        group2     TYPE screen-group2,
-        required   TYPE screen-required,
-        input      TYPE screen-input,
-        output     TYPE screen-output,
-        invisible  TYPE screen-invisible,
-        active     TYPE screen-active,
-        t_listbox  TYPE vrm_values,
+        name        TYPE screen-name,
+        group1      TYPE screen-group1,
+        group2      TYPE screen-group2,
+        required    TYPE screen-required,
+        input       TYPE screen-input,
+        output      TYPE screen-output,
+        invisible   TYPE screen-invisible,
+        intensified TYPE screen-intensified,
+        active      TYPE screen-active,
+        t_listbox   TYPE vrm_values,
 
         " For map
         label      TYPE zcl_eui_type=>ts_field_desc-label,
@@ -81,6 +82,7 @@ public section.
       !INPUT type SCREEN-INPUT optional
       !OUTPUT type SCREEN-OUTPUT optional
       !INVISIBLE type SCREEN-INVISIBLE optional
+      !INTENSIFIED type SCREEN-INTENSIFIED optional
       !ACTIVE type SCREEN-ACTIVE optional
       !IT_LISTBOX type VRM_VALUES optional
       !IV_LABEL type CSEQUENCE optional
@@ -253,19 +255,20 @@ METHOD customize.
   ro_screen = me.
 
   " All as one input argument
-  IF it_ IS NOT INITIAL.
+  IF it_ IS SUPPLIED.
     lt_all[]  = it_[].
   ELSE.
     " Pass as 1 parameter
-    ls_param-name       = name.
-    ls_param-group1     = group1.
-    ls_param-group2     = group2.
-    ls_param-input      = input.    " ls_map-input
-    ls_param-required   = required. " ls_map-required
-    ls_param-output     = output.
-    ls_param-invisible  = invisible.
-    ls_param-active     = active.
-    ls_param-t_listbox  = it_listbox.
+    ls_param-name        = name.
+    ls_param-group1      = group1.
+    ls_param-group2      = group2.
+    ls_param-input       = input.    " ls_map-input
+    ls_param-required    = required. " ls_map-required
+    ls_param-output      = output.
+    ls_param-invisible   = invisible.
+    ls_param-intensified = intensified.
+    ls_param-active      = active.
+    ls_param-t_listbox   = it_listbox.
 
     " For map
     ls_param-label     = iv_label.

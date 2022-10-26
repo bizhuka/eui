@@ -201,8 +201,9 @@ METHOD call_handlers.
 
       " Make method public!
       IF <ls_methdescr>-visibility <> cl_abap_objectdescr=>public AND lv_is_friend <> abap_true.
-        MESSAGE s008(zeui_message) WITH <ls_methdescr>-name INTO sy-msgli.
-        zcx_eui_exception=>raise_dump( iv_message = sy-msgli ).
+        DATA lv_message TYPE c LENGTH 255.
+        MESSAGE s008(zeui_message) WITH <ls_methdescr>-name INTO lv_message.
+        zcx_eui_exception=>raise_dump( iv_message = lv_message ).
       ENDIF.
 
       " Fill each time

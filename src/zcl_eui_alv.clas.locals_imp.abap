@@ -112,6 +112,10 @@ CLASS lcl_helper IMPLEMENTATION.
     IF cs_variant-handle IS INITIAL.
       cs_variant-handle = mo_eui_alv->ms_screen-dynnr.
     ENDIF.
+    " Special value for backward compatibility
+    IF cs_variant-handle = 'NULL'.
+      CLEAR cs_variant-handle.
+    ENDIF.
 
     " For complex UI
     CHECK ms_field_desc IS NOT INITIAL.
