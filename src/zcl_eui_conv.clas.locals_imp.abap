@@ -31,9 +31,8 @@ ENDCLASS.
 CLASS lcl_salv_util IMPLEMENTATION.
   METHOD _get_grid_from_salv.
     DATA:
-      lo_grid_adapter TYPE REF TO cl_salv_grid_adapter,
-      lo_fs_adapter   TYPE REF TO cl_salv_fullscreen_adapter,
-      lo_root         TYPE REF TO cx_root.
+      lo_adapter TYPE REF TO object,
+      lo_root    TYPE REF TO cx_root.
 
     IF io_salv->model <> if_salv_c_model=>table.
       RAISE EXCEPTION TYPE cx_salv_msg
@@ -45,34 +44,18 @@ CLASS lcl_salv_util IMPLEMENTATION.
     ENDIF.
 
     TRY.
-        lo_grid_adapter ?= io_salv->r_controller->r_adapter.
+        CALL METHOD io_salv->r_controller->r_adapter->('GET_GRID')
+          RECEIVING
+            value = ro_gui_alv.
       CATCH cx_root INTO lo_root.
-        "could be fullscreen adaptper
-        TRY .
-            lo_fs_adapter ?= io_salv->r_controller->r_adapter.
-          CATCH cx_root INTO lo_root.
-            RAISE EXCEPTION TYPE cx_salv_msg
-              EXPORTING
-                previous = lo_root
-                msgid    = '00'
-                msgno    = '001'
-                msgty    = 'E'
-                msgv1    = 'Check PREVIOUS exception'.
-        ENDTRY.
+        RAISE EXCEPTION TYPE cx_salv_msg
+          EXPORTING
+            previous = lo_root
+            msgid    = '00'
+            msgno    = '001'
+            msgty    = 'E'
+            msgv1    = 'Check PREVIOUS exception'.
     ENDTRY.
-
-    IF lo_grid_adapter IS NOT INITIAL.
-      ro_gui_alv = lo_grid_adapter->get_grid( ).
-    ELSEIF lo_fs_adapter IS NOT INITIAL.
-      ro_gui_alv = lo_fs_adapter->get_grid( ).
-    ELSE.
-      RAISE EXCEPTION TYPE cx_salv_msg
-        EXPORTING
-          msgid = '00'
-          msgno = '001'
-          msgty = 'W'
-          msgv1 = 'Adapter is not bound yet'.
-    ENDIF.
   ENDMETHOD.
 ENDCLASS.
 
