@@ -1029,6 +1029,9 @@ METHOD _add_comp_info.
     DATA ls_header TYPE x030l.
     ls_header = io_struc->get_ddic_header( ).
     cs_field_desc-rollname = ls_header-tabname.
+  ELSEIF io_struc->absolute_name CP '\CLASS=*'.
+    cs_field_desc-rollname = io_struc->absolute_name+7.
+    REPLACE FIRST OCCURRENCE OF '\TYPE=' IN cs_field_desc-rollname WITH '=>'.
   ENDIF.
 
   CLEAR cs_field_desc-sub_fdesc.
