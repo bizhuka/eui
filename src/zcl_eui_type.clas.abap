@@ -734,7 +734,7 @@ METHOD get_catalog.
       <ls_fieldcat>-coltext = <ls_fieldcat>-scrtext_l.
     ENDIF.
 
-    IF <ls_fieldcat>-domname = 'XSDBOOLEAN'.
+    IF <ls_fieldcat>-domname = 'XSDBOOLEAN' OR <ls_fieldcat>-domname = 'OS_BOOLEAN'.
       <ls_fieldcat>-checkbox = abap_true.
     ENDIF.
   ENDLOOP.
