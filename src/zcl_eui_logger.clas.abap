@@ -116,6 +116,7 @@ public section.
   methods SHOW_AS_BUTTON
     importing
       !IV_WRITE_MESSAGE type CSEQUENCE optional
+      !IS_PROFILE type BAL_S_PROF optional
     returning
       value(RO_LOGGER) type ref to ZCL_EUI_LOGGER .
   methods GET_MESSAGES
@@ -150,6 +151,7 @@ private section.
   data MT_UNIQUE_MSG type TT_UNIQUE_MSG .
   data MT_SKIP_MSG type TT_SKIP_MSG .
   data MV_PREV_MSG_CNT type I .
+  data MS_BUT_PROFILE type BAL_S_PROF .
 
   methods _ON_BUTTON_PRESSED
     for event FUNCTION_SELECTED of CL_GUI_TOOLBAR
@@ -160,6 +162,9 @@ private section.
       !IV_MSGTY type SYMSGTY
     returning
       value(RV_OK) type ABAP_BOOL .
+  methods _SET_BUTTON_PROFILE
+    importing
+      !IS_PROFILE type BAL_S_PROF .
 ENDCLASS.
 
 
@@ -549,6 +554,8 @@ ENDMETHOD.
 METHOD show_as_button.
   ro_logger = me. " logger->show_as_button( )->show( ).
 
+  _set_button_profile( is_profile ).
+
   " No logs at all
   CHECK get_messages( ) IS NOT INITIAL
      OR mo_menu IS NOT INITIAL.
@@ -623,34 +630,40 @@ ENDMETHOD.
 
 METHOD _on_button_pressed.
   CHECK fcode = 'SHOW_MESSAGES'.
-  DATA ls_profile TYPE bal_s_prof.
 
-  " Prepare title
-  DO 1 TIMES.
-    CHECK ms_header-object IS NOT INITIAL AND ms_header-subobject IS NOT INITIAL.
-
-    DATA lv_objtxt TYPE balobjt-objtxt.
-    SELECT SINGLE objtxt INTO lv_objtxt
-    FROM balobjt
-    WHERE spras  = sy-langu
-      AND object = ms_header-object.
-    CHECK sy-subrc = 0.
-
-    DATA lv_subobjtxt TYPE balsubt-subobjtxt.
-    SELECT SINGLE subobjtxt INTO lv_subobjtxt
-    FROM balsubt
-    WHERE spras     = sy-langu
-      AND object    = ms_header-object
-      AND subobject = ms_header-subobject.
-    CHECK sy-subrc = 0.
-
-    CONCATENATE lv_objtxt ` - ` lv_subobjtxt INTO ls_profile-title.
-  ENDDO.
-
-  ls_profile-start_col = ls_profile-start_row = 1.
-  ls_profile-use_grid  = abap_true.
   show( iv_profile = mc_profile-popup
         " Set additional values
-        is_profile = ls_profile ).
+        is_profile = ms_but_profile ).
+ENDMETHOD.
+
+
+METHOD _set_button_profile.
+  ms_but_profile = is_profile.
+
+  IF ms_but_profile IS INITIAL.
+    ms_but_profile-start_col = ms_but_profile-start_row = 1.
+    ms_but_profile-use_grid  = abap_true.
+  ENDIF.
+
+  " Prepare title
+  CHECK ms_header-object IS NOT INITIAL AND ms_header-subobject IS NOT INITIAL
+    AND ms_but_profile-title IS INITIAL.
+
+  DATA lv_objtxt TYPE balobjt-objtxt.
+  SELECT SINGLE objtxt INTO lv_objtxt
+  FROM balobjt
+  WHERE spras  = sy-langu
+    AND object = ms_header-object.
+  CHECK sy-subrc = 0.
+
+  DATA lv_subobjtxt TYPE balsubt-subobjtxt.
+  SELECT SINGLE subobjtxt INTO lv_subobjtxt
+  FROM balsubt
+  WHERE spras     = sy-langu
+    AND object    = ms_header-object
+    AND subobject = ms_header-subobject.
+  CHECK sy-subrc = 0.
+
+  CONCATENATE lv_objtxt ` - ` lv_subobjtxt INTO ms_but_profile-title.
 ENDMETHOD.
 ENDCLASS.
