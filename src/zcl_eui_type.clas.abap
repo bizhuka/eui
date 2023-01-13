@@ -560,6 +560,7 @@ METHOD find_dropdown.
 
     IF iv_show_key = abap_true.
       CONCATENATE ls_dropdown-int_value ` - ` <lv_txt> INTO ls_dropdown-value.
+      CONDENSE ls_dropdown-value.
     ELSE.
       ls_dropdown-value     = <lv_txt>.
     ENDIF.
