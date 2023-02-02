@@ -37,7 +37,9 @@ public section.
       !IT_F4_TABLE type TT_F4_TABLE .
   methods SET_TOP_OF_PAGE_HEIGHT
     importing
-      !IV_TOP_OF_PAGE_HEIGHT type I default 12 . "#EC NUMBER_OK
+      !IV_TOP_OF_PAGE_HEIGHT type I default 12  "#EC NUMBER_OK
+    returning
+      value(RO_ALV) type ref to ZCL_EUI_ALV .
   methods ADD_BUTTON
     importing
       !IS_BUTTON type STB_BUTTON
@@ -124,6 +126,7 @@ ENDMETHOD.
 
 
 METHOD set_top_of_page_height.
+  ro_alv = me.
   mo_helper->mv_top_of_page_height = iv_top_of_page_height.
 ENDMETHOD.
 
