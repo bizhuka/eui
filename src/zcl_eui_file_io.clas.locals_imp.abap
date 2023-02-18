@@ -52,7 +52,8 @@ CLASS lcl_helper IMPLEMENTATION.
 
       " For export to excel
       IF et_fieldcat IS REQUESTED.
-        APPEND <ls_fieldcat> TO et_fieldcat.
+        APPEND <ls_fieldcat> TO et_fieldcat ASSIGNING <ls_fieldcat>.
+        <ls_fieldcat>-col_pos = sy-tabix.
       ENDIF.
 
       " Only if not supplied
