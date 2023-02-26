@@ -30,12 +30,10 @@
        <PARAMETER>IO_SCR_MANAGER</PARAMETER>
        <KIND>P</KIND>
        <STEXT>Screen events manager</STEXT>
-       <INDEX> 001</INDEX>
       </RSFDO>
       <RSFDO>
        <PARAMETER>IV_IS_TOP</PARAMETER>
        <KIND>P</KIND>
-       <INDEX> 002</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
@@ -54,7 +52,6 @@
        <PARAMETER>IV_UCOMM</PARAMETER>
        <KIND>P</KIND>
        <STEXT>Function Code</STEXT>
-       <INDEX> 001</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
@@ -112,27 +109,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -182,27 +171,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -252,27 +233,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -322,27 +295,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -392,27 +357,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -462,27 +419,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -532,27 +481,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -602,27 +543,19 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0100.</LINE>
+       <LINE>  MODULE pbo_0100.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0100.</LINE>
+       <LINE>  MODULE pai_0100.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -673,41 +606,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_00 gv_screen_dynnr_00.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_00 gv_screen_dynnr_00.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -758,41 +679,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -843,41 +752,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_02 gv_screen_dynnr_02.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_02 gv_screen_dynnr_02.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -928,41 +825,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_03 gv_screen_dynnr_03.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_03 gv_screen_dynnr_03.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1013,41 +898,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_04 gv_screen_dynnr_04.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_04 gv_screen_dynnr_04.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1098,41 +971,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_05 gv_screen_dynnr_05.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_05 gv_screen_dynnr_05.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1183,41 +1044,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_06 gv_screen_dynnr_06.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_06 gv_screen_dynnr_06.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1268,41 +1117,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_07 gv_screen_dynnr_07.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_07 gv_screen_dynnr_07.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1354,41 +1191,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_00 gv_screen_dynnr_00.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_00 gv_screen_dynnr_00.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1440,41 +1265,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_01 gv_screen_dynnr_01.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1526,41 +1339,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_02 gv_screen_dynnr_02.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_02 gv_screen_dynnr_02.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1612,41 +1413,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_03 gv_screen_dynnr_03.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_03 gv_screen_dynnr_03.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1698,41 +1487,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_04 gv_screen_dynnr_04.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_04 gv_screen_dynnr_04.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1784,41 +1561,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_05 gv_screen_dynnr_05.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_05 gv_screen_dynnr_05.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1870,41 +1635,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_06 gv_screen_dynnr_06.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_06 gv_screen_dynnr_06.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
     <item>
      <HEADER>
@@ -1956,41 +1709,29 @@
        <LINE>PROCESS BEFORE OUTPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pbo_0700.</LINE>
+       <LINE>  MODULE pbo_0700.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area</LINE>
+       <LINE>  CALL SUBSCREEN area</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>INCLUDING gv_screen_prog_07 gv_screen_dynnr_07.</LINE>
+       <LINE>    INCLUDING gv_screen_prog_07 gv_screen_dynnr_07.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW/>
       <RPY_DYFLOW>
        <LINE>PROCESS AFTER INPUT.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_exit AT EXIT-COMMAND.</LINE>
+       <LINE>  MODULE pai_exit AT EXIT-COMMAND.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>CALL SUBSCREEN area.</LINE>
+       <LINE>  CALL SUBSCREEN area.</LINE>
       </RPY_DYFLOW>
       <RPY_DYFLOW>
-       <LINE>MODULE pai_0700.</LINE>
+       <LINE>  MODULE pai_0700.</LINE>
       </RPY_DYFLOW>
      </FLOW_LOGIC>
-     <SPACES>
-      <item>0</item>
-      <item>2</item>
-      <item>0</item>
-      <item>2</item>
-      <item>4</item>
-      <item>0</item>
-      <item>0</item>
-      <item>2</item>
-      <item>2</item>
-      <item>2</item>
-     </SPACES>
     </item>
    </DYNPROS>
    <CUA>

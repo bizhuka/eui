@@ -37,92 +37,117 @@
      <LENGTH>20</LENGTH>
     </item>
    </TPOOL>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>R</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>I</ID>
+       <KEY>CHR</KEY>
+       <ENTRY>Символов</ENTRY>
+       <LENGTH>15</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>EDT</KEY>
+       <ENTRY>Редактировать</ENTRY>
+       <LENGTH>20</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>ROW</KEY>
+       <ENTRY>Строк</ENTRY>
+       <LENGTH>14</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>SHR</KEY>
+       <ENTRY>Показать диапазон</ENTRY>
+       <LENGTH>20</LENGTH>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>CONFIRM</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Popup confirm</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>CONSTRUCTOR</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>CONSTRUCTOR</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>CUSTOMIZE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Prepare for PBO</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>EDIT_IN_POPUP</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Edit in popup</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>GET_CONTEXT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Get screen context</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>GET_DIMENSION</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Calculate the size of screen</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>MC_DYNNR</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Type of screen</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>SET_INIT_PARAMS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Write context to screen</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>SHOW_RANGE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Show SELECT-OPTION popup</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>TOP_PAI</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Call -&gt;pai( ) for top instance</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>TOP_PBO</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Call -&gt;pbo( ) for top instance</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>TT_CUSTOMIZE</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>For 7.40 all params of CUSTOMIZE( )</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>TT_MAP</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Map of SCREEN elements</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_SCREEN</CLSNAME>
      <CMPNAME>TT_SCREEN</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>PBO event - Std. table of SCREEN</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
+   <DESCRIPTIONS_SUB>
+    <SEOSUBCOTX>
+     <CMPNAME>CUSTOMIZE</CMPNAME>
+     <SCONAME>IV_COMMAND</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Only for checkbox &amp; listbox</DESCRIPT>
+    </SEOSUBCOTX>
+   </DESCRIPTIONS_SUB>
   </asx:values>
  </asx:abap>
 </abapGit>

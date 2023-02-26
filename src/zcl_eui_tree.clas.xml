@@ -19,15 +19,26 @@
      <LENGTH>76</LENGTH>
     </item>
    </TPOOL>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>R</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>I</ID>
+       <KEY>PPV</KEY>
+       <ENTRY>Пожалуйста, передайте пустую стандартную таблицу</ENTRY>
+       <LENGTH>76</LENGTH>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_TREE</CLSNAME>
      <CMPNAME>CONSTRUCTOR</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>CONSTRUCTOR</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_TREE</CLSNAME>
      <CMPNAME>_SET_HANDLERS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Use GET_TREE( ) for other events</DESCRIPT>

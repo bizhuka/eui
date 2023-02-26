@@ -1,0 +1,127 @@
+{
+  "formatVersion": "1",
+  "header": {
+    "description": "Screen events manager",
+    "originalLanguage": "en"
+  },
+  "descriptions": {
+    "types": [
+      {
+        "name": "TS_POPUP",
+        "description": "Set if show in popup"
+      },
+      {
+        "name": "TS_SCREEN",
+        "description": "Subscreen info"
+      },
+      {
+        "name": "TS_STATUS",
+        "description": "Screen status info"
+      },
+      {
+        "name": "TT_STATUS_EXCLUDE",
+        "description": "Exclude commands from PF-STATUS"
+      }
+    ],
+    "attributes": [
+      {
+        "name": "MC_CMD",
+        "description": "SY-UCOMM commands"
+      },
+      {
+        "name": "MS_POPUP",
+        "description": "Set if show in popup"
+      },
+      {
+        "name": "MS_SCREEN",
+        "description": "Subscreen info"
+      },
+      {
+        "name": "MS_STATUS",
+        "description": "Screen status info"
+      }
+    ],
+    "events": [
+      {
+        "name": "PAI_EVENT",
+        "description": "Handle PAI events & close"
+      },
+      {
+        "name": "PBO_EVENT",
+        "description": "Fill container @see ZFM_HT_SHOW_NEXT_SCREEN"
+      }
+    ],
+    "methods": [
+      {
+        "name": "PAI",
+        "description": "PAI command & close",
+        "parameters": [
+          {
+            "name": "IS_STATUS",
+            "description": "Screen status info"
+          },
+          {
+            "name": "RO_MANAGER",
+            "description": "Screen events manager"
+          }
+        ]
+      },
+      {
+        "name": "PBO",
+        "description": "Fill container @see ZFM_EUI_NEXT_SCREEN",
+        "parameters": [
+          {
+            "name": "IS_STATUS",
+            "description": "Screen status info"
+          },
+          {
+            "name": "RO_MANAGER",
+            "description": "Screen events manager"
+          }
+        ]
+      },
+      {
+        "name": "POPUP",
+        "description": "Defaults for popup",
+        "parameters": [
+          {
+            "name": "IS_STATUS",
+            "description": "Screen status info"
+          },
+          {
+            "name": "RO_MANAGER",
+            "description": "Screen events manager"
+          }
+        ]
+      },
+      {
+        "name": "SET_STATUS",
+        "description": "Set MS_STATUS",
+        "parameters": [
+          {
+            "name": "IS_STATUS",
+            "description": "Screen status info"
+          },
+          {
+            "name": "RO_MANAGER",
+            "description": "Screen events manager"
+          }
+        ]
+      },
+      {
+        "name": "SHOW",
+        "description": "Show in SCREEN",
+        "parameters": [
+          {
+            "name": "IS_STATUS",
+            "description": "Screen status info"
+          },
+          {
+            "name": "RO_MANAGER",
+            "description": "Screen events manager"
+          }
+        ]
+      }
+    ]
+  }
+}

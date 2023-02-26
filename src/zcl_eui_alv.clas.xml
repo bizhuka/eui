@@ -43,63 +43,90 @@
      <LENGTH>24</LENGTH>
     </item>
    </TPOOL>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>R</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>I</ID>
+       <KEY>CNT</KEY>
+       <ENTRY>Количество</ENTRY>
+       <LENGTH>15</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>EDT</KEY>
+       <ENTRY>Редактировать</ENTRY>
+       <LENGTH>14</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>EVO</KEY>
+       <ENTRY>Редактировать значения</ENTRY>
+       <LENGTH>24</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>PRO</KEY>
+       <ENTRY>Пожалуйста, укажите параметр &apos;IV_READ_ONLY&apos;</ENTRY>
+       <LENGTH>88</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>VVO</KEY>
+       <ENTRY>Просмотр значений</ENTRY>
+       <LENGTH>24</LENGTH>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>CONSTRUCTOR</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>CONSTRUCTOR</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>GET_GRID</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Use sender in events &amp; this method in PBO_EVENT</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MO_GRID</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>ALV List Viewer</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MS_LAYOUT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>ALV control: Layout structure</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MS_VARIANT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Layout (External Use)</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MT_FILTER</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>ALV control: Table of filter conditions</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MT_MOD_CATALOG</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Field Catalog for List Viewer Control</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MT_SORT</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>ALV Control: Table of Sort Criteria</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>MT_TOOLBAR</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Toolbar Buttons</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV</CLSNAME>
      <CMPNAME>UPDATE_COMPLEX_FIELDS</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>For complex UI fields (range &amp; table)</DESCRIPT>

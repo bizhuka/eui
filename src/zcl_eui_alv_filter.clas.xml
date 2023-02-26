@@ -43,20 +43,81 @@
      <LENGTH>22</LENGTH>
     </item>
    </TPOOL>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>R</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>I</ID>
+       <KEY>CAF</KEY>
+       <ENTRY>Очистить все фильтры</ENTRY>
+       <LENGTH>27</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>CNT</KEY>
+       <ENTRY>Количество</ENTRY>
+       <LENGTH>15</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>DES</KEY>
+       <ENTRY>Описание</ENTRY>
+       <LENGTH>21</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>FLT</KEY>
+       <ENTRY>Фильтр</ENTRY>
+       <LENGTH>16</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>SFL</KEY>
+       <ENTRY>Показать фильтры</ENTRY>
+       <LENGTH>22</LENGTH>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
    <DESCRIPTIONS>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV_FILTER</CLSNAME>
      <CMPNAME>CONSTRUCTOR</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>CONSTRUCTOR</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
-     <CLSNAME>ZCL_EUI_ALV_FILTER</CLSNAME>
      <CMPNAME>MO_ALV</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>ALV manager</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
+   <DESCRIPTIONS_SUB>
+    <SEOSUBCOTX>
+     <CMPNAME>ADD_RULE</CMPNAME>
+     <SCONAME>RO_FILTER</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Filter with conditional formatting</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_FILTER_BY_MENU</CMPNAME>
+     <SCONAME>IV_COMMAND</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Function Code</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_FILTER_BY_MENU</CMPNAME>
+     <SCONAME>RV_OK</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ALV control: Table of filter conditions</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>_GET_RULE_DESCRIPTION</CMPNAME>
+     <SCONAME>IT_CATALOG</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Field Catalog for List Viewer Control</DESCRIPT>
+    </SEOSUBCOTX>
+   </DESCRIPTIONS_SUB>
   </asx:values>
  </asx:abap>
 </abapGit>
