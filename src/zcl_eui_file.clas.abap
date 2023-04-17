@@ -255,7 +255,7 @@ METHOD download.
      ev_length  = lv_solix_len
      et_table   = lt_solix_tab ).
 
-  IF lv_solix_len < 10000000.                            "#EC NUMBER_OK
+  IF lv_solix_len < 10000000 AND sy-batch <> abap_true.                            "#EC NUMBER_OK
     " For small files
     cl_gui_frontend_services=>gui_download(
       EXPORTING
