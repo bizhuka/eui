@@ -642,7 +642,7 @@ METHOD to_app_server.
       binary_tab    = <lt_content>.
 
   sy-cprog = 'RC1TCG3Z'.
-  CALL FUNCTION 'C13Z_RAWDATA_WRITE'
+  CALL FUNCTION 'C13Z_RAWDATA_WRITE' "#EC EXISTS
     EXPORTING
       i_file           = lv_file
       i_file_size      = lv_length
