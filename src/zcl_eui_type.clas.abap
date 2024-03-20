@@ -409,6 +409,7 @@ METHOD find_dropdown.
   " No need
   CHECK is_fieldcat-checkbox <> abap_true
     AND is_fieldcat-hotspot  <> abap_true
+    AND is_fieldcat-icon     <> abap_true   "github @juvickaul
     AND is_fieldcat-inttype  <> cl_abap_typedescr=>typekind_int
     AND is_fieldcat-inttype  <> 'b' "cl_abap_typedescr=>typekind_int1
     AND is_fieldcat-inttype  <> 's' "cl_abap_typedescr=>typekind_int2
