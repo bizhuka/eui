@@ -886,7 +886,10 @@ CLASS lcl_helper IMPLEMENTATION.
     " Always 1 field
     DATA ls_key LIKE LINE OF lr_tdesc->key.
     READ TABLE lr_tdesc->key INTO ls_key INDEX 1.
-    APPEND ls_key-name TO et_std_field.
+    " TODO Test
+    IF sy-subrc = 0.
+      APPEND ls_key-name TO et_std_field.
+    ENDIF.
 
     " For new structure
     DATA lr_comp      TYPE REF TO abap_compdescr.
