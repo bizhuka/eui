@@ -2,6 +2,22 @@
 *"* definitions, interfaces or type declarations) you need for
 *"* components in the private section
 
+CLASS lcl_protocol DEFINITION INHERITING FROM cl_gui_alv_grid FINAL.
+  PUBLIC SECTION.
+    CLASS-DATA:
+      mo_protocol TYPE REF TO cl_alv_changed_data_protocol READ-ONLY,
+      mo_grid     TYPE REF TO cl_gui_alv_grid.
+
+    CLASS-METHODS:
+      clear,
+
+      init
+        IMPORTING
+          io_grid TYPE REF TO cl_gui_alv_grid,
+
+      show.
+ENDCLASS.
+
 CLASS lcl_helper DEFINITION FINAL.
   PUBLIC SECTION.
     DATA:
@@ -21,8 +37,9 @@ CLASS lcl_helper DEFINITION FINAL.
 
       " TOP_OF_PAGE
       mv_top_of_page_height TYPE i,
-      mo_dyndoc             TYPE REF TO cl_dd_document.
+      mo_dyndoc             TYPE REF TO cl_dd_document,
 
+      mt_sorted_key         TYPE SORTED TABLE OF fieldname WITH UNIQUE KEY table_line.
     METHODS:
       constructor
         IMPORTING
@@ -160,7 +177,11 @@ CLASS lcl_helper DEFINITION FINAL.
       _fill_std_corresponding
         IMPORTING
           ir_any_f4_table TYPE REF TO data
-          ir_std_f4_table TYPE REF TO data.
+          ir_std_f4_table TYPE REF TO data,
+
+      _sort_source_table_by_key
+        IMPORTING
+          ir_table_desc TYPE REF TO cl_abap_tabledescr.
 ENDCLASS.
 
 CLASS zcl_eui_alv DEFINITION LOCAL FRIENDS lcl_helper.

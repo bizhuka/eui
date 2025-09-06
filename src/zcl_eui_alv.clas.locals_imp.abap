@@ -512,7 +512,9 @@ CLASS lcl_helper IMPLEMENTATION.
     DATA:
       lr_data       TYPE REF TO data,
       lo_tab_desc   TYPE REF TO cl_abap_tabledescr,
-      lo_struc_desc TYPE REF TO cl_abap_structdescr.
+      lo_struc_desc TYPE REF TO cl_abap_structdescr,
+      ls_stable     TYPE lvc_s_stbl,
+      lv_tabix      TYPE sytabix.
     FIELD-SYMBOLS:
       <lt_table_src>  TYPE STANDARD TABLE,
       <lt_table_dest> TYPE ANY TABLE,
@@ -542,12 +544,38 @@ CLASS lcl_helper IMPLEMENTATION.
         CREATE DATA lr_data TYPE HANDLE lo_struc_desc.
         ASSIGN lr_data->* TO <ls_dest>.
 
+        _sort_source_table_by_key( lo_tab_desc ).
+        lcl_protocol=>clear( ).
+
         " And copy back
         LOOP AT <lt_table_src>  ASSIGNING <ls_src>.
+          lv_tabix = sy-tabix.
+
           CLEAR <ls_dest>.
           MOVE-CORRESPONDING <ls_src> TO <ls_dest>.
           INSERT <ls_dest> INTO TABLE <lt_temp>.
+
+          CHECK sy-subrc <> 0 AND mt_sorted_key[] IS NOT INITIAL.
+          lcl_protocol=>init( mo_eui_alv->mo_grid ).
+
+          DATA lv_sorted_key TYPE fieldname.
+          LOOP AT mt_sorted_key INTO lv_sorted_key.
+            lcl_protocol=>mo_protocol->add_protocol_entry(
+                    i_msgid     = '02'
+                    i_msgty     = 'E'
+                    i_msgno     = 605
+                    i_msgv1     = lv_tabix
+                    i_fieldname = lv_sorted_key
+                    i_row_id    = lv_tabix ).
+          ENDLOOP.
         ENDLOOP.
+
+        IF mt_sorted_key[] IS NOT INITIAL AND lcl_protocol=>mo_protocol IS NOT INITIAL.
+          ls_stable-col = ls_stable-row = abap_true.
+          mo_eui_alv->mo_grid->refresh_table_display( is_stable = ls_stable ).
+
+          lcl_protocol=>show( ).
+        ENDIF.
 
         IF lines( <lt_table_src> ) = lines( <lt_temp> ).
           <lt_table_dest> = <lt_temp>.
@@ -565,6 +593,29 @@ CLASS lcl_helper IMPLEMENTATION.
         ENDIF.
 
     ENDCASE.
+  ENDMETHOD.
+
+  METHOD _sort_source_table_by_key.
+    DATA:
+      lt_order      TYPE abap_sortorder_tab,
+      ls_order      TYPE abap_sortorder,
+      lr_key        TYPE REF TO abap_keydescr,
+      lv_sorted_key TYPE fieldname.
+    FIELD-SYMBOLS:
+      <lt_table_src>  TYPE STANDARD TABLE.
+    CHECK ir_table_desc->table_kind = cl_abap_tabledescr=>tablekind_sorted. " Hashed too ?
+
+    CLEAR mt_sorted_key[].
+    LOOP AT ir_table_desc->key REFERENCE INTO lr_key.
+      ls_order-name = lr_key->name.
+      INSERT ls_order      INTO TABLE lt_order[].
+
+      lv_sorted_key = lr_key->name.
+      INSERT lv_sorted_key INTO TABLE mt_sorted_key[].
+    ENDLOOP.
+
+    ASSIGN mr_table->* TO <lt_table_src>.
+    SORT <lt_table_src> BY (lt_order).
   ENDMETHOD.
 
   METHOD on_data_changed.
@@ -931,5 +982,65 @@ CLASS lcl_helper IMPLEMENTATION.
       APPEND INITIAL LINE TO <lt_f4_std_table> ASSIGNING <ls_dest>.
       MOVE-CORRESPONDING <ls_src> TO <ls_dest>.
     ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+**********************************************************************
+**********************************************************************
+
+CLASS lcl_protocol IMPLEMENTATION.
+  METHOD clear.
+    CHECK mo_protocol IS NOT INITIAL.
+    mo_protocol->refresh_protocol( ).
+
+    mo_protocol->free( ).
+    CLEAR mo_protocol.
+    CLEAR mo_grid.
+  ENDMETHOD.
+
+  METHOD init.
+    CHECK mo_protocol IS INITIAL.
+
+    mo_grid = io_grid.
+    CREATE OBJECT mo_protocol EXPORTING i_calling_alv = io_grid.
+
+    io_grid->get_backend_fieldcatalog(
+     IMPORTING
+       et_fieldcatalog = mo_protocol->mt_fieldcatalog ).
+  ENDMETHOD.
+
+  METHOD show.
+    DATA:
+      ls_protocol TYPE REF TO lvc_s_msg1,
+      ls_fcat     TYPE REF TO lvc_s_fcat,
+      lt_err_cell TYPE lvc_t_err,
+      ls_err_cell TYPE REF TO lvc_s_err.
+
+    LOOP AT mo_protocol->mt_protocol REFERENCE INTO ls_protocol.
+      " Find column number
+      READ TABLE mo_protocol->mt_fieldcatalog REFERENCE INTO ls_fcat
+       WITH KEY fieldname = ls_protocol->fieldname.
+      CHECK sy-subrc = 0.
+
+      APPEND INITIAL LINE TO lt_err_cell REFERENCE INTO ls_err_cell.
+      ls_err_cell->row_id = ls_protocol->row_id.
+      ls_err_cell->col_id = ls_fcat->col_id.
+    ENDLOOP.
+
+    " Simple trick
+    CALL FUNCTION 'DP_CONTROL_ASSIGN_TABLE'
+      EXPORTING
+        h_cntl       = mo_grid->h_control
+        medium       = cndp_medium_r3table
+        propertyname = 'ErrorCells'
+      TABLES
+        data         = lt_err_cell
+      EXCEPTIONS
+        OTHERS       = 1.
+    IF sy-subrc <> 0.
+      MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 DISPLAY LIKE 'E'.
+    ENDIF.
+
+    mo_protocol->display_protocol( ).
   ENDMETHOD.
 ENDCLASS.
