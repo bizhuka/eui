@@ -91,6 +91,7 @@ public section.
       value(RO_LOGGER) type ref to ZCL_EUI_LOGGER .
   methods ADD_EXCEPTION
     importing
+      !IV_ADD_EXC type ABAP_BOOL OPTIONAL
       !IS_EXC type BAL_S_EXC optional
       !IO_EXCEPTION type ref to CX_ROOT optional
       !IV_MSGTY type SYMSGTY optional
@@ -271,22 +272,30 @@ METHOD add_exception.
   CHECK _is_msg_ok( ls_exc-msgty ) = abap_true.
 
   " Do not work in CALL FUNCTION 'BAL_GLB_SEARCH_MSG'
-*  CALL FUNCTION 'BAL_LOG_EXCEPTION_ADD'
-*    i_log_handle     = mv_handle
-*    i_s_exc          = ls_exc
-
-  " As free text
-  CALL FUNCTION 'BAL_LOG_EXC_ADD'
-    EXPORTING
-      i_log_handle     = mv_handle
-      i_msgty          = ls_exc-msgty
-      i_probclass      = ls_exc-probclass
-      i_exception      = ls_exc-exception
-    EXCEPTIONS
-      log_not_found    = 1
-      msg_inconsistent = 2
-      log_is_full      = 3
-      OTHERS           = 4.
+  IF iv_add_exc = abap_true.
+    CALL FUNCTION 'BAL_LOG_EXCEPTION_ADD'
+      EXPORTING
+        i_log_handle     = mv_handle
+        i_s_exc          = ls_exc
+      EXCEPTIONS
+        log_not_found    = 1
+        msg_inconsistent = 2
+        log_is_full      = 3
+        OTHERS           = 4.
+  ELSE.
+    " As free text
+    CALL FUNCTION 'BAL_LOG_EXC_ADD'
+      EXPORTING
+        i_log_handle     = mv_handle
+        i_msgty          = ls_exc-msgty
+        i_probclass      = ls_exc-probclass
+        i_exception      = ls_exc-exception
+      EXCEPTIONS
+        log_not_found    = 1
+        msg_inconsistent = 2
+        log_is_full      = 3
+        OTHERS           = 4.
+  ENDIF.
 
   CHECK sy-subrc <> 0.
   zcx_eui_no_check=>raise_sys_error( ).
