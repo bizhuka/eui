@@ -184,4 +184,18 @@ CLASS lcl_helper DEFINITION FINAL.
           ir_table_desc TYPE REF TO cl_abap_tabledescr.
 ENDCLASS.
 
+CLASS lcl_gui_alv_grid DEFINITION INHERITING FROM cl_gui_alv_grid FINAL.
+  PUBLIC SECTION.
+    METHODS:
+      constructor IMPORTING i_parent   TYPE REF TO cl_gui_container
+                            io_eui_alv TYPE REF TO zcl_eui_alv.
+  PROTECTED SECTION.
+    METHODS:
+      on_before_send REDEFINITION.
+  PRIVATE SECTION.
+    DATA:
+      mo_eui_alv TYPE REF TO zcl_eui_alv.
+ENDCLASS.
+
 CLASS zcl_eui_alv DEFINITION LOCAL FRIENDS lcl_helper.
+CLASS zcl_eui_alv DEFINITION LOCAL FRIENDS lcl_gui_alv_grid.

@@ -368,12 +368,12 @@ CLASS lcl_helper IMPLEMENTATION.
                                    height = mv_top_of_page_height ).
     ENDIF.
 
-    CREATE OBJECT mo_eui_alv->mo_grid
+    CREATE OBJECT mo_eui_alv->mo_grid TYPE lcl_gui_alv_grid
       EXPORTING
-        i_parent = lo_container
-*       i_appl_events = abap_true
+        i_parent   = lo_container
+        io_eui_alv = mo_eui_alv
       EXCEPTIONS
-        OTHERS   = 1.
+        OTHERS     = 1.
     IF sy-subrc <> 0.
       MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno DISPLAY LIKE 'E' WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
       RETURN.
@@ -1042,5 +1042,20 @@ CLASS lcl_protocol IMPLEMENTATION.
     ENDIF.
 
     mo_protocol->display_protocol( ).
+  ENDMETHOD.
+ENDCLASS.
+
+**********************************************************************
+**********************************************************************
+CLASS lcl_gui_alv_grid IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor( i_parent = i_parent ).
+    mo_eui_alv = io_eui_alv.
+  ENDMETHOD.
+
+  METHOD on_before_send.
+    super->on_before_send( firstline = firstline
+                           lastline  = lastline ).
+    mo_eui_alv->raise_change_styles( ).
   ENDMETHOD.
 ENDCLASS.

@@ -55,6 +55,8 @@ public section.
     redefinition .
   methods ZIF_EUI_MANAGER~PBO
     redefinition .
+
+  events CHANGE_STYLES.
 protected section.
 private section.
 
@@ -67,6 +69,8 @@ private section.
   data MT_FILTER type LVC_T_FILT .
   data MT_SORT type LVC_T_SORT .
   data MO_HELPER type ref to LCL_HELPER .
+
+  METHODS raise_change_styles.
 ENDCLASS.
 
 
@@ -276,4 +280,9 @@ METHOD zif_eui_manager~pbo.
    io_container  = io_container
    iv_set_status = iv_set_status  ).
 ENDMETHOD.
+
+METHOD raise_change_styles.
+  RAISE EVENT change_styles.
+ENDMETHOD.
+
 ENDCLASS.
