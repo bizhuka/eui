@@ -1,23 +1,10 @@
 class ZCL_EUI_FILE definition
   public
   inheriting from ZCL_EUI_MANAGER
-  create public .
+  create public GLOBAL FRIENDS zif_eui_ole.
 
 public section.
   type-pools ABAP .
-  type-pools OLE2 .
-
-  types:
-    BEGIN OF TS_OLE_INFO,
-      " Excel & Word
-      app       TYPE ole2_object,
-      class     TYPE text40,
-      mime_type TYPE string,
-
-      " Html & pdf
-      in_browser   TYPE abap_bool,
-      proxy_app    TYPE text40,
-    END OF TS_OLE_INFO .
 
   constants:
     BEGIN OF MC_EXTENSION,
@@ -28,14 +15,12 @@ public section.
      pdf  TYPE STRING VALUE 'pdf',
    END OF MC_EXTENSION .
   data MV_XSTRING type XSTRING read-only .
+  data MO_OLE     type ref to ZIF_EUI_OLE read-only.
 
   methods CONSTRUCTOR
     importing
       !IV_FILE_NAME type CSEQUENCE optional
       !IV_XSTRING type XSTRING optional .
-  methods GET_OLE_INFO
-    returning
-      value(RS_OLE_INFO) type TS_OLE_INFO .
   methods GET_FULL_PATH
     returning
       value(RV_FULL_PATH) type STRING .
@@ -90,9 +75,7 @@ public section.
   methods OPEN_BY_OLE
     importing
       !IV_VISIBLE type ABAP_BOOL default ABAP_TRUE
-    changing
-      !CV_OLE_APP type OLE2_OBJECT optional
-      !CV_OLE_DOC type OLE2_OBJECT optional
+    returning value(ro_ole) type ref to zif_eui_ole
     raising
       ZCX_EUI_EXCEPTION .
   class-methods SPLIT_FILE_PATH
@@ -124,7 +107,6 @@ protected section.
 private section.
 
   data MV_FULL_PATH type STRING .
-  data MS_OLE_INFO type TS_OLE_INFO .
 ENDCLASS.
 
 
@@ -136,6 +118,12 @@ METHOD constructor.
   super->constructor( iv_editable = abap_false ).
 
   mv_xstring = iv_xstring.
+  TRY.
+    CREATE OBJECT mo_ole TYPE ('ZCL_EUI_OLE')
+      EXPORTING io_file = me.
+  CATCH cx_sy_create_object_error.
+    CLEAR mo_ole.
+  ENDTRY.
   set_full_path( iv_file_name ).
 ENDMETHOD.
 
@@ -183,12 +171,14 @@ METHOD download.
 **********************************************************************
   " Add as an attachment to Web dynpro
 **********************************************************************
-  IF wdr_task=>application IS NOT INITIAL.
-    lcl_doi=>web_dynpro_attach(
-        i_filename      = iv_default_filename " lv_file_name " File name with extension
-        i_content       = me->mv_xstring
-        i_inplace       = abap_false  " <--- just download
-        i_mime_type     = ms_ole_info-mime_type ).
+  DATA lv_is_web_dynpro TYPE abap_bool.
+  IF mo_ole IS NOT INITIAL.
+    lv_is_web_dynpro = mo_ole->is_web_dynpro( iv_filename = iv_default_filename " lv_file_name " File name with extension
+                                              iv_inplace  = abap_false  " <--- just download
+                                              ).
+  ENDIF.
+
+  IF lv_is_web_dynpro = abap_true.
     RETURN.
   ENDIF.
 
@@ -328,11 +318,6 @@ METHOD get_full_path.
 ENDMETHOD.
 
 
-METHOD get_ole_info.
-  rs_ole_info = ms_ole_info.
-ENDMETHOD.
-
-
 METHOD import_from_binary.
   mv_xstring = zcl_eui_conv=>binary_to_xstring(
    it_table  = it_table
@@ -451,36 +436,15 @@ ENDMETHOD.
 
 
 METHOD open_by_ole.
-  DATA lo_docs      TYPE ole2_object.
-
   " Excel and word only
-  IF ms_ole_info-class IS INITIAL.
+  IF mo_ole IS INITIAL OR mo_ole->mv_class IS INITIAL.
     MESSAGE s012(zeui_message) WITH mv_extension INTO sy-msgli.
     zcx_eui_exception=>raise_sys_error( ).
   ENDIF.
 
-  " Open with OLE for call a macro. Only for .docx, .docm, .xlsx, .xlsm
-  IF cv_ole_app IS INITIAL.
-    " Create 1 time only (or use existing)
-    CREATE OBJECT cv_ole_app ms_ole_info-class.
-  ENDIF.
-
-  " Excel
-  IF ms_ole_info-class = `Excel.Application`.
-    GET PROPERTY OF cv_ole_app 'Workbooks' = lo_docs.
-  ELSE. " Word
-    GET PROPERTY OF cv_ole_app 'Documents' = lo_docs.
-  ENDIF.
-
-  CALL METHOD OF lo_docs 'Open' = cv_ole_doc
-    EXPORTING
-      #1 = me->mv_full_path.
-
-  IF iv_visible = abap_true.
-    SET PROPERTY OF cv_ole_app 'Visible' = 1.
-  ENDIF.
-
-  " No need ro_file = me.
+  mo_ole->open( iv_path    = mv_full_path
+                iv_visible = iv_visible ).
+  ro_ole = mo_ole.
 ENDMETHOD.
 
 
@@ -518,40 +482,8 @@ METHOD set_full_path.
   " Have cases based on MC_EXTENSION
   TRANSLATE mv_extension TO LOWER CASE.
 
-  " No need
-  IF ms_ole_info IS NOT INITIAL.
-    RETURN.
-  ENDIF.
-
-  " detect by extension
-  IF mv_extension CP `xls*` OR mv_extension = mc_extension-csv.
-    ms_ole_info-class      = `Excel.Application`.
-    ms_ole_info-proxy_app  = `Excel.Sheet`.
-    CASE mv_extension.
-      WHEN `xls`.
-        ms_ole_info-mime_type  = `application/vnd.ms-excel`.
-      WHEN `xlsx`.
-        ms_ole_info-mime_type  = `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
-      WHEN `xlsm`.
-        ms_ole_info-mime_type  = `application/vnd.ms-excel.sheet.macroEnabled.12`.
-    ENDCASE.
-  ELSEIF mv_extension CP `doc*`.
-    ms_ole_info-class      = `Word.Application`.
-    ms_ole_info-proxy_app  = `Word.Document`.
-    CASE mv_extension.
-      WHEN `doc`.
-        ms_ole_info-mime_type  = `application/msword`.
-      WHEN `docx`.
-        ms_ole_info-mime_type  = `application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
-      WHEN `docm`.
-        ms_ole_info-mime_type  = `application/vnd.ms-word.document.macroEnabled.12`.
-    ENDCASE.
-  ELSEIF mv_extension CP `htm*`.
-    ms_ole_info-in_browser = abap_true.
-    ms_ole_info-mime_type  = `text/html`.
-  ELSEIF mv_extension = mc_extension-pdf.
-    ms_ole_info-in_browser = abap_true.
-    ms_ole_info-mime_type  = `application/pdf`.
+  IF mo_ole IS NOT INITIAL AND mo_ole->mv_class IS INITIAL.
+    mo_ole->init( ).
   ENDIF.
 ENDMETHOD.
 
@@ -662,21 +594,9 @@ ENDMETHOD.
 
 
 METHOD zif_eui_manager~pbo.
-  " Initilize 1 time
-  IF io_container IS NOT INITIAL.
-    " In browser
-    IF ms_ole_info-in_browser = abap_true.
-      lcl_doi=>show_in_browser(
-         io_file      = me
-         io_container = io_container  ).
-    ELSE. " Use doi
-      lcl_doi=>show_in_doi(
-       EXPORTING
-         io_file      = me
-         io_container = io_container
-       CHANGING
-         co_ole_app    = ms_ole_info-app ).
-    ENDIF.
+  " Initialize 1 time
+  IF io_container IS NOT INITIAL AND mo_ole IS NOT INITIAL.
+    mo_ole->show( io_container ).
   ENDIF.
 
   super->pbo(
@@ -686,25 +606,27 @@ ENDMETHOD.
 
 
 METHOD zif_eui_manager~show.
-  " Web dynpro
-  IF wdr_task=>application IS NOT INITIAL.
-    IF mv_file_name IS INITIAL.
-      CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
-                  sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) `.`
-                  mv_extension
-       INTO mv_file_name.
-    ENDIF.
+  DATA lv_is_web_dynpro TYPE abap_bool.
+  IF mv_file_name IS INITIAL.
+    CONCATENATE sy-datum(4) `-` sy-datum+4(2) `-` sy-datum+6(2) ` `
+                sy-uzeit(2) `-` sy-uzeit+2(2) `-` sy-uzeit+4(2) `.`
+                mv_extension
+     INTO mv_file_name.
+  ENDIF.
 
-    lcl_doi=>web_dynpro_attach(
-        i_filename      = mv_file_name   " File name with extension
-        i_content       = me->mv_xstring
-        i_inplace       = abap_true   " <--- Show inplace
-        i_mime_type     = ms_ole_info-mime_type ).
+  " Web dynpro
+  IF mo_ole IS NOT INITIAL.
+    lv_is_web_dynpro = mo_ole->is_web_dynpro( iv_filename = mv_file_name " File name with extension
+                                              iv_inplace  = abap_true    " <--- Show inplace
+                                              ).
+  ENDIF.
+
+  IF lv_is_web_dynpro = abap_true.
     RETURN.
   ENDIF.
 
   " Oops!
-  IF ms_ole_info-class IS INITIAL AND ms_ole_info-in_browser <> abap_true.
+  IF mo_ole->mv_class IS INITIAL AND mo_ole->mv_in_browser <> abap_true.
     MESSAGE s013(zeui_message) WITH mv_extension INTO sy-msgli.
     zcx_eui_exception=>raise_dump( iv_message = sy-msgli ).
     RETURN.
