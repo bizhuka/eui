@@ -7,8 +7,12 @@
 
 CLASS lcl_json_util IMPLEMENTATION.
 
-  METHOD class_constructor.
+  METHOD init.
     FIELD-SYMBOLS <lv_type> LIKE LINE OF mt_xsdboolean.
+    IF mv_inited = abap_true.
+      RETURN.
+    ENDIF.
+    mv_inited = abap_true.
 
     " Get all boolean types
     SELECT rollname INTO TABLE mt_xsdboolean

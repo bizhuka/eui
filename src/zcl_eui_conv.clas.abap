@@ -11,10 +11,10 @@ public section.
 
   constants:
     BEGIN OF mc_encoding,
-      win_1251 TYPE abap_encoding VALUE '1504',
-      utf_8    TYPE abap_encoding VALUE '4110',
-      utf_16be TYPE abap_encoding VALUE '4102',
-      utf_16le TYPE abap_encoding VALUE '4103',
+      win_1251 TYPE abap_encoding VALUE 'WINDOWS-1251', "'1504',
+      utf_8    TYPE abap_encoding VALUE 'UTF-8',        "'4110',
+      utf_16be TYPE abap_encoding VALUE 'UTF-16BE',     "'4102',
+      utf_16le TYPE abap_encoding VALUE 'UTF-16LE',     "'4103',
     END OF mc_encoding .
   constants:
     BEGIN OF mc_json_mode,
@@ -129,9 +129,9 @@ public section.
       !EXP type ANY
       !ACT type ANY
       !MSG type CSEQUENCE optional
-      !LEVEL type AUNIT_LEVEL default IF_AUNIT_CONSTANTS=>CRITICAL
+      !LEVEL type NUMERIC default IF_AUNIT_CONSTANTS=>CRITICAL
       !TOL type F optional
-      !QUIT type AUNIT_FLOWCTRL default IF_AUNIT_CONSTANTS=>METHOD
+      !QUIT type NUMERIC default IF_AUNIT_CONSTANTS=>METHOD
       !IGNORE_HASH_SEQUENCE type ABAP_BOOL default ABAP_FALSE
     returning
       value(ASSERTION_FAILED) type ABAP_BOOL .
@@ -416,12 +416,19 @@ ENDMETHOD.
 
 METHOD STRING_TO_XSTRING.
   " rv_xstring = cl_bcs_convert=>string_to_xstring( iv_string = iv_string iv_codepage = IV_ENCODING ).
-  CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
-    EXPORTING
-      text     = iv_string
-      encoding = iv_encoding
-    IMPORTING
-      buffer   = rv_xstring.
+*  CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
+*    EXPORTING
+*      text     = iv_string
+*      encoding = iv_encoding
+*    IMPORTING
+*      buffer   = rv_xstring.
+  DATA lo_convert TYPE REF TO cl_abap_conv_out_ce.
+  lo_convert = cl_abap_conv_out_ce=>create(
+    encoding    = iv_encoding
+    ignore_cerr = abap_true ).
+
+  lo_convert->write( data = iv_string ).
+  rv_xstring = lo_convert->get_buffer( ).
 ENDMETHOD.
 
 
@@ -709,6 +716,7 @@ METHOD _abap_2_json.
 *           condense &1.
 
       WHEN 'C' OR 'g'. " Char sequences and Strings
+        lcl_json_util=>init( ).
         READ TABLE lcl_json_util=>mt_xsdboolean TRANSPORTING NO FIELDS BINARY SEARCH
          WITH KEY table_line = &3->absolute_name.
         IF sy-subrc = 0.
@@ -963,6 +971,7 @@ METHOD _json_2_abap.
           CONDENSE l_value NO-GAPS.
         ENDIF.
       WHEN 'C'. " char
+        lcl_json_util=>init( ).
         READ TABLE lcl_json_util=>mt_xsdboolean TRANSPORTING NO FIELDS BINARY SEARCH
          WITH KEY table_line = lo_type->absolute_name.
         IF sy-subrc = 0.

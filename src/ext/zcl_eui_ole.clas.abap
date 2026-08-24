@@ -6,14 +6,18 @@ CLASS zcl_eui_ole DEFINITION PUBLIC FINAL CREATE PUBLIC .
 
     ALIASES:
     " Excel & Word
-     mv_ole_app   FOR zif_eui_ole~mv_ole_app,
-     mv_ole_doc   FOR zif_eui_ole~mv_ole_doc,
-     mv_class     FOR zif_eui_ole~mv_class,
-     mv_mime_type FOR zif_eui_ole~mv_mime_type,
+     mv_ole_app    FOR zif_eui_ole~mv_ole_app,
+     mv_ole_doc    FOR zif_eui_ole~mv_ole_doc,
+     mv_class      FOR zif_eui_ole~mv_class,
+     mv_mime_type  FOR zif_eui_ole~mv_mime_type,
 
     " HTML & PDF
-    mv_in_browser FOR zif_eui_ole~mv_in_browser,
-    mv_proxy_app  FOR zif_eui_ole~mv_proxy_app.
+     mv_in_browser FOR zif_eui_ole~mv_in_browser,
+     mv_proxy_app  FOR zif_eui_ole~mv_proxy_app,
+
+     call_method   FOR zif_eui_ole~call_method,
+     get_property  FOR zif_eui_ole~get_property,
+     set_property  FOR zif_eui_ole~set_property.
 
     METHODS:
       constructor IMPORTING io_file TYPE REF TO zcl_eui_file.
@@ -82,17 +86,17 @@ CLASS zcl_eui_ole IMPLEMENTATION.
     ENDIF.
 
     IF mv_class = `Excel.Application`. " Excel
-      GET PROPERTY OF mv_ole_app 'Workbooks' = lo_docs.
+      lo_docs = get_property( iv_prop = 'Workbooks' ).
     ELSE.                              " Word
-      GET PROPERTY OF mv_ole_app 'Documents' = lo_docs.
+      lo_docs = get_property( iv_prop = 'Documents' ).
     ENDIF.
 
-    CALL METHOD OF lo_docs 'Open' = mv_ole_doc
-      EXPORTING
-        #1 = iv_path.
-
+    mv_ole_doc = call_method( io_object = lo_docs
+                              iv_method = 'Open'
+                              iv_param1 = iv_path ).
     IF iv_visible = abap_true.
-      SET PROPERTY OF mv_ole_app 'Visible' = 1.
+      set_property( iv_prop  = 'Visible'
+                    iv_value = 1 ).
     ENDIF.
   ENDMETHOD.
 
@@ -193,18 +197,18 @@ CLASS zcl_eui_ole IMPLEMENTATION.
         handle = ls_handle ).
 
     " Get Application object (the same for Word & Excel)
-    GET PROPERTY OF ls_handle-obj 'Application' = mv_ole_app.
+    mv_ole_app = get_property( io_object = ls_handle-obj
+                               iv_prop   = 'Application' ).
   ENDMETHOD.
 
   METHOD zif_eui_ole~save_as.
-  BREAK-POINT.
-    CALL METHOD OF mv_ole_doc 'SaveAs'
-      EXPORTING
-        #1 = iv_path
-        #2 = iv_ext_format.
+    call_method( io_object = mv_ole_doc
+                 iv_method = 'SaveAs'
+                 iv_param1 = iv_path
+                 iv_param2 = iv_ext_format ).
 
     IF iv_quit = abap_true.
-      CALL METHOD OF mv_ole_app 'QUIT'.
+      call_method( iv_method = 'QUIT' ).
       FREE OBJECT: mv_ole_doc, mv_ole_app.
     ENDIF.
   ENDMETHOD.
@@ -230,5 +234,64 @@ CLASS zcl_eui_ole IMPLEMENTATION.
       " Use defaults
       i_in_new_window = iv_in_new_window
       i_mime_type     = lv_mime_type ).
+  ENDMETHOD.
+
+  METHOD zif_eui_ole~call_method.
+    DATA lv_ole_object TYPE ole2_object.
+
+    IF io_object IS INITIAL.
+      lv_ole_object = mv_ole_app.
+    ELSE.
+      lv_ole_object = io_object.
+    ENDIF.
+
+    IF iv_param1 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result.
+    ELSEIF iv_param2 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1.
+    ELSEIF iv_param3 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1 #2 = iv_param2.
+    ELSEIF iv_param4 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1 #2 = iv_param2 #3 = iv_param3.
+    ELSEIF iv_param5 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1 #2 = iv_param2 #3 = iv_param3 #4 = iv_param4.
+    ELSEIF iv_param6 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1 #2 = iv_param2 #3 = iv_param3 #4 = iv_param4 #5 = iv_param5.
+    ELSEIF iv_param7 IS NOT SUPPLIED.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1 #2 = iv_param2 #3 = iv_param3 #4 = iv_param4 #5 = iv_param5 #6 = iv_param6.
+    ELSE.
+      CALL METHOD OF lv_ole_object iv_method = ro_result
+        EXPORTING #1 = iv_param1 #2 = iv_param2 #3 = iv_param3 #4 = iv_param4 #5 = iv_param5 #6 = iv_param6 #7 = iv_param7.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD zif_eui_ole~get_property.
+    DATA lv_ole_object TYPE ole2_object.
+
+    IF io_object IS INITIAL.
+      lv_ole_object = mv_ole_app.
+    ELSE.
+      lv_ole_object = io_object.
+    ENDIF.
+
+    GET PROPERTY OF lv_ole_object iv_prop = ro_result.
+  ENDMETHOD.
+
+  METHOD zif_eui_ole~set_property.
+    DATA lv_ole_object TYPE ole2_object.
+
+    IF io_object IS INITIAL.
+      lv_ole_object = mv_ole_app.
+    ELSE.
+      lv_ole_object = io_object.
+    ENDIF.
+
+    SET PROPERTY OF lv_ole_object iv_prop = iv_value.
   ENDMETHOD.
 ENDCLASS.

@@ -787,7 +787,7 @@ METHOD get_field_desc.
       FROM dd04l
       WHERE rollname = rs_field_desc-rollname
         AND as4local = 'A'
-        AND as4vers  = 0000.
+        AND as4vers  = '0000'.
 
       " Also CHAR
       CASE lv_domname.

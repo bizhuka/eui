@@ -6,10 +6,11 @@ CLASS lcl_json_util DEFINITION FINAL.
   PUBLIC SECTION.
 
     CLASS-DATA:
+     mv_inited     TYPE abap_bool,
      mt_xsdboolean TYPE stringtab.
 
     CLASS-METHODS:
-      class_constructor.
+      init.
 ENDCLASS.
 
 CLASS lcl_salv_util DEFINITION INHERITING FROM cl_salv_model_list FINAL.

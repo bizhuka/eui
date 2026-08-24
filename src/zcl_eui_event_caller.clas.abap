@@ -104,7 +104,12 @@ METHOD add_handler.
   " Get all handler methods
   lo_object_descr ?= cl_abap_objectdescr=>describe_by_object_ref( ls_item-listener ).
   ls_item-t_methdescr = lo_object_descr->methods.
-  ls_item-t_friend    = lo_object_descr->get_friend_types( ).
+  TRY.
+    CALL METHOD lo_object_descr->('GET_FRIEND_TYPES')
+      RECEIVING p_friends_tab = ls_item-t_friend.
+  CATCH cx_sy_dyn_call_illegal_method. " or parent cx_sy_dyn_call_error ?
+    CLEAR ls_item-t_friend[].
+  ENDTRY.
   DELETE ls_item-t_methdescr WHERE for_event IS INITIAL.
 
   " Exact only specefic methods

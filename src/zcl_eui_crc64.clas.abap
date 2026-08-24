@@ -80,7 +80,6 @@ private section.
     importing
       !IV_INPUT type ANY
       !IV_NAME type CSEQUENCE .
-  methods _SHOW_LOG .
 ENDCLASS.
 
 
@@ -223,7 +222,12 @@ ENDMETHOD.
 
 
 METHOD get_hash.
-  _show_log( ).
+*  IF mv_log = abap_true.
+*    NEW zcl_eui_alv( ir_table       = REF #( mt_log )
+*                     it_mod_catalog = VALUE #( ( fieldname = 'NAME' coltext   = `Name` )
+*                                               ( fieldname = 'I1'   coltext   = `Part 1` )
+*                                               ( fieldname = 'I2'   coltext   = `Part 2` ) ) )->popup( iv_row_end = 25 )->show( ).
+*  ENDIF.
 
   FIELD-SYMBOLS <lv_raw> TYPE x.
   ASSIGN mv_crc64 TO <lv_raw> CASTING.
@@ -316,36 +320,5 @@ METHOD _get_sub_name.
   IF mv_log = abap_true.
     CONCATENATE iv_name iv_dash iv_suffix INTO rv_sub_name.
   ENDIF.
-ENDMETHOD.
-
-
-METHOD _show_log.
-  CHECK mv_log = abap_true.
-
-  DATA lr_table TYPE REF TO data.
-  GET REFERENCE OF mt_log INTO lr_table.
-
-  DATA lt_catalog TYPE lvc_t_fcat.
-  DATA lr_catalog TYPE REF TO lvc_s_fcat.
-  APPEND INITIAL LINE TO lt_catalog REFERENCE INTO lr_catalog.
-  lr_catalog->fieldname = 'NAME'.
-  lr_catalog->coltext   = `Name`.
-
-  APPEND INITIAL LINE TO lt_catalog REFERENCE INTO lr_catalog.
-  lr_catalog->fieldname = 'I1'.
-  lr_catalog->coltext   = `Part 1`.
-
-  APPEND INITIAL LINE TO lt_catalog REFERENCE INTO lr_catalog.
-  lr_catalog->fieldname = 'I2'.
-  lr_catalog->coltext   = `Part 2`.
-
-  DATA lo_alv TYPE REF TO zcl_eui_alv.
-  CREATE OBJECT lo_alv
-    EXPORTING
-      ir_table       = lr_table
-      it_mod_catalog = lt_catalog.
-
-  lo_alv->popup( iv_row_end = 25 ).                      "#EC NUMBER_OK
-  lo_alv->show( ).
 ENDMETHOD.
 ENDCLASS.
