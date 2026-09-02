@@ -39,7 +39,14 @@ ENDCLASS.
 
 CLASS lcl_assert_util DEFINITION FINAL.
   PUBLIC SECTION.
+
     CLASS-METHODS:
       get_class_name
-        RETURNING VALUE(rv_class_name) TYPE seoclass-clsname.
+        RETURNING VALUE(rv_class_name) TYPE seoclass-clsname,
+
+      get_sap_encoding
+        IMPORTING
+          iv_encoding TYPE abap_encoding
+        RETURNING VALUE(rv_encoding) TYPE abap_encoding.
+
 ENDCLASS.

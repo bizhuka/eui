@@ -78,6 +78,7 @@ METHOD raise_sys_error.
   DATA lv_incl TYPE syrepid.
   DATA lv_line TYPE i.
   DATA lv_text TYPE string.
+  DATA ls_msg  TYPE zcl_eui_logger=>ts_msg.
 
   " From string
   IF iv_message IS NOT INITIAL.
@@ -100,7 +101,6 @@ METHOD raise_sys_error.
   " Any error based on system message
   IF ls_string IS INITIAL.
     MESSAGE ID sy-msgid TYPE 'E' NUMBER sy-msgno WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 INTO ls_string.
-    DATA ls_msg TYPE zcl_eui_logger=>ts_msg.
     ls_msg-msgid = sy-msgid.
     ls_msg-msgno = sy-msgno.
     ls_msg-msgty = sy-msgty. " Always error 'E'

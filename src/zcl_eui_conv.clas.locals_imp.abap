@@ -89,4 +89,15 @@ CLASS lcl_assert_util IMPLEMENTATION.
       WHERE clsname = 'CL_AUNIT_ASSERT'.
     ENDIF.
   ENDMETHOD.
+
+  METHOD get_sap_encoding.
+    CASE iv_encoding.
+      WHEN zcl_eui_conv=>mc_encoding-win_1251.  rv_encoding = '1504'.
+      WHEN zcl_eui_conv=>mc_encoding-utf_8.     rv_encoding = '4110'.
+      WHEN zcl_eui_conv=>mc_encoding-utf_16be.  rv_encoding = '4102'.
+      WHEN zcl_eui_conv=>mc_encoding-utf_16le.  rv_encoding = '4103'.
+      WHEN OTHERS.
+        rv_encoding = iv_encoding.
+    ENDCASE.
+  ENDMETHOD.
 ENDCLASS.

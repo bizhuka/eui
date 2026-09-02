@@ -213,11 +213,15 @@ ENDMETHOD.
 
 
 METHOD binary_to_string.
+  DATA:
+    lv_encoding TYPE abap_encoding.
+
+  lv_encoding = lcl_assert_util=>get_sap_encoding( iv_encoding ).
   TRY.
       CALL FUNCTION 'SCMS_BINARY_TO_STRING'
         EXPORTING
           input_length = iv_length
-          encoding     = iv_encoding
+          encoding     = lv_encoding
         IMPORTING
           text_buffer  = rv_string
         TABLES
@@ -415,20 +419,17 @@ ENDMETHOD.
 
 
 METHOD STRING_TO_XSTRING.
-  " rv_xstring = cl_bcs_convert=>string_to_xstring( iv_string = iv_string iv_codepage = IV_ENCODING ).
-*  CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
-*    EXPORTING
-*      text     = iv_string
-*      encoding = iv_encoding
-*    IMPORTING
-*      buffer   = rv_xstring.
-  DATA lo_convert TYPE REF TO cl_abap_conv_out_ce.
-  lo_convert = cl_abap_conv_out_ce=>create(
-    encoding    = iv_encoding
-    ignore_cerr = abap_true ).
+  DATA:
+    lv_encoding TYPE abap_encoding.
+  lv_encoding = lcl_assert_util=>get_sap_encoding( iv_encoding ).
 
-  lo_convert->write( data = iv_string ).
-  rv_xstring = lo_convert->get_buffer( ).
+  " rv_xstring = cl_bcs_convert=>string_to_xstring( iv_string = iv_string iv_codepage = lv_encoding ).
+  CALL FUNCTION 'SCMS_STRING_TO_XSTRING'
+    EXPORTING
+      text     = iv_string
+      encoding = lv_encoding
+    IMPORTING
+      buffer   = rv_xstring.
 ENDMETHOD.
 
 
