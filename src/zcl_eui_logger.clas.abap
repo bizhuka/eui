@@ -589,16 +589,8 @@ METHOD show_as_button.
                            iv_check_tcode = abap_false ).
 
   " New screen
-  CHECK iv_write_message IS NOT INITIAL.
-
-  " Skip UT
-  DATA lt_callstack TYPE abap_callstack.
-  CALL FUNCTION 'SYSTEM_CALLSTACK'
-    IMPORTING
-      callstack = lt_callstack.
-  READ TABLE lt_callstack TRANSPORTING NO FIELDS
-   WITH KEY blocktype = 'METHOD' blockname = 'INVOKE_TEST_METHOD' flag_system = 'X'.
-  CHECK sy-subrc <> 0.
+  CHECK iv_write_message IS NOT INITIAL
+    AND zcl_eui_menu=>can_show( ) = abap_true.
 
   " Selection screen ?
   IF sy-dynnr = 1000.

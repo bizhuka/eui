@@ -77,6 +77,11 @@ ENDCLASS.
 
 CLASS lcl_assert_util IMPLEMENTATION.
   METHOD get_class_name.
+    IF sy-saprl = 'OPEN'.
+      rv_class_name = 'CL_ABAP_UNIT_ASSERT'.
+      RETURN.
+    ENDIF.
+
     " Let see >=7.02
     SELECT SINGLE clsname INTO rv_class_name
     FROM seoclass

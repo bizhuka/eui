@@ -143,6 +143,7 @@ METHOD _generate_subroutine.
   DATA lv_message TYPE string.
   DATA lv_pos     TYPE i.                    "#EC NEEDED  <-- dump info
   DATA lv_word    TYPE string.               "#EC NEEDED  <-- dump info
+
   GENERATE SUBROUTINE POOL it_code NAME rv_prog
     MESSAGE lv_message
     LINE    lv_pos

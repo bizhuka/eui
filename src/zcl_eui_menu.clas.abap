@@ -110,6 +110,15 @@ METHOD can_show.
      AND lp_cat = space
      AND lp_gui = 'Y'.
 
+  " Skip UT
+  DATA lt_callstack TYPE abap_callstack.
+  CALL FUNCTION 'SYSTEM_CALLSTACK'
+    IMPORTING
+      callstack = lt_callstack.
+  READ TABLE lt_callstack TRANSPORTING NO FIELDS
+   WITH KEY blocktype = 'METHOD' blockname = 'INVOKE_TEST_METHOD' flag_system = 'X'.
+  CHECK sy-subrc <> 0.
+
   rv_ok = abap_true.
 ENDMETHOD.
 
