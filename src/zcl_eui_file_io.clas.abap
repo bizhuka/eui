@@ -134,7 +134,9 @@ CLASS ZCL_EUI_FILE_IO IMPLEMENTATION.
 
 
 METHOD column_2_int.
-  DATA: lv_uccpi   TYPE i,
+  DATA: lv_column  TYPE string,
+        lv_length  TYPE i,
+        lv_uccpi   TYPE i,
         lv_factor  TYPE i,
         lv_offset  TYPE i,
         lv_char    TYPE c,
@@ -142,37 +144,36 @@ METHOD column_2_int.
         ls_col_ind TYPE lcl_helper=>ts_col_ind.
 
 *   Upper case
-  TRANSLATE iv_column TO UPPER CASE.
-  CONDENSE iv_column NO-GAPS.
+  lv_column = iv_column.
+  TRANSLATE lv_column TO UPPER CASE.
+  CONDENSE lv_column NO-GAPS.
 
   " For speed
   READ TABLE lcl_helper=>mt_col_ind REFERENCE INTO lr_col_ind
-   WITH TABLE KEY col = iv_column.
+   WITH TABLE KEY col = lv_column.
   IF sy-subrc = 0.
     rv_column = lr_col_ind->ind.
     RETURN.
   ENDIF.
 
-*   Get string lenght and align to right
-  lv_offset = 3 - strlen( iv_column ).
-
-  SHIFT iv_column RIGHT BY lv_offset PLACES.
+*   Get string length
+  lv_length = strlen( lv_column ).
 
 *   Claculate column position
-  DO 3 TIMES.
+  DO lv_length TIMES.
     lv_offset = sy-index - 1.
-    lv_char = iv_column+lv_offset(1).
+    lv_char = lv_column+lv_offset(1).
     IF lv_char IS INITIAL.
       CONTINUE.
     ENDIF.
     lv_uccpi   = cl_abap_conv_out_ce=>uccpi( lv_char ).
-    lv_factor  = 26 ** ( 3 - sy-index ).                      "#EC NUMBER_OK
+    lv_factor  = 26 ** ( lv_length - sy-index ).              "#EC NUMBER_OK
     rv_column  = rv_column + ( lv_uccpi MOD 64 ) * lv_factor. "#EC NUMBER_OK
   ENDDO.
 
   " Add to both tables
-  CONDENSE iv_column.
-  ls_col_ind-col = iv_column.
+  CONDENSE lv_column.
+  ls_col_ind-col = lv_column.
   ls_col_ind-ind = rv_column.
   INSERT ls_col_ind INTO TABLE lcl_helper=>mt_col_ind.
   INSERT ls_col_ind INTO TABLE lcl_helper=>mt_ind_col.
@@ -660,17 +661,17 @@ METHOD int_2_column.
     lv_uccpi   TYPE i,
     lv_text    TYPE sychar02.
 
+  IF iv_column > 16384 OR iv_column < 1.                 "#EC NUMBER_OK
+    MESSAGE s004(zeui_message) WITH iv_column INTO sy-msgli.
+    zcx_eui_exception=>raise_sys_error( ).
+  ENDIF.
+
   " For speed
   READ TABLE lcl_helper=>mt_ind_col REFERENCE INTO lr_col_ind
    WITH TABLE KEY ind = iv_column.
   IF sy-subrc = 0.
     rv_column = lr_col_ind->col.
     RETURN.
-  ENDIF.
-
-  IF iv_column > 16384 OR iv_column < 1.                 "#EC NUMBER_OK
-    MESSAGE s004(zeui_message) WITH iv_column INTO sy-msgli.
-    zcx_eui_exception=>raise_sys_error( ).
   ENDIF.
 
   ls_col_ind-ind = iv_column.
