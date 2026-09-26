@@ -41,7 +41,8 @@ ENDCLASS.
 **********************************************************************
 CLASS lcl_test IMPLEMENTATION.
   METHOD _assert_column_to_int.
-    DATA(lv_actual) = zcl_eui_file_io=>column_2_int( iv_column ).
+    DATA lv_actual TYPE i.
+    lv_actual = zcl_eui_file_io=>column_2_int( iv_column ).
 
     zcl_eui_conv=>assert_equals(
       act = lv_actual
@@ -50,7 +51,8 @@ CLASS lcl_test IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD _assert_int_to_column.
-    DATA(lv_actual) = zcl_eui_file_io=>int_2_column( iv_index ).
+    DATA lv_actual TYPE char3.
+    lv_actual = zcl_eui_file_io=>int_2_column( iv_index ).
 
     zcl_eui_conv=>assert_equals(
       act = lv_actual
